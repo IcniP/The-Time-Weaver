@@ -1,16 +1,21 @@
 from settings import * 
+from entity import *
+from entity import player
+from entity import allsprite
 
 class Game:
     def __init__(self):
         pygame.init()
-        self.display_surface = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
-        pygame.display.set_caption('Platformer')
+        self.Screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+        pygame.display.set_caption('Time Weaver')
         self.clock = pygame.time.Clock()
         self.running = True
 
         # groups 
         self.all_sprites = pygame.sprite.Group()
         self.collision_sprites = pygame.sprite.Group()
+
+        
 
 
     def run(self):
@@ -25,8 +30,9 @@ class Game:
             self.all_sprites.update(dt)
 
             # draw 
-            self.display_surface.fill(BG_COLOR)
-            self.all_sprites.draw(self.display_surface)
+            self.Screen.fill(BG_COLOR)
+            self.all_sprites.draw(self.Screen)
+            self.all_sprites.update(dt)
             pygame.display.update()
         
         pygame.quit()
