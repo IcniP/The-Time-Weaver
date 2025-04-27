@@ -16,6 +16,25 @@ class Game:
         # add player
         self.player = Player((WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2), self.all_sprites)
 
+        self.game_active = False
+        
+    def main_menu(self):
+        title_font = pygame.font.Font('Assets/Fonts/m5x7.ttf', 50)
+        text_surface = title_font.render('The Time Weaver', True, 'White')
+        
+        while not self.game_active:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    self.running = False
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_SPACE:
+                        self.game_active = True
+
+            # draw title screen
+            self.screen.fill('black')
+            self.screen.blit(text_surface, (WINDOW_WIDTH // 2 - text_surface.get_width() // 2, WINDOW_HEIGHT // 2 - text_surface.get_height() // 2))
+            pygame.display.update()
+
     def run(self):
         while self.running:
             dt = self.clock.tick(FRAMERATE) / 1000
@@ -24,15 +43,20 @@ class Game:
                 if event.type == pygame.QUIT:
                     self.running = False
 
-            # update
-            self.all_sprites.update(dt)
+            if self.game_active:
+                # update
+                self.all_sprites.update(dt)
 
-            # draw 
-            self.screen.fill(BG_COLOR)
-            self.all_sprites.draw(self.screen)
-            pygame.display.update()
-        
+                # draw 
+                self.screen.fill(BG_COLOR)
+                self.all_sprites.draw(self.screen)
+                pygame.display.update()
+            else:
+                self.main_menu()
+                
+
         pygame.quit()
+
 
 if __name__ == '__main__':
     game = Game()

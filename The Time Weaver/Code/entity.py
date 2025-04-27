@@ -20,12 +20,13 @@ class Player(pygame.sprite.Sprite):
         self.speed = 200  # pixels per second
         self.gravity = 500
         self.jump_speed = -300
+        self.facing_right = True # Facing right
 
         # attack
         self.attacking = False
 
     def import_assets(self):
-        base_path = r'E:\Coding\python\The Time Weaver\Assets\Player'
+        base_path = r'C:\Users\ASUS\OneDrive\Dokumen\PyGames\The Time Weaver\Assets\Player'
         for action in self.animations.keys():
             full_path = join(base_path, action)
             self.animations[action] = self.import_folder(full_path)
@@ -70,6 +71,12 @@ class Player(pygame.sprite.Sprite):
             self.rect.bottom = WINDOW_HEIGHT
             self.direction.y = 0
 
+        if self.direction.x > 0:
+            self.facing_right = True
+        elif self.direction.x < 0:
+            self.facing_right = False
+
+
     def animate(self, dt):
         if self.attacking:
             self.status = 'Attack'
@@ -90,3 +97,6 @@ class Player(pygame.sprite.Sprite):
         self.input()
         self.move(dt)
         self.animate(dt)
+
+        if not self.facing_right:
+            self.image = pygame.transform.flip(self.image, True, False)
