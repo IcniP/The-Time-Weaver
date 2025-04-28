@@ -19,8 +19,13 @@ class Game:
         self.game_active = False
         
     def main_menu(self):
-        title_font = pygame.font.Font('Assets/Fonts/m5x7.ttf', 50)
-        text_surface = title_font.render('The Time Weaver', True, 'White')
+        #font for title, size 100
+        title_font = pygame.font.Font('Assets/Fonts/m5x7.ttf', 100)
+        title_surface = title_font.render('The Time Weaver', True, 'White')
+
+        #font for space to start, size 50
+        start_font = pygame.font.Font('Assets/Fonts/m5x7.ttf', 50)
+        presstostart_surface = start_font.render('Press Space to Start', True, 'White')
         
         while not self.game_active:
             for event in pygame.event.get():
@@ -32,7 +37,8 @@ class Game:
 
             # draw title screen
             self.screen.fill('black')
-            self.screen.blit(text_surface, (WINDOW_WIDTH // 2 - text_surface.get_width() // 2, WINDOW_HEIGHT // 2 - text_surface.get_height() // 2))
+            self.screen.blit(title_surface, (WINDOW_WIDTH // 2 - title_surface.get_width() // 2, WINDOW_HEIGHT // 2 - title_surface.get_height() // 2))
+            self.screen.blit(presstostart_surface, (WINDOW_WIDTH // 2 - presstostart_surface.get_width() // 2, WINDOW_HEIGHT // 2 + title_surface.get_height() // 2))
             pygame.display.update()
 
     def run(self):
