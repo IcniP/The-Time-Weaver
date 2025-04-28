@@ -14,7 +14,7 @@ class Game:
         self.collision_sprites = pygame.sprite.Group()
 
         # add player
-        self.player = Player((WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2), self.all_sprites)
+        self.soul_weaver = Player((WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2), self.all_sprites)
 
         self.game_active = False
         
