@@ -112,8 +112,11 @@ class Player(pygame.sprite.Sprite):
         if self.status == 'Attack':
             self.frame_index += 10 * dt
         #animation speed for all
+        elif self.status == 'Move':
+            self.frame_index += 10 * dt
         else:
             self.frame_index += self.animation_speed * dt
+
 
         #reset animation attack only after finished
         if self.status == 'Attack' and self.frame_index >= len(frames):
