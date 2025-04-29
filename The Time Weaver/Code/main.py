@@ -4,7 +4,7 @@ from entity import Player
 class Game:
     def __init__(self):
         pygame.init()
-        self.screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+        self.screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT), pygame.SCALED) #just add this to scale the entire screen
         pygame.display.set_caption('Time Weaver')
         self.clock = pygame.time.Clock()
         self.running = True
