@@ -4,42 +4,43 @@ from entity import Player
 class Game:
     def __init__(self):
         pygame.init()
-        self.screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+        self.current_resolution = "normal"  # Default resolution
+        self.screen = pygame.display.set_mode(RESOLUTIONS[self.current_resolution])
         pygame.display.set_caption('Time Weaver')
         self.clock = pygame.time.Clock()
         self.running = True
         self.map = pygame.image.load('Assets/Bg/1.png').convert_alpha()
-        self.map_angle = 0  # Angle for rotation
-        self.map_scale = 2.5  # Scale factor
+        self.map_scaled = self.map  # Scaled version of the map
 
         # groups 
         self.all_sprites = pygame.sprite.Group()
         self.collision_sprites = pygame.sprite.Group()
 
         # add player
-        self.player = Player((WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2), self.all_sprites)
+        self.player = Player((RESOLUTIONS[self.current_resolution][0] // 2, RESOLUTIONS[self.current_resolution][1] // 2), self.all_sprites)
 
         self.game_active = False
         self.paused = False  # New variable to track if the game is paused
         self.volume = 0.5  # Default volume (50%)
 
         # Buttons
-        self.start_button = self.create_button("Start", (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 30))
-        self.setting_button = self.create_button("Settings", (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 60))
-        self.exit_button = self.create_button("Exit", (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 90))
+        self.start_button = self.create_button("Start", (RESOLUTIONS[self.current_resolution][0] // 2, RESOLUTIONS[self.current_resolution][1] // 2 + 30))
+        self.setting_button = self.create_button("Settings", (RESOLUTIONS[self.current_resolution][0] // 2, RESOLUTIONS[self.current_resolution][1] // 2 + 60))
+        self.exit_button = self.create_button("Exit", (RESOLUTIONS[self.current_resolution][0] // 2, RESOLUTIONS[self.current_resolution][1] // 2 + 90))
 
         # Pause menu buttons
-        self.resume_button = self.create_button("Resume", (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 - 60))
-        self.return_button = self.create_button("Return to Main Menu", (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 - 30))
-        self.pause_setting_button = self.create_button("Settings", (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2))
-        self.save_button = self.create_button("Save", (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 30))
+        self.resume_button = self.create_button("Resume", (RESOLUTIONS[self.current_resolution][0] // 2, RESOLUTIONS[self.current_resolution][1] // 2 - 60))
+        self.return_button = self.create_button("Return to Main Menu", (RESOLUTIONS[self.current_resolution][0] // 2, RESOLUTIONS[self.current_resolution][1] // 2 - 30))
+        self.pause_setting_button = self.create_button("Settings", (RESOLUTIONS[self.current_resolution][0] // 2, RESOLUTIONS[self.current_resolution][1] // 2))
+        self.save_button = self.create_button("Save", (RESOLUTIONS[self.current_resolution][0] // 2, RESOLUTIONS[self.current_resolution][1] // 2 + 30))
 
         # Settings menu buttons
-        self.volume_up_button = self.create_button("Volume +", (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 - 60))
-        self.volume_down_button = self.create_button("Volume -", (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 - 30))
-        self.size_2x_button = self.create_button("Window 2x", (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2))
-        self.size_3x_button = self.create_button("Window 3x", (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 30))
-        self.back_button = self.create_button("Back", (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 60))
+        self.volume_up_button = self.create_button("Volume +", (RESOLUTIONS[self.current_resolution][0] // 2, RESOLUTIONS[self.current_resolution][1] // 2 - 60))
+        self.volume_down_button = self.create_button("Volume -", (RESOLUTIONS[self.current_resolution][0] // 2, RESOLUTIONS[self.current_resolution][1] // 2 - 30))
+        self.size_normal_button = self.create_button("Window 1x", (RESOLUTIONS[self.current_resolution][0] // 2, RESOLUTIONS[self.current_resolution][1] // 2))
+        self.size_2x_button = self.create_button("Window 2x", (RESOLUTIONS[self.current_resolution][0] // 2, RESOLUTIONS[self.current_resolution][1] // 2 + 30))
+        self.size_3x_button = self.create_button("Window 3x", (RESOLUTIONS[self.current_resolution][0] // 2, RESOLUTIONS[self.current_resolution][1] // 2 + 60))
+        self.back_button = self.create_button("Back", (RESOLUTIONS[self.current_resolution][0] // 2, RESOLUTIONS[self.current_resolution][1] // 2 + 90))
 
     def create_button(self, text, position):
         """Create a button with text and position."""
@@ -58,9 +59,7 @@ class Game:
     def reset_game(self):
         self.all_sprites.empty()  
         self.collision_sprites.empty()  
-        self.player = Player((WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2), self.all_sprites)  
-        self.map_angle = 0  
-        self.map_scale = 2.5  
+        self.player = Player((RESOLUTIONS[self.current_resolution][0] // 2, RESOLUTIONS[self.current_resolution][1] // 2), self.all_sprites)  
 
     def main_menu(self):
         """Display the main menu and handle button interactions."""
@@ -89,7 +88,7 @@ class Game:
 
             # Draw title screen
             self.screen.fill('black')
-            self.screen.blit(title_surface, (WINDOW_WIDTH // 2 - title_surface.get_width() // 2, WINDOW_HEIGHT // 3 - title_surface.get_height() // 2))
+            self.screen.blit(title_surface, (RESOLUTIONS[self.current_resolution][0] // 2 - title_surface.get_width() // 2, RESOLUTIONS[self.current_resolution][1] // 3 - title_surface.get_height() // 2))
             self.screen.blit(self.start_button["surface"], self.start_button["rect"])
             self.screen.blit(self.setting_button["surface"], self.setting_button["rect"])
             self.screen.blit(self.exit_button["surface"], self.exit_button["rect"])
@@ -143,6 +142,7 @@ class Game:
                     action = self.detect_mouse_collision(mouse_pos, {
                         "volume_up": self.volume_up_button,
                         "volume_down": self.volume_down_button,
+                        "size_normal": self.size_normal_button,
                         "size_2x": self.size_2x_button,
                         "size_3x": self.size_3x_button,
                         "back": self.back_button
@@ -155,11 +155,14 @@ class Game:
                         self.volume = max(0.0, self.volume - 0.1)  # Decrease volume, min 0.0
                         pygame.mixer.music.set_volume(self.volume)
                         print(f"Volume: {self.volume * 100:.0f}%")
+                    elif action == "size_normal":
+                        self.set_window_size("normal")
+                        print("Window size set to 1x")
                     elif action == "size_2x":
-                        self.screen = pygame.display.set_mode((WINDOW_WIDTH * 2, WINDOW_HEIGHT * 2))
+                        self.set_window_size("2x")
                         print("Window size set to 2x")
                     elif action == "size_3x":
-                        self.screen = pygame.display.set_mode((WINDOW_WIDTH * 3, WINDOW_HEIGHT * 3))
+                        self.set_window_size("3x")
                         print("Window size set to 3x")
                     elif action == "back":
                         return  # Exit the settings menu
@@ -168,11 +171,41 @@ class Game:
             self.screen.fill('black')
             self.screen.blit(self.volume_up_button["surface"], self.volume_up_button["rect"])
             self.screen.blit(self.volume_down_button["surface"], self.volume_down_button["rect"])
+            self.screen.blit(self.size_normal_button["surface"], self.size_normal_button["rect"])
             self.screen.blit(self.size_2x_button["surface"], self.size_2x_button["rect"])
             self.screen.blit(self.size_3x_button["surface"], self.size_3x_button["rect"])
             self.screen.blit(self.back_button["surface"], self.back_button["rect"])
 
             pygame.display.update()
+
+    def set_window_size(self, resolution_key):
+        """Set the window size and scale all elements."""
+        self.current_resolution = resolution_key
+        new_width, new_height = RESOLUTIONS[resolution_key]
+        self.screen = pygame.display.set_mode((new_width, new_height))
+
+        # Scale the background
+        self.map_scaled = pygame.transform.scale(self.map, (new_width, new_height))
+
+        # Recreate buttons with updated positions and sizes
+        self.start_button = self.create_button("Start", (new_width // 2, new_height // 2 + 30))
+        self.setting_button = self.create_button("Settings", (new_width // 2, new_height // 2 + 60))
+        self.exit_button = self.create_button("Exit", (new_width // 2, new_height // 2 + 90))
+
+        self.resume_button = self.create_button("Resume", (new_width // 2, new_height // 2 - 60))
+        self.return_button = self.create_button("Return to Main Menu", (new_width // 2, new_height // 2 - 30))
+        self.pause_setting_button = self.create_button("Settings", (new_width // 2, new_height // 2))
+        self.save_button = self.create_button("Save", (new_width // 2, new_height // 2 + 30))
+
+        self.volume_up_button = self.create_button("Volume +", (new_width // 2, new_height // 2 - 60))
+        self.volume_down_button = self.create_button("Volume -", (new_width // 2, new_height // 2 - 30))
+        self.size_normal_button = self.create_button("Window 1x", (new_width // 2, new_height // 2))
+        self.size_2x_button = self.create_button("Window 2x", (new_width // 2, new_height // 2 + 30))
+        self.size_3x_button = self.create_button("Window 3x", (new_width // 2, new_height // 2 + 60))
+        self.back_button = self.create_button("Back", (new_width // 2, new_height // 2 + 90))
+
+        # Update player position
+        self.player.rect.center = (new_width // 2, new_height // 2)
 
     def run(self):
         while self.running:
@@ -189,12 +222,8 @@ class Game:
                 # Update
                 self.all_sprites.update(dt)
 
-                # Apply rotozoom to the map
-                transformed_map = pygame.transform.rotozoom(self.map, self.map_angle, self.map_scale)
-
-                # Draw
-                self.screen.fill('black')  # Clear the screen
-                self.screen.blit(transformed_map, (0, 0))  # Draw the transformed map
+                # Draw the scaled background
+                self.screen.blit(self.map_scaled, (0, 0))
                 self.all_sprites.draw(self.screen)
                 pygame.display.update()
             elif not self.game_active:
