@@ -10,10 +10,3 @@ WINDOW_WIDTH, WINDOW_HEIGHT = 640, 360
 TILE_SIZE = 32 
 FRAMERATE = 60
 BG_COLOR = '#fcdfcd'
-
-# Resolutions
-RESOLUTIONS = {
-    "normal": (640, 360),
-    "2x": (1280, 720),
-    "3x": (1920, 1080)
-}
