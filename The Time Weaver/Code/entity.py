@@ -29,7 +29,7 @@ class Player(pygame.sprite.Sprite):
         self.attack_button_pressed = False
         self.max_combo = 2
         self.current_combo = 1
-        self.combo_reset_time = 1000  # miliseconds before combo reset
+        self.combo_reset_time = 5000  # miliseconds before combo reset
         self.last_attack_time = 0  # for combo timing
 
 #-----------------------------Import------------------------------------------

@@ -1,26 +1,40 @@
 from settings import *
 from entity import Player
+from cervus import Cervus
 
 class Game:
     def __init__(self):
         pygame.init()
-        self.screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT), pygame.SCALED) #just add this to scale the entire screen
+        # Set up the game screen with scaling
+        self.screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT), pygame.SCALED)
         pygame.display.set_caption('Time Weaver')
         self.clock = pygame.time.Clock()
         self.running = True
         self.map = pygame.image.load('Assets/Bg/1.png').convert_alpha()
         self.map_scaled = pygame.transform.scale(self.map, (WINDOW_WIDTH, WINDOW_HEIGHT))  # Scale map to fixed resolution
 
-        # groups 
+        # Groups
         self.all_sprites = pygame.sprite.Group()
         self.collision_sprites = pygame.sprite.Group()
 
-        # add player
+        # Level
+        self.level = 1  
+
+        
+        self.cervus = None
+        if self.level == 5:
+            self.cervus = Cervus((WINDOW_WIDTH // 2, WINDOW_HEIGHT // 3 + 100), self.all_sprites, None)
+
+       
         self.player = Player((WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2), self.all_sprites)
 
+        
+        if self.cervus:
+            self.cervus.player = self.player
+
         self.game_active = False
-        self.paused = False  # New variable to track if the game is paused
-        self.volume = 0.5  # Default volume (50%)
+        self.paused = False  
+        self.volume = 0.5  
 
         # Buttons
         self.start_button = self.create_button("Start", (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 30))
@@ -56,7 +70,18 @@ class Game:
         """Reset the game state."""
         self.all_sprites.empty()
         self.collision_sprites.empty()
+
+        # Add Cervus first (so it is drawn behind the player)
+        self.cervus = None
+        if self.level == 5:
+            self.cervus = Cervus((WINDOW_WIDTH // 2, WINDOW_HEIGHT // 3 + 100), self.all_sprites, None)
+
+        # Add player after Cervus (so it is drawn on top)
         self.player = Player((WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2), self.all_sprites)
+
+        # Pass the player reference to Cervus
+        if self.cervus:
+            self.cervus.player = self.player
 
     def main_menu(self):
         """Display the main menu and handle button interactions."""
