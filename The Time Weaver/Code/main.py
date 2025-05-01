@@ -1,5 +1,5 @@
 from settings import *
-from entity import Player
+from entity import *
 from cervus import Cervus
 
 class Game:
@@ -52,6 +52,37 @@ class Game:
         self.volume_down_button = self.create_button("Volume -", (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 - 30))
         self.back_button = self.create_button("Back", (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 60))
 
+#--------------Collision-------------------
+    def player_collision(self):
+        hits = pygame.sprite.spritecollide(self.player, self.enemy_sprites, False, pygame.sprite.collide_mask)
+        if hits:
+            #untuk nnti, ex: 
+            #if nyawa masih > jumlah nyawa
+            #   nyawanya kurang satu
+            #else: mati, respawn di last checkpoint
+            pass
+
+#--------------Maps-------------------
+#nanti susunanny tiap level/map beda method
+# def map1(self):
+#     map = load_pygame(join('data', 'maps', 'world.tmx'))
+
+#     for x, y, image in map.get_layer_by_name('Ground').tiles():
+#         Sprite((x * TILE_SIZE, y * TILE_SIZE), image, self.all_sprites)
+
+#     for obj in map.get_layer_by_name('Objects'):
+#         CollisionSprite((obj.x, obj.y), obj.image, (self.all_sprites, collision_sprites))
+        
+#     for collision in map.get_layer_by_name('Collisions'):
+#         CollisionSprite((collision.x, collision.y), pygame.Surface((collision.width, collision.height)), collision_sprites)
+
+#     for marker in map.get_layer_by_name('Entities'):
+#         if marker.name == 'Player':
+#             player = Player((marker.x, marker.y), all_sprites, collision_sprites)
+#         else:
+#             spawn_positions.append((marker.x, marker.y))
+
+#---------------Main Menu-------------------
     def create_button(self, text, position):
         """Create a button with text and position."""
         font = pygame.font.Font('Assets/Fonts/m5x7.ttf', 40)
