@@ -2,8 +2,42 @@ import pygame
 from settings import *
 from os import listdir
 from os.path import join, dirname, abspath
+from abc import ABC, abstractmethod
 
-class Player(pygame.sprite.Sprite):
+#-----------------------------Sprite thingy------------------------------------------
+class Sprite(pygame.sprite.Sprite):
+    def __init__(self, pos, surf, groups):
+        super().__init__(groups)
+        self.image = surf
+        self.rect = self.image.get_frect(topleft = pos)
+        self.ground = True
+
+class CollisionSprite(pygame.sprite.Sprite):
+    def __init__(self, pos, surf, groups):
+        super().__init__(groups)
+        self.image = surf
+        self.rect = self.image.get_frect(topleft = pos)
+
+#-----------------------------Entity->Player n Enemies------------------------------------------
+class Entity(ABC):
+
+    @abstractmethod
+    def import_assets(self):
+        pass
+
+    @abstractmethod
+    def import_folder(self, path):
+        pass
+
+    @abstractmethod
+    def move(self):
+        pass
+
+    @abstractmethod
+    def update(self, dt):
+        pass
+
+class Player(pygame.sprite.Sprite, Entity):
     def __init__(self, pos, groups):
         super().__init__(groups)
         self.animations = {'Idle': [], 'Move': [], 'Attack': [], 'Attack2': [], 'Jump': [], 'Fall': []}
@@ -29,7 +63,7 @@ class Player(pygame.sprite.Sprite):
         self.attack_button_pressed = False
         self.max_combo = 2
         self.current_combo = 1
-        self.combo_reset_time = 5000  # miliseconds before combo reset
+        self.combo_reset_time = 2000  # miliseconds before combo reset
         self.last_attack_time = 0  # for combo timing
 
 #-----------------------------Import------------------------------------------
@@ -49,28 +83,6 @@ class Player(pygame.sprite.Sprite):
 
 
 #-----------------------------movements and all dat------------------------------------------
-    #method attack
-    def attack(self, mouse_pressed):
-        current_time = pygame.time.get_ticks()
-        if current_time - self.last_attack_time > self.combo_reset_time:
-            self.current_combo = 1
-
-        if mouse_pressed[0] and not self.attack_button_pressed:
-            self.attack_button_pressed = True
-            self.last_attack_time = current_time
-            if self.current_combo == 1 and not self.attacking:
-                self.attacking = True
-                self.attack_locked = True
-                self.frame_index = 0
-                self.state = 'attack1'
-            elif self.current_combo == 2 and not self.attacking_two:
-                self.attacking_two = True
-                self.attack_locked = True
-                self.frame_index = 0
-                self.state = 'attack2'
-        elif not mouse_pressed[0]:
-            self.attack_button_pressed = False
-
     #method jump
     def jump(self, keys):
         if keys[pygame.K_SPACE] and self.on_ground() and not self.jumping:
@@ -100,6 +112,28 @@ class Player(pygame.sprite.Sprite):
 
         # Attack input (mouse click)
         self.attack(mouse_pressed)
+    
+    #method attack
+    def attack(self, mouse_pressed):
+        current_time = pygame.time.get_ticks()
+        if current_time - self.last_attack_time > self.combo_reset_time:
+            self.current_combo = 1
+
+        if mouse_pressed[0] and not self.attack_button_pressed:
+            self.attack_button_pressed = True
+            self.last_attack_time = current_time
+            if self.current_combo == 1 and not self.attacking:
+                self.attacking = True
+                self.attack_locked = True
+                self.frame_index = 0
+                self.state = 'attack1'
+            elif self.current_combo == 2 and not self.attacking_two:
+                self.attacking_two = True
+                self.attack_locked = True
+                self.frame_index = 0
+                self.state = 'attack2'
+        elif not mouse_pressed[0]:
+            self.attack_button_pressed = False
     
 #-----------------------------gravity stuff------------------------------------------
     def add_gravity(self, dt):
@@ -174,3 +208,26 @@ class Player(pygame.sprite.Sprite):
         # Reset combo if too much time passed
         if pygame.time.get_ticks() - self.last_attack_time > self.combo_reset_time:
             self.current_combo = 1
+
+class Enemy(pygame.sprite.Sprite, Entity):
+    def __init__(self, pos, frames, groups, player, collision_sprites):
+        super().__init__(groups[0])
+        self.animations = {'Idle': [], 'Move': [], 'Attack': []}
+        self.import_assets(frames)
+        self.frame_index = 0
+        self.animation_speed = 6
+        self.state = 'idle'
+        self.image = self.animations[self.get_animation_key()][self.frame_index]
+        self.rect = self.image.get_rect(center=pos)
+        self.collision_sprites = collision_sprites[1]
+
+        # movement n jump
+        self.direction = pygame.math.Vector2(0, 0)
+        self.speed = 100  # pixels per second
+        self.gravity = 500
+        # self.jump_speed = -300
+        # self.jumping = False
+        self.facing_right = True
+
+        # attack
+        self.attacking = False
