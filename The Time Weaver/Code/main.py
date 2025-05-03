@@ -18,7 +18,7 @@ class Game:
         self.collision_sprites = pygame.sprite.Group()
 
         # Level
-        self.level = 1  
+        self.level = 5  
 
         
         self.cervus = None

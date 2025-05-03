@@ -51,8 +51,8 @@ class Player(pygame.sprite.Sprite, Entity):
         # movement n jump
         self.direction = pygame.math.Vector2(0, 0)
         self.speed = 200  # pixels per second
-        self.gravity = 500
-        self.jump_speed = -300
+        self.gravity = 1000
+        self.jump_speed = -350
         self.jumping = False
         self.facing_right = True
 
