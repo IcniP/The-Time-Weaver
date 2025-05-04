@@ -9,4 +9,3 @@ WINDOW_WIDTH, WINDOW_HEIGHT = 640, 360
 # Tile size and framerate
 TILE_SIZE = 32 
 FRAMERATE = 60
-BG_COLOR = '#fcdfcd'
