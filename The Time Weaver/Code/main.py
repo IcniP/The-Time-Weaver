@@ -14,21 +14,16 @@ class Game:
         self.map_scaled = pygame.transform.scale(self.map, (WINDOW_WIDTH, WINDOW_HEIGHT))  # Scale map to fixed resolution
 
         # Groups
-        self.all_sprites = pygame.sprite.Group()
+        self.all_sprites = AllSprites()
         self.collision_sprites = pygame.sprite.Group()
 
         # Level
-        self.level = 5  
-
+        self.level = 1  
         
         self.cervus = None
         if self.level == 5:
             self.cervus = Cervus((WINDOW_WIDTH // 2, WINDOW_HEIGHT // 3 + 100), self.all_sprites, None)
 
-       
-        self.player = Player((WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2), self.all_sprites)
-
-        
         if self.cervus:
             self.cervus.player = self.player
 
@@ -64,23 +59,25 @@ class Game:
 
 #--------------Maps-------------------
 #nanti susunanny tiap level/map beda method
-# def map1(self):
-#     map = load_pygame(join('data', 'maps', 'world.tmx'))
+    def map1(self):
+        map = load_pygame(join('data', 'maps', 'lvl1-1.tmx'))
 
-#     for x, y, image in map.get_layer_by_name('Ground').tiles():
-#         Sprite((x * TILE_SIZE, y * TILE_SIZE), image, self.all_sprites)
+        self.all_sprites = AllSprites()
+        self.collision_sprites = pygame.sprite.Group()
+        self.spawn_positions = []
 
-#     for obj in map.get_layer_by_name('Objects'):
-#         CollisionSprite((obj.x, obj.y), obj.image, (self.all_sprites, collision_sprites))
+        for x, y, image in map.get_layer_by_name('ground').tiles():
+            
+            Sprite((x * TILE_SIZE, y * TILE_SIZE), image, (self.all_sprites, self.collision_sprites))
         
-#     for collision in map.get_layer_by_name('Collisions'):
-#         CollisionSprite((collision.x, collision.y), pygame.Surface((collision.width, collision.height)), collision_sprites)
+        for collision in map.get_layer_by_name('pits'):
+            CollisionSprite((collision.x, collision.y), pygame.Surface((collision.width, collision.height)), self.collision_sprites)
 
-#     for marker in map.get_layer_by_name('Entities'):
-#         if marker.name == 'Player':
-#             player = Player((marker.x, marker.y), all_sprites, collision_sprites)
-#         else:
-#             spawn_positions.append((marker.x, marker.y))
+        for marker in map.get_layer_by_name('entities'):
+            if marker.name == 'Player':
+                self.player = Player((marker.x, marker.y), self.all_sprites, self.collision_sprites)
+            else:
+                self.spawn_positions.append((marker.x, marker.y))
 
 #---------------Main Menu-------------------
     def create_button(self, text, position):
@@ -103,16 +100,18 @@ class Game:
         self.collision_sprites.empty()
 
         # Add Cervus first (so it is drawn behind the player)
-        self.cervus = None
-        if self.level == 5:
-            self.cervus = Cervus((WINDOW_WIDTH // 2, WINDOW_HEIGHT // 3 + 100), self.all_sprites, None)
+        # self.cervus = None
+        # if self.level == 5:
+        #     self.cervus = Cervus((WINDOW_WIDTH // 2, WINDOW_HEIGHT // 3 + 100), self.all_sprites, None)
 
         # Add player after Cervus (so it is drawn on top)
-        self.player = Player((WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2), self.all_sprites)
+        # self.player = Player((WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2), self.all_sprites)
+        
+        self.map1()  # Load the map
 
         # Pass the player reference to Cervus
-        if self.cervus:
-            self.cervus.player = self.player
+        # if self.cervus:
+        #     self.cervus.player = self.player
 
     def main_menu(self):
         """Display the main menu and handle button interactions."""
@@ -233,13 +232,12 @@ class Game:
 
                 # Draw the scaled background
                 self.screen.blit(self.map_scaled, (0, 0))
-                self.all_sprites.draw(self.screen)
+                self.all_sprites.draw(self.player.rect.center)
                 pygame.display.update()
             elif not self.game_active:
                 self.main_menu()
 
         pygame.quit()
-
 
 if __name__ == '__main__':
     game = Game()
