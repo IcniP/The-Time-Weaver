@@ -23,15 +23,12 @@ class Sprite(pygame.sprite.Sprite):
         super().__init__(groups)
         self.image = surf
         self.rect = self.image.get_frect(topleft = pos)
-        self.mask = pygame.mask.from_surface(self.image)
-        #self.ground = True
 
 class CollisionSprite(pygame.sprite.Sprite):
     def __init__(self, pos, surf, groups):
         super().__init__(groups)
         self.image = surf
         self.rect = self.image.get_frect(topleft = pos)
-        self.mask = pygame.mask.from_surface(self.image)
 
 #-----------------------------Entity->Player n Enemies------------------------------------------
 class Entity(ABC):
@@ -82,7 +79,9 @@ class Player(pygame.sprite.Sprite, Entity):
         self.combo_reset_time = 1000  # miliseconds before combo reset
         self.last_attack_time = 0  # for combo timing
 
-        self.mask = pygame.mask.from_surface(self.image)
+        self.player_hitwidth = 16
+        self.player_hitheight = 32
+        self.player_hitbox = pygame.Rect(0, 0, self.player_hitwidth, self.player_hitheight)
 
 #-----------------------------Import------------------------------------------
     def import_assets(self):
@@ -156,35 +155,38 @@ class Player(pygame.sprite.Sprite, Entity):
 #-----------------------------gravity stuff------------------------------------------
     def add_gravity(self, dt):
         self.direction.y += self.gravity * dt  # Apply gravity
-        self.rect.y += self.direction.y
+        self.player_hitbox.y += self.direction.y
         self.collision('vertical')
 
-        self.rect.x += self.direction.x * self.speed * dt #Apply consistent speed
+        self.player_hitbox.x += self.direction.x * self.speed * dt #Apply consistent speed
         self.collision('horizontal')
+
+        self.rect.center = self.player_hitbox.center  # Update the rect position
     
     def collision(self, direction):
         for sprite in self.collision_sprites:
-            if sprite.rect.colliderect(self.rect):
+            if sprite.rect.colliderect(self.player_hitbox):
                 if direction == 'horizontal':
-                    if self.direction.x > 0: self.rect.right = sprite.rect.left
-                    if self.direction.x < 0: self.rect.left = sprite.rect.right
+                    if self.direction.x > 0: self.player_hitbox.right = sprite.rect.left
+                    if self.direction.x < 0: self.player_hitbox.left = sprite.rect.right
                 if direction == 'vertical':
                     if self.direction.y > 0: 
-                        self.rect.bottom = sprite.rect.top
+                        self.player_hitbox.bottom = sprite.rect.top
                         self.direction.y = 0
                         self.jumping = False
                     if self.direction.y < 0: 
-                        self.rect.top = sprite.rect.bottom
+                        self.player_hitbox.top = sprite.rect.bottom
                         self.direction.y = 0
+        self.rect.center = self.player_hitbox.center  # Update the rect position
 
     #method for on ground check
     def on_ground(self):
-        self.rect.y += 1  # Temporarily move the player down by 1 pixel
+        self.player_hitbox.y += 1  # Temporarily move the player down by 1 pixel
         for sprite in self.collision_sprites:
-            if self.rect.colliderect(sprite.rect):
-                self.rect.y -= 1  # Reset the player's position
+            if sprite.rect.colliderect(self.player_hitbox):
+                self.player_hitbox.y -= 1  # Reset the player's position
                 return True
-        self.rect.y -= 1  # Reset the player's position
+        self.player_hitbox.y -= 1  # Reset the player's position
         return False
 
 #-----------------------------animation matter------------------------------------------
@@ -238,10 +240,9 @@ class Player(pygame.sprite.Sprite, Entity):
         if not self.facing_right:
             self.image = pygame.transform.flip(self.image, True, False)
         
-        self.mask = pygame.mask.from_surface(self.image)
-        
         
     def update(self, dt):
+        self.player_hitbox.center = self.rect.center
         self.move()
         self.add_gravity(dt)
         self.update_state()
