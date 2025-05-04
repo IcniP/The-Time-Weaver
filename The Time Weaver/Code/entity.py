@@ -5,18 +5,33 @@ from os.path import join, dirname, abspath
 from abc import ABC, abstractmethod
 
 #-----------------------------Sprite thingy------------------------------------------
+class AllSprites(pygame.sprite.Group):
+    def __init__(self):
+        super().__init__()
+        self.display_surface = pygame.display.get_surface()
+        self.offset = pygame.Vector2(0, 0)
+
+    def draw(self, target_pos):
+        self.offset.x = -(target_pos[0] - WINDOW_WIDTH / 2)
+        self.offset.y = -(target_pos[1] - WINDOW_HEIGHT / 2)
+
+        for sprite in self:
+            self.display_surface.blit(sprite.image, sprite.rect.topleft + self.offset)
+
 class Sprite(pygame.sprite.Sprite):
     def __init__(self, pos, surf, groups):
         super().__init__(groups)
         self.image = surf
         self.rect = self.image.get_frect(topleft = pos)
-        self.ground = True
+        self.mask = pygame.mask.from_surface(self.image)
+        #self.ground = True
 
 class CollisionSprite(pygame.sprite.Sprite):
     def __init__(self, pos, surf, groups):
         super().__init__(groups)
         self.image = surf
         self.rect = self.image.get_frect(topleft = pos)
+        self.mask = pygame.mask.from_surface(self.image)
 
 #-----------------------------Entity->Player n Enemies------------------------------------------
 class Entity(ABC):
@@ -38,7 +53,7 @@ class Entity(ABC):
         pass
 
 class Player(pygame.sprite.Sprite, Entity):
-    def __init__(self, pos, groups):
+    def __init__(self, pos, groups, collision_sprites):
         super().__init__(groups)
         self.animations = {'Idle': [], 'Move': [], 'Attack': [], 'Attack2': [], 'Jump': [], 'Fall': []}
         self.import_assets()
@@ -46,13 +61,14 @@ class Player(pygame.sprite.Sprite, Entity):
         self.animation_speed = 6
         self.state = 'idle'
         self.image = self.animations[self.get_animation_key()][self.frame_index]
-        self.rect = self.image.get_rect(center=pos)
+        self.rect = self.image.get_rect(midbottom=pos)
+        self.collision_sprites = collision_sprites
 
         # movement n jump
         self.direction = pygame.math.Vector2(0, 0)
         self.speed = 200  # pixels per second
-        self.gravity = 1000
-        self.jump_speed = -350
+        self.gravity = 50
+        self.jump_speed = -15
         self.jumping = False
         self.facing_right = True
 
@@ -63,8 +79,10 @@ class Player(pygame.sprite.Sprite, Entity):
         self.attack_button_pressed = False
         self.max_combo = 2
         self.current_combo = 1
-        self.combo_reset_time = 2000  # miliseconds before combo reset
+        self.combo_reset_time = 1000  # miliseconds before combo reset
         self.last_attack_time = 0  # for combo timing
+
+        self.mask = pygame.mask.from_surface(self.image)
 
 #-----------------------------Import------------------------------------------
     def import_assets(self):
@@ -138,18 +156,36 @@ class Player(pygame.sprite.Sprite, Entity):
 #-----------------------------gravity stuff------------------------------------------
     def add_gravity(self, dt):
         self.direction.y += self.gravity * dt  # Apply gravity
-        self.rect.x += self.direction.x * self.speed * dt #Apply consistent speed
-        self.rect.y += self.direction.y * dt
+        self.rect.y += self.direction.y
+        self.collision('vertical')
 
-        # Floor collision
-        if self.rect.bottom >= WINDOW_HEIGHT:
-            self.rect.bottom = WINDOW_HEIGHT
-            self.direction.y = 0
-            self.jumping = False
+        self.rect.x += self.direction.x * self.speed * dt #Apply consistent speed
+        self.collision('horizontal')
+    
+    def collision(self, direction):
+        for sprite in self.collision_sprites:
+            if sprite.rect.colliderect(self.rect):
+                if direction == 'horizontal':
+                    if self.direction.x > 0: self.rect.right = sprite.rect.left
+                    if self.direction.x < 0: self.rect.left = sprite.rect.right
+                if direction == 'vertical':
+                    if self.direction.y > 0: 
+                        self.rect.bottom = sprite.rect.top
+                        self.direction.y = 0
+                        self.jumping = False
+                    if self.direction.y < 0: 
+                        self.rect.top = sprite.rect.bottom
+                        self.direction.y = 0
 
     #method for on ground check
     def on_ground(self):
-        return self.rect.bottom >= WINDOW_HEIGHT  # Assume ground is bottom of screen
+        self.rect.y += 1  # Temporarily move the player down by 1 pixel
+        for sprite in self.collision_sprites:
+            if self.rect.colliderect(sprite.rect):
+                self.rect.y -= 1  # Reset the player's position
+                return True
+        self.rect.y -= 1  # Reset the player's position
+        return False
 
 #-----------------------------animation matter------------------------------------------
     def get_animation_key(self):
@@ -169,16 +205,19 @@ class Player(pygame.sprite.Sprite, Entity):
 
         if self.direction.y < 0:
             self.state = 'jump'
+            self.collision('vertical')
         elif self.direction.y > 1 and not self.on_ground():
             self.state = 'fall'
+            self.collision('vertical')
         elif self.direction.x != 0:
             self.state = 'move'
+            self.collision('horizontal')
         else:
             self.state = 'idle'
 
     def update_animation(self, dt):
         frames = self.animations[self.get_animation_key()]
-        self.frame_index += 6 * dt if 'attack' not in self.state else 5 * dt
+        self.frame_index += 6 * dt if 'attack' not in self.state else 8 * dt
 
         if self.frame_index >= len(frames):
             self.frame_index = 0
@@ -198,6 +237,9 @@ class Player(pygame.sprite.Sprite, Entity):
         self.image = frames[int(self.frame_index)]
         if not self.facing_right:
             self.image = pygame.transform.flip(self.image, True, False)
+        
+        self.mask = pygame.mask.from_surface(self.image)
+        
         
     def update(self, dt):
         self.move()
