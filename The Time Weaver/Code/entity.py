@@ -31,7 +31,9 @@ class CollisionSprite(pygame.sprite.Sprite):
         self.rect = self.image.get_frect(topleft = pos)
 
 #-----------------------------Entity->Player n Enemies------------------------------------------
-class Entity(ABC):
+class Entity(pygame.sprite.Sprite, ABC):
+    def __init__(self, groups):
+        super().__init__(groups)
 
     @abstractmethod
     def import_assets(self):
@@ -49,7 +51,7 @@ class Entity(ABC):
     def update(self, dt):
         pass
 
-class Player(pygame.sprite.Sprite, Entity):
+class Player(Entity):
     def __init__(self, pos, groups, collision_sprites):
         super().__init__(groups)
         self.animations = {'Idle': [], 'Move': [], 'Attack': [], 'Attack2': [], 'Jump': [], 'Fall': []}
@@ -252,7 +254,7 @@ class Player(pygame.sprite.Sprite, Entity):
         if pygame.time.get_ticks() - self.last_attack_time > self.combo_reset_time:
             self.current_combo = 1
 
-class Enemy(pygame.sprite.Sprite, Entity):
+class Enemy(Entity):
     def __init__(self, pos, frames, groups, player, collision_sprites):
         super().__init__(groups[0])
         self.animations = {'Idle': [], 'Move': [], 'Attack': []}
