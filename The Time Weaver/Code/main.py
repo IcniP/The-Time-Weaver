@@ -47,16 +47,6 @@ class Game:
         self.volume_down_button = self.create_button("Volume -", (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 - 30))
         self.back_button = self.create_button("Back", (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 60))
 
-#--------------Collision-------------------
-    def player_collision(self):
-        hits = pygame.sprite.spritecollide(self.player, self.enemy_sprites, False, pygame.sprite.collide_mask)
-        if hits:
-            #untuk nnti, ex: 
-            #if nyawa masih > jumlah nyawa
-            #   nyawanya kurang satu
-            #else: mati, respawn di last checkpoint
-            pass
-
 #--------------Maps-------------------
 #nanti susunanny tiap level/map beda method
     def map1(self):
@@ -81,8 +71,6 @@ class Game:
                 self.skelly_spear = Humanoid('Spear', (marker.x, marker.y), self.all_sprites, self.collision_sprites)
             else:
                 self.spawn_positions.append((marker.x, marker.y))
-        
-
 
 #---------------Main Menu-------------------
     def create_button(self, text, position):
