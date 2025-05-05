@@ -34,7 +34,6 @@ class CollisionSprite(pygame.sprite.Sprite):
 class Entity(pygame.sprite.Sprite, ABC):
     def __init__(self, groups):
         super().__init__(groups)
-
     @abstractmethod
     def import_assets(self):
         pass
@@ -254,25 +253,128 @@ class Player(Entity):
         if pygame.time.get_ticks() - self.last_attack_time > self.combo_reset_time:
             self.current_combo = 1
 
-class Enemy(Entity):
-    def __init__(self, pos, frames, groups, player, collision_sprites):
-        super().__init__(groups[0])
+class Humanoid(Entity):
+    def __init__(self, type, pos, groups, collision_sprites):
+        super().__init__(groups)
+        self.type = type
         self.animations = {'Idle': [], 'Move': [], 'Attack': []}
-        self.import_assets(frames)
+        self.import_assets()
         self.frame_index = 0
         self.animation_speed = 6
         self.state = 'idle'
         self.image = self.animations[self.get_animation_key()][self.frame_index]
-        self.rect = self.image.get_rect(center=pos)
-        self.collision_sprites = collision_sprites[1]
-
+        self.rect = self.image.get_rect(midbottom=pos)
+        self.collision_sprites = collision_sprites
+        
         # movement n jump
         self.direction = pygame.math.Vector2(0, 0)
         self.speed = 100  # pixels per second
-        self.gravity = 500
-        # self.jump_speed = -300
-        # self.jumping = False
+        self.gravity = 50
         self.facing_right = True
 
         # attack
         self.attacking = False
+
+        self.entity_hitwidth = 16
+        self.entity_hitheight = 32
+        self.entity_hitbox = pygame.Rect(0, 0, self.entity_hitwidth, self.entity_hitheight)
+
+
+#-----------------------------Import------------------------------------------
+    def import_assets(self):
+        base_path = join(dirname(abspath(__file__)), '..', 'Assets', 'Enemy', 'Skelly', self.type)
+        for action in self.animations.keys():
+            full_path = join(base_path, action)
+            self.animations[action] = self.import_folder(full_path)
+
+    def import_folder(self, path):
+        images = []
+        for file_name in sorted(listdir(path), key=lambda x: int(x.split('.')[0])):
+            full_path = join(path, file_name)
+            image = pygame.image.load(full_path).convert_alpha()
+            images.append(image)
+        return images
+
+#-----------------------------movements and all dat------------------------------------------
+    def move(self, dt):
+        pass
+
+
+#-----------------------------gravity stuff------------------------------------------
+    def add_gravity(self, dt):
+        self.direction.y += self.gravity * dt  # Apply gravity
+        self.entity_hitbox.y += self.direction.y * dt  # Apply gravity to the rect
+        self.collision('vertical')
+
+        self.entity_hitbox.x += self.direction.x * self.speed * dt  # Apply consistent speed
+        self.collision('horizontal')
+
+        self.rect.center = self.entity_hitbox.center  # Update the rect position
+
+    def collision(self, direction):
+        for sprite in self.collision_sprites:
+            if sprite.rect.colliderect(self.entity_hitbox):
+                if direction == 'horizontal':
+                    if self.direction.x > 0: self.entity_hitbox.right = sprite.rect.left
+                    if self.direction.x < 0: self.entity_hitbox.left = sprite.rect.right
+                if direction == 'vertical':
+                    if self.direction.y > 0: 
+                        self.entity_hitbox.bottom = sprite.rect.top
+                        self.direction.y = 0
+                    if self.direction.y < 0: 
+                        self.entity_hitbox.top = sprite.rect.bottom
+                        self.direction.y = 0
+        self.rect.center = self.entity_hitbox.center  # Update the rect position
+    
+    # def on_ground(self):
+    #     self.entity_hitbox.y += 1
+    #     for sprite in self.collision_sprites:
+    #         if sprite.rect.colliderect(self.entity_hitbox):
+    #             self.entity_hitbox.y -= 1
+    #             return True
+    #     self.entity_hitbox.y -= 1
+    #     return False
+
+#-----------------------------animation matter------------------------------------------
+    def get_animation_key(self):
+        mapping = {
+            'idle': 'Idle',
+            'move': 'Move',
+            'attack': 'Attack'
+        }
+        return mapping[self.state]
+        
+    def update_state(self):
+        if self.attacking:
+            return
+        
+        if self.direction.x != 0:
+            self.state = 'move'
+            self.collision('horizontal')
+        else:
+            self.state = 'idle'
+    
+    def update_animation(self, dt):
+        frames = self.animations[self.get_animation_key()]
+        self.frame_index += 6 * dt if 'attack' not in self.state else 8 * dt
+
+        if self.frame_index >= len(frames):
+            self.frame_index = 0
+
+            # Finish attack
+            if self.state == 'attack':
+                self.attacking = False
+                self.state = 'idle'
+
+        self.image = frames[int(self.frame_index)]
+        if not self.facing_right:
+            self.image = pygame.transform.flip(self.image, True, False)
+    
+    def update(self, dt):
+        self.entity_hitbox.center = self.rect.center
+        self.move(dt)
+        self.add_gravity(dt)
+        self.update_state()
+        self.update_animation(dt)
+        
+
