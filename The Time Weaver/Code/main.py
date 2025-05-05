@@ -18,7 +18,7 @@ class Game:
         self.collision_sprites = pygame.sprite.Group()
 
         # Level
-        self.level = 1  
+        self.level = 1
         
         self.cervus = None
         if self.level == 5:
@@ -28,8 +28,8 @@ class Game:
             self.cervus.player = self.player
 
         self.game_active = False
-        self.paused = False  
-        self.volume = 0.5  
+        self.paused = False
+        self.volume = 0.5
 
         # Buttons
         self.start_button = self.create_button("Start", (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 30))
@@ -62,12 +62,9 @@ class Game:
     def map1(self):
         map = load_pygame(join('data', 'maps', 'lvl1-1.tmx'))
 
-        self.all_sprites = AllSprites()
-        self.collision_sprites = pygame.sprite.Group()
         self.spawn_positions = []
 
         for x, y, image in map.get_layer_by_name('ground').tiles():
-            
             Sprite((x * TILE_SIZE, y * TILE_SIZE), image, (self.all_sprites, self.collision_sprites))
         
         for collision in map.get_layer_by_name('pits'):
@@ -76,8 +73,16 @@ class Game:
         for marker in map.get_layer_by_name('entities'):
             if marker.name == 'Player':
                 self.player = Player((marker.x, marker.y), self.all_sprites, self.collision_sprites)
+            elif marker.name == 'sword':
+                self.skelly_sword = Humanoid('Sword', (marker.x, marker.y), self.all_sprites, self.collision_sprites)
+            elif marker.name == 'axe':
+                self.skelly_axe = Humanoid('Axe', (marker.x, marker.y), self.all_sprites, self.collision_sprites)
+            elif marker.name == 'spear':
+                self.skelly_spear = Humanoid('Spear', (marker.x, marker.y), self.all_sprites, self.collision_sprites)
             else:
                 self.spawn_positions.append((marker.x, marker.y))
+        
+
 
 #---------------Main Menu-------------------
     def create_button(self, text, position):
