@@ -61,6 +61,7 @@ class Player(Entity):
         self.image = self.animations[self.get_animation_key()][self.frame_index]
         self.rect = self.image.get_rect(midbottom=pos)
         self.collision_sprites = collision_sprites
+        self.groupss = groups #all_sprites
 
         # movement n jump
         self.direction = pygame.math.Vector2(0, 0)
@@ -145,13 +146,33 @@ class Player(Entity):
                 self.attack_locked = True
                 self.frame_index = 0
                 self.state = 'attack1'
+
+                hitbox = self.attack_hitbox()
+                for enemy in self.groupss:
+                    if isinstance(enemy, Humanoid) and hitbox.colliderect(enemy.entity_hitbox):
+                        enemy.take_damage(1)
             elif self.current_combo == 2 and not self.attacking_two:
                 self.attacking_two = True
                 self.attack_locked = True
                 self.frame_index = 0
                 self.state = 'attack2'
+
+                hitbox = self.attack_hitbox()
+                for enemy in self.groupss:
+                    if isinstance(enemy, Humanoid) and hitbox.colliderect(enemy.entity_hitbox):
+                        enemy.take_damage(1)
+                        
         elif not mouse_pressed[0]:
             self.attack_button_pressed = False
+    
+    def attack_hitbox(self):
+        hitbox = self.player_hitbox.copy()
+        hitbox.height = 32  # Set the height of the attack hitbox to match the player's height
+        if self.facing_right:
+            hitbox.width += 25
+        else:
+            hitbox.width -= 40
+        return hitbox
     
 #-----------------------------gravity stuff------------------------------------------
     def add_gravity(self, dt):
@@ -241,7 +262,6 @@ class Player(Entity):
         if not self.facing_right:
             self.image = pygame.transform.flip(self.image, True, False)
         
-        
     def update(self, dt):
         self.player_hitbox.center = self.rect.center
         self.move()
@@ -279,6 +299,16 @@ class Humanoid(Entity):
         self.entity_hitheight = 32
         self.entity_hitbox = pygame.Rect(0, 0, self.entity_hitwidth, self.entity_hitheight)
 
+        #hp
+        if self.type == 'Sword':
+            self.hp = 2
+        elif self.type == 'Spear':
+            self.hp = 3
+        elif self.type == 'Axe':
+            self.hp = 4
+        
+        self.death_time = 0
+        self.death_duration = 400
 
 #-----------------------------Import------------------------------------------
     def import_assets(self):
@@ -295,10 +325,28 @@ class Humanoid(Entity):
             images.append(image)
         return images
 
+
+    def take_damage(self, damage):
+        self.hp -= damage
+        if self.hp <= 0:
+            self.die()
+    
+    def die(self):
+        self.death_time = pygame.time.get_ticks()
+        
+        mask = pygame.mask.from_surface(self.image)
+        white_surf = mask.to_surface(setcolor=(255, 100, 0), unsetcolor=(0, 0, 0, 0))
+        white_surf.set_colorkey((0, 0, 0))
+        self.image = white_surf
+
+        # Stop all movement and actions
+        self.direction = pygame.math.Vector2(0, 0)
+        self.attacking = False
+
+
 #-----------------------------movements and all dat------------------------------------------
     def move(self, dt):
         pass
-
 
 #-----------------------------gravity stuff------------------------------------------
     def add_gravity(self, dt):
@@ -371,10 +419,15 @@ class Humanoid(Entity):
             self.image = pygame.transform.flip(self.image, True, False)
     
     def update(self, dt):
-        self.entity_hitbox.center = self.rect.center
-        self.move(dt)
-        self.add_gravity(dt)
-        self.update_state()
-        self.update_animation(dt)
+        current_time = pygame.time.get_ticks()
+        if self.death_time == 0:
+            self.entity_hitbox.center = self.rect.center
+            self.move(dt)
+            self.add_gravity(dt)
+            self.update_state()
+            self.update_animation(dt)
+        else:
+            if current_time - self.death_time >= self.death_duration:
+                self.kill()
         
 
