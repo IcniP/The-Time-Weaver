@@ -430,4 +430,3 @@ class Humanoid(Entity):
             if current_time - self.death_time >= self.death_duration:
                 self.kill()
         
-

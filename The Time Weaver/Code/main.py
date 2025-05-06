@@ -18,14 +18,28 @@ class Game:
         self.collision_sprites = pygame.sprite.Group()
 
         # Level
-        self.level = 1
+        self.level = 2
+        if self.level == 1:
+            self.mapz = "lvl1.tmx"
+        elif self.level == 2:
+            self.mapz = "lvl2.tmx"
+        elif self.level == 3:
+            self.mapz = "lvl3.tmx"
+        elif self.level == 4:
+            self.mapz = "lvl4.tmx"
+        elif self.level == 5:
+            self.mapz = "lvl5.tmx"
+        else:
+            self.mapz = "test.tmx"
+        
+        self.player = Player((WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2), self.all_sprites, self.collision_sprites)
         
         self.cervus = None
         if self.level == 5:
             self.cervus = Cervus((WINDOW_WIDTH // 2, WINDOW_HEIGHT // 3 + 100), self.all_sprites, None)
-
         if self.cervus:
             self.cervus.player = self.player
+
 
         self.game_active = False
         self.paused = False
@@ -47,10 +61,20 @@ class Game:
         self.volume_down_button = self.create_button("Volume -", (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 - 30))
         self.back_button = self.create_button("Back", (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 60))
 
+#--------------Collision-------------------
+    def player_collision(self):
+        hits = pygame.sprite.spritecollide(self.player, self.enemy_sprites, False, pygame.sprite.collide_mask)
+        if hits:
+            #untuk nnti, ex: 
+            #if nyawa masih > jumlah nyawa
+            #   nyawanya kurang satu
+            #else: mati, respawn di last checkpoint
+            pass
+
 #--------------Maps-------------------
 #nanti susunanny tiap level/map beda method
     def map1(self):
-        map = load_pygame(join('data', 'maps', 'lvl1-1.tmx'))
+        map = load_pygame(join('data', 'maps', self.mapz))
 
         self.spawn_positions = []
 
@@ -69,8 +93,16 @@ class Game:
                 self.skelly_axe = Humanoid('Axe', (marker.x, marker.y), self.all_sprites, self.collision_sprites)
             elif marker.name == 'spear':
                 self.skelly_spear = Humanoid('Spear', (marker.x, marker.y), self.all_sprites, self.collision_sprites)
+            elif marker.name == 'Cervus':
+                self.cervus = Cervus((marker.x, marker.y), self.all_sprites, self.player)
+            elif marker.name == 'right':
+                self.cervus.right_hand.rect.topleft = (marker.x, marker.y)
+            elif marker.name == 'left':
+                self.cervus.left_hand.rect.topleft = (marker.x, marker.y)
             else:
                 self.spawn_positions.append((marker.x, marker.y))
+        
+
 
 #---------------Main Menu-------------------
     def create_button(self, text, position):
