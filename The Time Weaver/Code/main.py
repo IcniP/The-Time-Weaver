@@ -30,13 +30,6 @@ class Game:
         }.get(self.level, "test.tmx")
 
         self.player = Player((WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2), self.all_sprites, self.collision_sprites)
-        self.cervus = None
-
-        if self.level == 5:
-            self.cervus = Cervus((WINDOW_WIDTH // 2, WINDOW_HEIGHT // 3 + 100), self.all_sprites, None)
-        if self.cervus:
-            self.cervus.player = self.player
-
         self.fix_tmx_tileset('data/maps', 'Assets/Tilesets')
         self.game_active = False
         self.paused = False
@@ -70,10 +63,20 @@ class Game:
         for collision in map.get_layer_by_name('pits'):
             CollisionSprite((collision.x, collision.y), pygame.Surface((collision.width, collision.height)), self.collision_sprites)
 
+        # --- sementara player kosong ---
+        player_pos = None
+
         for marker in map.get_layer_by_name('entities'):
             if marker.name == 'Player':
-                self.player = Player((marker.x, marker.y), self.all_sprites, self.collision_sprites)
-            elif marker.name == 'sword':
+                player_pos = (marker.x, marker.y)
+
+        # Setelah semua marker dicek, baru spawn player
+        if player_pos:
+            self.player = Player(player_pos, self.all_sprites, self.collision_sprites)
+
+        # Setelah player ada, baru spawn musuh
+        for marker in map.get_layer_by_name('entities'):
+            if marker.name == 'sword':
                 Humanoid('Sword', (marker.x, marker.y), self.all_sprites, self.collision_sprites)
             elif marker.name == 'axe':
                 Humanoid('Axe', (marker.x, marker.y), self.all_sprites, self.collision_sprites)

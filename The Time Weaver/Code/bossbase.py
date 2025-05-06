@@ -89,7 +89,7 @@ class BossBase(pygame.sprite.Sprite):
         offset = (attack_hitbox.x - self.rect.x, attack_hitbox.y - self.rect.y)
         if self.mask.overlap(attack_mask, offset):
             if not self.is_damaged:
-                self.take_damage(10)
+                self.take_damage(100)
                 self.is_damaged = True
                 print(f"{self.boss_name} collided with the player's attack! HP: {self.hp}")
         else:
