@@ -10,3 +10,11 @@ By
 
 Dev Log
 -
+
+WARNING
+WE will Not Tolerate Plagiarism Copying This Or Stealing
+If So we will Not Hesitate
+
+KyS
+
+Keep yourself Safe
