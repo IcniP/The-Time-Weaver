@@ -64,6 +64,13 @@ class Player(Entity):
         self.collision_sprites = collision_sprites
         self.groupss = groups #all_sprites
 
+        #hp
+        self.max_hp = 3
+        self.hp = self.max_hp
+        self.invincible = True
+        self.invincibility_duration = 1000  # ms
+        self.last_hit_time = 0
+
         # movement n jump
         self.direction = pygame.math.Vector2(0, 0)
         self.speed = 200  # pixels per second
@@ -85,6 +92,7 @@ class Player(Entity):
         self.player_hitwidth = 16
         self.player_hitheight = 32
         self.player_hitbox = pygame.Rect(0, 0, self.player_hitwidth, self.player_hitheight)
+        
 
 #-----------------------------Import------------------------------------------
     def import_assets(self):
@@ -181,6 +189,22 @@ class Player(Entity):
         else:
             hitbox.width -= 45
         return hitbox
+    
+    def take_damage(self, damage):
+        current_time = pygame.time.get_ticks()
+        if not self.invincible:
+            self.hp -= damage
+            print(f"Player terkena damage! HP sekarang: {self.hp}")
+            if self.hp <= 0:
+                self.die()
+            else:
+                self.invincible = True
+                self.last_hit_time = current_time
+
+    def die(self):
+        print("Player mati!")
+        # Bisa tambahkan animasi kematian, freeze game, dsb.
+        self.kill()
     
 #-----------------------------gravity stuff------------------------------------------
     def add_gravity(self, dt):
@@ -280,6 +304,9 @@ class Player(Entity):
         # Reset combo if too much time passed
         if pygame.time.get_ticks() - self.last_attack_time > self.combo_reset_time:
             self.current_combo = 1
+        if self.invincible:
+            if pygame.time.get_ticks() - self.last_hit_time > self.invincibility_duration:
+                self.invincible = False
 
 class Humanoid(Entity):
     def __init__(self, type, pos, groups, collision_sprites):
