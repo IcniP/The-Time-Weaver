@@ -152,6 +152,10 @@ class Player(Entity):
                 for enemy in self.groupss:
                     if isinstance(enemy, Humanoid) and hitbox.colliderect(enemy.entity_hitbox):
                         enemy.take_damage(1)
+                    if isinstance(enemy, BossBase) and hitbox.colliderect(enemy.rect):
+                        enemy.take_damage(100)
+                        print(f"{enemy.boss_name} collided with the player's attack! HP: {enemy.hp}")
+
             elif self.current_combo == 2 and not self.attacking_two:
                 self.attacking_two = True
                 self.attack_locked = True
@@ -160,10 +164,11 @@ class Player(Entity):
 
                 hitbox = self.attack_hitbox()
                 for enemy in self.groupss:
-                    if isinstance(enemy, Humanoid) and hitbox.colliderect(enemy.entity_hitbox): #<--------- untuk skellies
+                    if isinstance(enemy, Humanoid) and hitbox.colliderect(enemy.entity_hitbox):
                         enemy.take_damage(1)
-                if isinstance(enemy, BossBase) and hitbox.colliderect(enemy.rect): #<---------untuk boss2nya
-                        enemy.take_damage(50) #<---------ganti2 aj hit damageny
+                    if isinstance(enemy, BossBase) and hitbox.colliderect(enemy.rect):
+                        enemy.take_damage(100)
+                        print(f"{enemy.boss_name} collided with the player's attack! HP: {enemy.hp}")
                         
         elif not mouse_pressed[0]:
             self.attack_button_pressed = False
@@ -174,7 +179,7 @@ class Player(Entity):
         if self.facing_right:
             hitbox.width += 25
         else:
-            hitbox.width -= 40
+            hitbox.width -= 45
         return hitbox
     
 #-----------------------------gravity stuff------------------------------------------
