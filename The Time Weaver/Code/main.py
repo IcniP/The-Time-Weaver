@@ -1,6 +1,8 @@
 from settings import *
 from entity import *
 from cervus import Cervus
+import xml.etree.ElementTree as ET
+from pathlib import Path
 
 class Game:
     def __init__(self):
@@ -17,8 +19,9 @@ class Game:
         self.all_sprites = AllSprites()
         self.collision_sprites = pygame.sprite.Group()
 
+        self.fix_tmx_tileset('data/maps', 'Assets/Tilesets')
         # Level
-        self.level = 2
+        self.level = 1
         if self.level == 1:
             self.mapz = "lvl1.tmx"
         elif self.level == 2:
@@ -31,7 +34,7 @@ class Game:
             self.mapz = "lvl5.tmx"
         else:
             self.mapz = "test.tmx"
-        
+
         self.player = Player((WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2), self.all_sprites, self.collision_sprites)
         
         self.cervus = None
@@ -61,6 +64,23 @@ class Game:
         self.volume_down_button = self.create_button("Volume -", (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 - 30))
         self.back_button = self.create_button("Back", (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 60))
 
+    def fix_tmx_tileset(self, map_folder, tileset_folder):
+            map_folder = Path(map_folder)
+            tileset_folder = Path(tileset_folder)
+
+            for tmx_file in map_folder.glob('*.tmx'):
+                tree = ET.parse(tmx_file)
+                root = tree.getroot()
+
+                for tileset in root.findall('tileset'):
+                    image = tileset.find('image')
+                    if image is not None:
+                        filename = Path(image.attrib['source']).name
+                        correct_path = tileset_folder / filename
+                        image.attrib['source'] = str(correct_path.as_posix())
+
+                tree.write(tmx_file, encoding='utf-8', xml_declaration=True)
+                print(f"[Fixed] {tmx_file.name}")
 #--------------Collision-------------------
     def player_collision(self):
         hits = pygame.sprite.spritecollide(self.player, self.enemy_sprites, False, pygame.sprite.collide_mask)
