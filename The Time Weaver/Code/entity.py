@@ -1,5 +1,6 @@
 import pygame
 from settings import *
+from bossbase import BossBase
 from os import listdir
 from os.path import join, dirname, abspath
 from abc import ABC, abstractmethod
@@ -159,8 +160,10 @@ class Player(Entity):
 
                 hitbox = self.attack_hitbox()
                 for enemy in self.groupss:
-                    if isinstance(enemy, Humanoid) and hitbox.colliderect(enemy.entity_hitbox):
+                    if isinstance(enemy, Humanoid) and hitbox.colliderect(enemy.entity_hitbox): #<--------- untuk skellies
                         enemy.take_damage(1)
+                if isinstance(enemy, BossBase) and hitbox.colliderect(enemy.rect): #<---------untuk boss2nya
+                        enemy.take_damage(50) #<---------ganti2 aj hit damageny
                         
         elif not mouse_pressed[0]:
             self.attack_button_pressed = False
