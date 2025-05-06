@@ -3,104 +3,69 @@ from entity import *
 from cervus import Cervus
 import xml.etree.ElementTree as ET
 from pathlib import Path
+from mainmenu import MainMenuManager
 
 class Game:
     def __init__(self):
         pygame.init()
-        # Set up the game screen with scaling
         self.screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT), pygame.SCALED)
         pygame.display.set_caption('Time Weaver')
         self.clock = pygame.time.Clock()
         self.running = True
-        self.map = pygame.image.load('Assets/Bg/1.png').convert_alpha()
-        self.map_scaled = pygame.transform.scale(self.map, (WINDOW_WIDTH, WINDOW_HEIGHT))  # Scale map to fixed resolution
 
-        # Groups
+        self.map = pygame.image.load('Assets/Bg/1.png').convert_alpha()
+        self.map_scaled = pygame.transform.scale(self.map, (WINDOW_WIDTH, WINDOW_HEIGHT))
+
         self.all_sprites = AllSprites()
         self.collision_sprites = pygame.sprite.Group()
 
-        self.fix_tmx_tileset('data/maps', 'Assets/Tilesets')
-        # Level
-        self.level = 1
-        if self.level == 1:
-            self.mapz = "lvl1.tmx"
-        elif self.level == 2:
-            self.mapz = "lvl2.tmx"
-        elif self.level == 3:
-            self.mapz = "lvl3.tmx"
-        elif self.level == 4:
-            self.mapz = "lvl4.tmx"
-        elif self.level == 5:
-            self.mapz = "lvl5.tmx"
-        else:
-            self.mapz = "test.tmx"
+        self.level = 6
+        self.mapz = {
+            1: "lvl1.tmx",
+            2: "lvl2.tmx",
+            3: "lvl3.tmx",
+            4: "lvl4.tmx",
+            5: "lvl5.tmx"
+        }.get(self.level, "test.tmx")
 
         self.player = Player((WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2), self.all_sprites, self.collision_sprites)
-        
         self.cervus = None
+
         if self.level == 5:
             self.cervus = Cervus((WINDOW_WIDTH // 2, WINDOW_HEIGHT // 3 + 100), self.all_sprites, None)
         if self.cervus:
             self.cervus.player = self.player
 
-
+        self.fix_tmx_tileset('data/maps', 'Assets/Tilesets')
         self.game_active = False
         self.paused = False
-        self.volume = 0.5
 
-        # Buttons
-        self.start_button = self.create_button("Start", (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 30))
-        self.setting_button = self.create_button("Settings", (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 60))
-        self.exit_button = self.create_button("Exit", (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 90))
-
-        # Pause menu buttons
-        self.resume_button = self.create_button("Resume", (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 - 60))
-        self.return_button = self.create_button("Return to Main Menu", (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 - 30))
-        self.pause_setting_button = self.create_button("Settings", (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2))
-        self.save_button = self.create_button("Save", (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 30))
-
-        # Settings menu buttons
-        self.volume_up_button = self.create_button("Volume +", (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 - 60))
-        self.volume_down_button = self.create_button("Volume -", (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 - 30))
-        self.back_button = self.create_button("Back", (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 60))
+        self.menu_manager = MainMenuManager(self.screen, self)
 
     def fix_tmx_tileset(self, map_folder, tileset_folder):
-            map_folder = Path(map_folder)
-            tileset_folder = Path(tileset_folder)
+        map_folder = Path(map_folder)
+        tileset_folder = Path(tileset_folder)
+        for tmx_file in map_folder.glob('*.tmx'):
+            tree = ET.parse(tmx_file)
+            root = tree.getroot()
+            for tileset in root.findall('tileset'):
+                image = tileset.find('image')
+                if image is not None:
+                    filename = Path(image.attrib['source']).name
+                    correct_path = tileset_folder / filename
+                    image.attrib['source'] = str(correct_path.as_posix())
+            tree.write(tmx_file, encoding='utf-8', xml_declaration=True)
 
-            for tmx_file in map_folder.glob('*.tmx'):
-                tree = ET.parse(tmx_file)
-                root = tree.getroot()
+    def reset_game(self):
+        self.all_sprites.empty()
+        self.collision_sprites.empty()
+        self.map1()
 
-                for tileset in root.findall('tileset'):
-                    image = tileset.find('image')
-                    if image is not None:
-                        filename = Path(image.attrib['source']).name
-                        correct_path = tileset_folder / filename
-                        image.attrib['source'] = str(correct_path.as_posix())
-
-                tree.write(tmx_file, encoding='utf-8', xml_declaration=True)
-                print(f"[Fixed] {tmx_file.name}")
-#--------------Collision-------------------
-    def player_collision(self):
-        hits = pygame.sprite.spritecollide(self.player, self.enemy_sprites, False, pygame.sprite.collide_mask)
-        if hits:
-            #untuk nnti, ex: 
-            #if nyawa masih > jumlah nyawa
-            #   nyawanya kurang satu
-            #else: mati, respawn di last checkpoint
-            pass
-
-#--------------Maps-------------------
-#nanti susunanny tiap level/map beda method
     def map1(self):
         map = load_pygame(join('data', 'maps', self.mapz))
-
-        self.spawn_positions = []
-
         for x, y, image in map.get_layer_by_name('ground').tiles():
             Sprite((x * TILE_SIZE, y * TILE_SIZE), image, (self.all_sprites, self.collision_sprites))
-        
+
         for collision in map.get_layer_by_name('pits'):
             CollisionSprite((collision.x, collision.y), pygame.Surface((collision.width, collision.height)), self.collision_sprites)
 
@@ -108,179 +73,38 @@ class Game:
             if marker.name == 'Player':
                 self.player = Player((marker.x, marker.y), self.all_sprites, self.collision_sprites)
             elif marker.name == 'sword':
-                self.skelly_sword = Humanoid('Sword', (marker.x, marker.y), self.all_sprites, self.collision_sprites)
+                Humanoid('Sword', (marker.x, marker.y), self.all_sprites, self.collision_sprites)
             elif marker.name == 'axe':
-                self.skelly_axe = Humanoid('Axe', (marker.x, marker.y), self.all_sprites, self.collision_sprites)
+                Humanoid('Axe', (marker.x, marker.y), self.all_sprites, self.collision_sprites)
             elif marker.name == 'spear':
-                self.skelly_spear = Humanoid('Spear', (marker.x, marker.y), self.all_sprites, self.collision_sprites)
+                Humanoid('Spear', (marker.x, marker.y), self.all_sprites, self.collision_sprites)
             elif marker.name == 'Cervus':
                 self.cervus = Cervus((marker.x, marker.y), self.all_sprites, self.player)
-            elif marker.name == 'right':
-                self.cervus.right_hand.rect.topleft = (marker.x, marker.y)
-            elif marker.name == 'left':
-                self.cervus.left_hand.rect.topleft = (marker.x, marker.y)
-            else:
-                self.spawn_positions.append((marker.x, marker.y))
-        
-
-
-#---------------Main Menu-------------------
-    def create_button(self, text, position):
-        """Create a button with text and position."""
-        font = pygame.font.Font('Assets/Fonts/m5x7.ttf', 40)
-        surface = font.render(text, True, 'White')
-        rect = surface.get_rect(center=position)
-        return {"surface": surface, "rect": rect}
-
-    def detect_mouse_collision(self, mouse_pos, buttons):
-        """Detect if the mouse is colliding with any button."""
-        for button_name, button in buttons.items():
-            if button["rect"].collidepoint(mouse_pos):
-                return button_name
-        return None
-
-    def reset_game(self):
-        """Reset the game state."""
-        self.all_sprites.empty()
-        self.collision_sprites.empty()
-
-        # Add Cervus first (so it is drawn behind the player)
-        # self.cervus = None
-        # if self.level == 5:
-        #     self.cervus = Cervus((WINDOW_WIDTH // 2, WINDOW_HEIGHT // 3 + 100), self.all_sprites, None)
-
-        # Add player after Cervus (so it is drawn on top)
-        # self.player = Player((WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2), self.all_sprites)
-        
-        self.map1()  # Load the map
-
-        # Pass the player reference to Cervus
-        # if self.cervus:
-        #     self.cervus.player = self.player
-
-    def main_menu(self):
-        """Display the main menu and handle button interactions."""
-        title_font = pygame.font.Font('Assets/Fonts/m5x7.ttf', 100)
-        title_surface = title_font.render('The Time Weaver', True, 'White')
-
-        while not self.game_active and self.running:
-            mouse_pos = pygame.mouse.get_pos()
-
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    self.running = False
-                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:  # Left mouse button
-                    action = self.detect_mouse_collision(mouse_pos, {
-                        "start": self.start_button,
-                        "settings": self.setting_button,
-                        "exit": self.exit_button
-                    })
-                    if action == "start":
-                        self.reset_game()  # Reset the game when starting
-                        self.game_active = True
-                    elif action == "settings":
-                        self.settings_menu()
-                    elif action == "exit":
-                        self.running = False
-
-            # Draw title screen
-            self.screen.fill('black')
-            self.screen.blit(title_surface, (WINDOW_WIDTH // 2 - title_surface.get_width() // 2, WINDOW_HEIGHT // 3 - title_surface.get_height() // 2))
-            self.screen.blit(self.start_button["surface"], self.start_button["rect"])
-            self.screen.blit(self.setting_button["surface"], self.setting_button["rect"])
-            self.screen.blit(self.exit_button["surface"], self.exit_button["rect"])
-
-            pygame.display.update()
-
-    def pause_menu(self):
-        """Display the pause menu and handle button interactions."""
-        self.paused = True  # Set the game to paused
-        while self.paused and self.running:
-            mouse_pos = pygame.mouse.get_pos()
-
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    self.running = False
-                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:  # Left mouse button
-                    action = self.detect_mouse_collision(mouse_pos, {
-                        "resume": self.resume_button,
-                        "return": self.return_button,
-                        "settings": self.pause_setting_button,
-                        "save": self.save_button
-                    })
-                    if action == "resume":
-                        self.paused = False  # Resume the game
-                    elif action == "return":
-                        self.game_active = False
-                        self.paused = False
-                    elif action == "settings":
-                        self.settings_menu()
-                    elif action == "save":
-                        print("Game saved!")  # Placeholder for save functionality
-
-            # Draw pause menu
-            self.screen.fill('black')
-            self.screen.blit(self.resume_button["surface"], self.resume_button["rect"])
-            self.screen.blit(self.return_button["surface"], self.return_button["rect"])
-            self.screen.blit(self.pause_setting_button["surface"], self.pause_setting_button["rect"])
-            self.screen.blit(self.save_button["surface"], self.save_button["rect"])
-
-            pygame.display.update()
-
-    def settings_menu(self):
-        """Display the settings menu and handle button interactions."""
-        while self.running:
-            mouse_pos = pygame.mouse.get_pos()
-
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    self.running = False
-                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:  # Left mouse button
-                    action = self.detect_mouse_collision(mouse_pos, {
-                        "volume_up": self.volume_up_button,
-                        "volume_down": self.volume_down_button,
-                        "back": self.back_button
-                    })
-                    if action == "volume_up":
-                        self.volume = min(1.0, self.volume + 0.1)  # Increase volume, max 1.0
-                        pygame.mixer.music.set_volume(self.volume)
-                        print(f"Volume: {self.volume * 100:.0f}%")
-                    elif action == "volume_down":
-                        self.volume = max(0.0, self.volume - 0.1)  # Decrease volume, min 0.0
-                        pygame.mixer.music.set_volume(self.volume)
-                        print(f"Volume: {self.volume * 100:.0f}%")
-                    elif action == "back":
-                        return  # Exit the settings menu
-
-            # Draw settings menu
-            self.screen.fill('black')
-            self.screen.blit(self.volume_up_button["surface"], self.volume_up_button["rect"])
-            self.screen.blit(self.volume_down_button["surface"], self.volume_down_button["rect"])
-            self.screen.blit(self.back_button["surface"], self.back_button["rect"])
-
-            pygame.display.update()
 
     def run(self):
         while self.running:
-            dt = self.clock.tick(FRAMERATE) / 1000
+            if not self.paused:
+                dt = self.clock.tick(FRAMERATE) / 1000
+            else:
+                self.clock.tick(FRAMERATE)
+                dt = 0
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.running = False
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                     if self.game_active:
-                        self.pause_menu()
+                        self.menu_manager.pause_menu()
 
-            if self.game_active and not self.paused:
-                # Update
-                self.all_sprites.update(dt)
+            if self.game_active:
+                if not self.paused:
+                    self.all_sprites.update(dt)
 
-                # Draw the scaled background
                 self.screen.blit(self.map_scaled, (0, 0))
                 self.all_sprites.draw(self.player.rect.center)
                 pygame.display.update()
-            elif not self.game_active:
-                self.main_menu()
+            else:
+                self.menu_manager.main_menu()
 
         pygame.quit()
 
