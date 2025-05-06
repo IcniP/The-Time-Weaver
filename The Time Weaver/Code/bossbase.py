@@ -16,19 +16,19 @@ class BossBase(pygame.sprite.Sprite):
 
         self.image = self.animations[self.status][self.frame_index]
         self.rect = self.image.get_rect(center=pos)
-        self.mask = pygame.mask.from_surface(self.image)  # Create mask for accurate collision
+        self.mask = pygame.mask.from_surface(self.image)
 
-        # Health points (HP) for the boss
-        self.hp = 100  # Default HP for any boss
+        self.hp = 100
 
-        # Damage control
-        self.is_damaged = False  # Track if already hit by an attack
+        self.is_damaged = False
+
+        # === Tambahan untuk arah hadap ===
+        self.facing_right = True
 
     def import_assets(self, animation_paths):
-        base_path = join(dirname(abspath(__file__)), '..', 'Assets', 'Enemy', 'Final')
         for key, relative_path in animation_paths.items():
-            full_path = join(base_path, *relative_path)
-            self.animations[key] = self.import_folder(full_path)
+            base_path = join('Assets', 'Enemy', *relative_path)
+            self.animations[key] = self.import_folder(base_path)
 
     def import_folder(self, path):
         images = []
@@ -39,14 +39,27 @@ class BossBase(pygame.sprite.Sprite):
         return images
 
     def animate(self, dt):
+        # Cek posisi player sebelum set image
+        if self.player.rect.centerx < self.rect.centerx:
+            self.facing_right = False
+        else:
+            self.facing_right = True
+
         frames = self.animations[self.status]
         self.frame_index += self.animation_speed * dt
 
         if self.frame_index >= len(frames):
             self.frame_index = 0
 
-        self.image = frames[int(self.frame_index)]
-        self.mask = pygame.mask.from_surface(self.image)  # Update mask every frame
+        original_image = frames[int(self.frame_index)]
+
+        # Flip kalau perlu
+        if self.facing_right:
+            self.image = original_image
+        else:
+            self.image = pygame.transform.flip(original_image, True, False)
+
+        self.mask = pygame.mask.from_surface(self.image)
 
     def play_animation(self, animation_name):
         if animation_name in self.animations:
@@ -66,7 +79,6 @@ class BossBase(pygame.sprite.Sprite):
         if not self.alive():
             return
 
-        # Only detect if the player is attacking
         if not self.player.attacking:
             self.is_damaged = False
             return
@@ -79,7 +91,7 @@ class BossBase(pygame.sprite.Sprite):
         offset = (attack_hitbox.x - self.rect.x, attack_hitbox.y - self.rect.y)
         if self.mask.overlap(attack_mask, offset):
             if not self.is_damaged:
-                self.take_damage(500)  # You can later set variable damage if needed
+                self.take_damage(10)
                 self.is_damaged = True
                 print(f"{self.boss_name} collided with the player's attack! HP: {self.hp}")
         else:

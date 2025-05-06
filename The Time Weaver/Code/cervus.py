@@ -6,9 +6,9 @@ from bossbase import BossBase
 class Cervus(BossBase):
     def __init__(self, pos, groups, player):
         animation_paths = {
-            'Idle': ['enemy final 1st'],
-            'LeftHand': ['left', 'idle'],
-            'RightHand': ['right', 'idle']
+            'Idle': ['cervus', '1st'],
+            'LeftHand': ['cervus', 'left', 'idle'],
+            'RightHand': ['cervus', 'right', 'idle']
         }
         super().__init__(pos, groups, player, boss_name='Cervus', animation_paths=animation_paths)
 

@@ -4,6 +4,7 @@ from cervus import Cervus
 import xml.etree.ElementTree as ET
 from pathlib import Path
 from mainmenu import MainMenuManager
+from noliictu import Noliictu
 
 class Game:
     def __init__(self):
@@ -80,6 +81,8 @@ class Game:
                 Humanoid('Spear', (marker.x, marker.y), self.all_sprites, self.collision_sprites)
             elif marker.name == 'Cervus':
                 self.cervus = Cervus((marker.x, marker.y), self.all_sprites, self.player)
+            elif marker.name == 'Noliictu':
+                self.noliictu = Noliictu((marker.x, marker.y), self.all_sprites, self.player)
 
     def run(self):
         while self.running:
