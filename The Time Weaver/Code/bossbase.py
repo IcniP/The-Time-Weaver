@@ -22,7 +22,6 @@ class BossBase(pygame.sprite.Sprite):
 
         self.is_damaged = False
 
-        # === Tambahan untuk arah hadap ===
         self.facing_right = True
 
     def import_assets(self, animation_paths):
@@ -39,7 +38,6 @@ class BossBase(pygame.sprite.Sprite):
         return images
 
     def animate(self, dt):
-        # Cek posisi player sebelum set image
         if self.player.rect.centerx < self.rect.centerx:
             self.facing_right = False
         else:

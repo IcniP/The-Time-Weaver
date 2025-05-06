@@ -23,45 +23,42 @@ class Noliictu(BossBase):
         self.time_in_rect = 0
         self.teleporting = False
         self.teleport_cooldown = 0
-        self.ready_to_teleport = False  # Baru teleport kalau ini True
+        self.ready_to_teleport = False  
 
     def update(self, dt):
         super().update(dt)
 
         self.detection_rect.center = self.rect.center
 
-        # Hitung cooldown teleport
+        #cooldown teleport
         if self.teleport_cooldown > 0:
             self.teleport_cooldown -= dt
 
         if self.teleporting:
             frames = self.animations[self.status]
 
-            # Selesai TeleportOut ➔ TeleportIn
             if self.status == 'TeleportOut' and self.frame_index >= len(frames) - 1:
                 self.play_animation('TeleportIn')
 
-            # Selesai TeleportIn ➔ Idle
             elif self.status == 'TeleportIn' and self.frame_index >= len(frames) - 1:
                 self.play_animation('Idle')
                 self.teleporting = False
-                self.teleport_cooldown = 3  # cooldown 3 detik
-                self.ready_to_teleport = False  # setelah teleport selesai, harus reset tunggu 5 detik lagi
+                self.teleport_cooldown = 5  
+                self.ready_to_teleport = False  
 
-        # Kalau tidak sedang teleport
+        
         if not self.teleporting and self.teleport_cooldown <= 0:
             if self.detection_rect.colliderect(self.player.rect):
                 self.time_in_rect += dt
             else:
                 self.time_in_rect = 0
 
-            # Kalau player stay 5 detik di area
+            # player detect
             if self.time_in_rect >= 5:
                 self.play_animation('TeleportOut')
                 self.teleporting = True
-                self.time_in_rect = 0  # Reset lagi waktu player stay
+                self.time_in_rect = 0  
         else:
-            # Kalau masih cooldown atau teleport, reset hitungannya
             self.time_in_rect = 0
 
     def draw_detection_rect(self, surface):

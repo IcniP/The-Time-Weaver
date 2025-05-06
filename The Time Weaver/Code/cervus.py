@@ -12,7 +12,7 @@ class Cervus(BossBase):
         }
         super().__init__(pos, groups, player, boss_name='Cervus', animation_paths=animation_paths)
 
-        self.hp = 1000  # Cervus has its own custom HP
+        self.hp = 1000  
 
         # Hands
         self.left_hand = pygame.sprite.Sprite(groups)
@@ -59,5 +59,5 @@ class Cervus(BossBase):
         self.right_hand.rect.y = max(0, min(self.right_hand.rect.y, WINDOW_HEIGHT - self.right_hand.rect.height))
 
     def update(self, dt):
-        super().update(dt)  # Animate and handle collision from BossBase
-        self.update_hands()  # Also update Cervus special hands movement
+        super().update(dt)  
+        self.update_hands() 
