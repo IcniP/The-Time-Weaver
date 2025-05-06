@@ -9,4 +9,4 @@ By
 -  Bima Aryaseta 123140177
 
 Dev Log
-https://docs.google.com/document/d/1nHpM3x4X66HIuDMbUH8xkEa2MdxrXhSAnb7dPTX-oPs/edit?usp=sharing
+-
