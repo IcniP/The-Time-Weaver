@@ -1,6 +1,6 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="75" height="32" tilewidth="32" tileheight="32" infinite="0" nextlayerid="6" nextobjectid="82">
- <tileset firstgid="1" source="../tilesets/timeweavertileset.tsx"/>
+ <tileset firstgid="1" source="../tilesets/timeweavertileset.tsx" />
  <layer id="1" name="ground" width="75" height="32">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -38,128 +38,128 @@
 </data>
  </layer>
  <objectgroup id="2" name="collisions">
-  <object id="46" x="0" y="0" width="32" height="1024"/>
-  <object id="47" x="32" y="832" width="320" height="192"/>
-  <object id="48" x="352" y="960" width="288" height="64"/>
-  <object id="49" x="704" y="960" width="384" height="64"/>
-  <object id="50" x="1152" y="960" width="288" height="64"/>
-  <object id="51" x="1440" y="928" width="64" height="96"/>
-  <object id="52" x="1504" y="896" width="64" height="128"/>
-  <object id="53" x="1568" y="864" width="832" height="160"/>
-  <object id="54" x="2112" y="736" width="64" height="128"/>
-  <object id="55" x="2368" y="0" width="32" height="864"/>
-  <object id="56" x="1792" y="192" width="480" height="32"/>
-  <object id="57" x="1920" y="320" width="416" height="32"/>
-  <object id="58" x="2336" y="320" width="32" height="320"/>
-  <object id="59" x="1408" y="640" width="960" height="64"/>
-  <object id="60" x="928" y="704" width="1248" height="32"/>
-  <object id="61" x="1792" y="224" width="32" height="96"/>
-  <object id="62" x="1408" y="320" width="416" height="32"/>
-  <object id="63" x="1216" y="320" width="96" height="32"/>
-  <object id="64" x="1184" y="160" width="32" height="320"/>
-  <object id="65" x="800" y="448" width="384" height="32"/>
-  <object id="66" x="608" y="448" width="128" height="32"/>
-  <object id="67" x="128" y="576" width="480" height="32"/>
-  <object id="68" x="608" y="480" width="32" height="256"/>
-  <object id="69" x="640" y="704" width="96" height="32"/>
-  <object id="70" x="704" y="576" width="96" height="32"/>
-  <object id="71" x="800" y="480" width="32" height="352"/>
-  <object id="73" x="544" y="832" width="864" height="32"/>
-  <object id="74" x="928" y="576" width="384" height="32"/>
-  <object id="75" x="1408" y="352" width="64" height="288"/>
-  <object id="77" x="1312" y="448" width="96" height="32"/>
-  <object id="81" x="2176" y="704" width="96" height="160"/>
+  <object id="46" x="0" y="0" width="32" height="1024" />
+  <object id="47" x="32" y="832" width="320" height="192" />
+  <object id="48" x="352" y="960" width="288" height="64" />
+  <object id="49" x="704" y="960" width="384" height="64" />
+  <object id="50" x="1152" y="960" width="288" height="64" />
+  <object id="51" x="1440" y="928" width="64" height="96" />
+  <object id="52" x="1504" y="896" width="64" height="128" />
+  <object id="53" x="1568" y="864" width="832" height="160" />
+  <object id="54" x="2112" y="736" width="64" height="128" />
+  <object id="55" x="2368" y="0" width="32" height="864" />
+  <object id="56" x="1792" y="192" width="480" height="32" />
+  <object id="57" x="1920" y="320" width="416" height="32" />
+  <object id="58" x="2336" y="320" width="32" height="320" />
+  <object id="59" x="1408" y="640" width="960" height="64" />
+  <object id="60" x="928" y="704" width="1248" height="32" />
+  <object id="61" x="1792" y="224" width="32" height="96" />
+  <object id="62" x="1408" y="320" width="416" height="32" />
+  <object id="63" x="1216" y="320" width="96" height="32" />
+  <object id="64" x="1184" y="160" width="32" height="320" />
+  <object id="65" x="800" y="448" width="384" height="32" />
+  <object id="66" x="608" y="448" width="128" height="32" />
+  <object id="67" x="128" y="576" width="480" height="32" />
+  <object id="68" x="608" y="480" width="32" height="256" />
+  <object id="69" x="640" y="704" width="96" height="32" />
+  <object id="70" x="704" y="576" width="96" height="32" />
+  <object id="71" x="800" y="480" width="32" height="352" />
+  <object id="73" x="544" y="832" width="864" height="32" />
+  <object id="74" x="928" y="576" width="384" height="32" />
+  <object id="75" x="1408" y="352" width="64" height="288" />
+  <object id="77" x="1312" y="448" width="96" height="32" />
+  <object id="81" x="2176" y="704" width="96" height="160" />
  </objectgroup>
  <objectgroup id="3" name="entities">
-  <object id="1" name="boss" x="1920" y="575.333">
-   <point/>
+  <object id="1" name="boss" x="1920" y="608">
+   <point />
   </object>
-  <object id="4" name="Player" x="95.3333" y="766">
-   <point/>
+  <object id="4" name="Player" x="1728" y="608">
+   <point />
   </object>
   <object id="5" name="axe" x="640" y="796.667">
-   <point/>
+   <point />
   </object>
   <object id="18" name="axe" x="928" y="384">
-   <point/>
+   <point />
   </object>
   <object id="20" name="axe" x="192" y="544">
-   <point/>
+   <point />
   </object>
   <object id="21" name="sword" x="512" y="544">
-   <point/>
+   <point />
   </object>
   <object id="22" name="sword" x="416" y="928">
-   <point/>
+   <point />
   </object>
   <object id="23" name="spear" x="800" y="928">
-   <point/>
+   <point />
   </object>
   <object id="24" name="sword" x="992" y="928">
-   <point/>
+   <point />
   </object>
   <object id="25" name="axe" x="1280" y="928">
-   <point/>
+   <point />
   </object>
   <object id="26" name="sword" x="1312" y="800">
-   <point/>
+   <point />
   </object>
   <object id="27" name="spear" x="1120" y="800">
-   <point/>
+   <point />
   </object>
   <object id="28" name="sword" x="1088" y="672">
-   <point/>
+   <point />
   </object>
   <object id="29" name="spear" x="1312" y="672">
-   <point/>
+   <point />
   </object>
   <object id="30" name="spear" x="992" y="544">
-   <point/>
+   <point />
   </object>
   <object id="31" name="sword" x="1184" y="544">
-   <point/>
+   <point />
   </object>
   <object id="32" name="spear" x="1536" y="288">
-   <point/>
+   <point />
   </object>
   <object id="33" name="sword" x="1696" y="288">
-   <point/>
+   <point />
   </object>
   <object id="34" name="spear" x="1888" y="160">
-   <point/>
+   <point />
   </object>
   <object id="35" name="sword" x="2048" y="160">
-   <point/>
+   <point />
   </object>
   <object id="36" name="axe" x="2240" y="160">
-   <point/>
+   <point />
   </object>
   <object id="37" name="sword" x="2240" y="288">
-   <point/>
+   <point />
   </object>
   <object id="38" name="spear" x="2080" y="288">
-   <point/>
+   <point />
   </object>
   <object id="39" name="axe" x="2048" y="832">
-   <point/>
+   <point />
   </object>
   <object id="40" name="spear" x="1920" y="832">
-   <point/>
+   <point />
   </object>
   <object id="41" name="sword" x="1792" y="832">
-   <point/>
+   <point />
   </object>
   <object id="42" name="Noli ictu" x="2336" y="800">
-   <point/>
+   <point />
   </object>
  </objectgroup>
  <objectgroup id="4" name="pits">
-  <object id="78" name="pits" x="1087" y="1012" width="67" height="11"/>
-  <object id="79" name="pits" x="639" y="1008.5" width="65.5" height="14"/>
+  <object id="78" name="pits" x="1087" y="1012" width="67" height="11" />
+  <object id="79" name="pits" x="639" y="1008.5" width="65.5" height="14" />
  </objectgroup>
  <objectgroup id="5" name="checkpoint">
   <object id="44" name="checkpoint" x="1952" y="288">
-   <point/>
+   <point />
   </object>
  </objectgroup>
 </map>
