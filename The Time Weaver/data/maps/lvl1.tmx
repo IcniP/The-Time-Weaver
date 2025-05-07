@@ -131,7 +131,7 @@
   <object id="19" name="sword" x="800" y="1024">
    <point />
   </object>
-  <object id="20" name="sword" x="320" y="1024">
+  <object id="20" name="axe" x="320" y="1024">
    <point />
   </object>
   <object id="21" name="Player" x="61.5" y="1105">

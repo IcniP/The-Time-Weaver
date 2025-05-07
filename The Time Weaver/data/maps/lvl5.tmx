@@ -37,29 +37,6 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5
 </data>
  </layer>
- <objectgroup id="2" name="collision">
-  <object id="1" x="0" y="32" width="32" height="832" />
-  <object id="2" x="0" y="864" width="4800" height="32" />
-  <object id="3" x="0" y="0" width="4800" height="32" />
-  <object id="4" x="4768" y="64" width="32" height="800" />
-  <object id="5" x="4768" y="32" width="32" height="32" />
-  <object id="6" x="3104" y="480" width="32" height="384" />
-  <object id="7" x="3136" y="480" width="1632" height="32" />
-  <object id="8" x="4192" y="736" width="128" height="32" />
-  <object id="9" x="4672" y="736" width="96" height="32" />
-  <object id="10" x="3648" y="736" width="128" height="32" />
-  <object id="11" x="3136" y="736" width="96" height="32" />
-  <object id="12" x="3360" y="896" width="32" height="96" />
-  <object id="13" x="3520" y="896" width="32" height="96" />
-  <object id="14" x="3392" y="960" width="128" height="32" />
-  <object id="15" x="3904" y="896" width="32" height="96" />
-  <object id="16" x="3936" y="960" width="160" height="32" />
-  <object id="17" x="4064" y="896" width="32" height="64" />
-  <object id="18" x="4384" y="896" width="32" height="96" />
-  <object id="19" x="4416" y="960" width="160" height="32" />
-  <object id="20" x="4544" y="896" width="32" height="64" />
-  <object id="25" x="2208" y="32" width="64" height="832" />
- </objectgroup>
  <objectgroup id="3" name="entities">
   <object id="21" name="Cervus" x="4000" y="768">
    <point />
