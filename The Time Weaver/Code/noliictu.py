@@ -25,8 +25,8 @@ class Knive(pygame.sprite.Sprite):
 
         self.mask = pygame.mask.from_surface(self.image)
 
-        self.speed = 200 #projectile speed
-        self.damage = 1  # Damage ke player
+        self.speed = 320 #projectile speed
+        self.damage = 0  # Damage ke player
 
     def update(self, dt):
         move = self.direction * self.speed * dt
@@ -35,7 +35,7 @@ class Knive(pygame.sprite.Sprite):
 
         # Cek jarak
         current_pos = pygame.math.Vector2(self.rect.center)
-        if self.start_pos.distance_to(current_pos) >= 500:
+        if self.start_pos.distance_to(current_pos) >= 1000:
             self.kill()
             return
 
@@ -61,8 +61,9 @@ class Noliictu(BossBase):
         self.detection_active = False
         self.time_in_rect = 0
         self.teleporting = False
-        self.teleport_cooldown = 10
+        self.teleport_cooldown = 8
         self.ready_to_teleport = False
+        self.dying = False
 
         self.knive_group = groups  
 
@@ -71,10 +72,35 @@ class Noliictu(BossBase):
         self.attack_cooldown_timer = 0
         self.knife_timer = 0
         self.knives_fired = 0
-        self.max_knives = 4
+        self.max_knives = 5
         self.knife_interval = 0.8  
         self.attacking = False
 
+        # ult attributes
+        self.can_ult = False
+        self.ult_cooldown = 25
+        self.ult_cooldown_timer = 0
+        self.is_uliting = False
+        self.ult_duration = 5
+        self.ult_timer = 0
+        self.after_ult_teleport = False
+        self.num = random.randint(1, 9)
+        self.recovering_after_ult = False
+
+        # after ult teleport
+        self.after_ult_teleport = False
+
+    def ult(self):
+        self.is_uliting = True
+        self.ult_timer = 0
+        self.play_animation('UltIn')
+        map = load_pygame(join('data', 'maps', 'lvl4.tmx'))
+        for marker in map.get_layer_by_name('entities'):
+            if marker.name == 'Ult':
+                teleport_pos = (marker.x, marker.y)
+                self.rect.center = teleport_pos
+                break
+            
     def attack(self, dt):
         if not self.attacking:
             self.attacking = True
@@ -99,29 +125,89 @@ class Noliictu(BossBase):
     def update(self, dt):
         super().update(dt)
         self.detection_rect.center = self.rect.center
+        num = random.randint(1, 9)
+
+        if self.dying:
+            frames = self.animations[self.status]
+            if self.status == 'TeleportOut' and self.frame_index >= len(frames) - 1:
+                self.kill()
+            return
 
         if self.teleport_cooldown > 0:
             self.teleport_cooldown -= dt
 
-        # === Handle teleport ===
+        if self.hp <= 3500:
+            self.ult_cooldown_timer += dt
+            if self.ult_cooldown_timer >= self.ult_cooldown and not self.is_uliting and not self.after_ult_teleport and not self.recovering_after_ult and not self.attacking:
+                self.ult()
+                self.ult_cooldown_timer = 0
+                return
+
+        if self.can_ult and not self.is_uliting:
+            self.ult()
+            self.can_ult = False
+            return
+
+        if self.is_uliting:
+            frames = self.animations[self.status]
+            if self.status == 'UltIn':
+                if self.frame_index >= len(frames) - 1:
+                    self.play_animation('Ult')
+            elif self.status == 'Ult':
+                self.ult_timer += dt
+                if self.ult_timer >= self.ult_duration:
+                    self.is_uliting = False
+                    self.after_ult_teleport = True
+                    self.play_animation('TeleportOut')
+            return
+
+        if self.after_ult_teleport:
+            frames = self.animations[self.status]
+            if self.status == 'TeleportOut' and self.frame_index >= len(frames) - 1:
+                map = load_pygame(join('data', 'maps', 'lvl4.tmx'))
+                possible_markers = [marker for marker in map.get_layer_by_name('entities') if marker.name.isdigit()]
+                if possible_markers:
+                    teleport_marker = random.choice(possible_markers)
+                    teleport_pos = (teleport_marker.x, teleport_marker.y)
+                    self.rect.center = teleport_pos
+                self.play_animation('TeleportIn')
+            elif self.status == 'TeleportIn' and self.frame_index >= len(frames) - 1:
+                self.after_ult_teleport = False
+                self.recovering_after_ult = True
+                self.attack_cooldown_timer = self.attack_cooldown  # tunggu cooldown dulu baru attack
+                self.attacking = False
+                self.play_animation('Idle')
+            return
+
+        if self.recovering_after_ult:
+            self.attack_cooldown_timer += dt
+            if self.attack_cooldown_timer >= self.attack_cooldown:
+                self.recovering_after_ult = False
+            return
+
         if self.teleporting:
             frames = self.animations[self.status]
             if self.status == 'TeleportOut' and self.frame_index >= len(frames) - 1:
+                map = load_pygame(join('data', 'maps', 'lvl4.tmx'))
+                for marker in map.get_layer_by_name('entities'):
+                    if marker.name == f'{num}':
+                        teleport_pos = (marker.x, marker.y)
+                        self.rect.center = teleport_pos
+                        break
                 self.play_animation('TeleportIn')
             elif self.status == 'TeleportIn' and self.frame_index >= len(frames) - 1:
                 self.teleporting = False
-                self.teleport_cooldown = 10  # cooldown TP 10 detik
-                self.attack_cooldown_timer = self.attack_cooldown  # Langsung siap untuk attack
+                self.teleport_cooldown = 8
+                self.attack_cooldown_timer = self.attack_cooldown
                 self.attacking = False
-                if self.status != 'Idle':
-                    self.play_animation('Idle')
+                self.play_animation('Idle')
         else:
             if self.detection_rect.colliderect(self.player.rect):
                 self.time_in_rect += dt
             else:
                 self.time_in_rect = 0
 
-            if self.time_in_rect >= 5 and self.teleport_cooldown <= 0:
+            if self.time_in_rect >= 2.5 and self.teleport_cooldown <= 0 and not self.is_uliting and not self.after_ult_teleport and not self.recovering_after_ult:
                 self.play_animation('TeleportOut')
                 self.teleporting = True
                 self.attacking = False
@@ -135,6 +221,13 @@ class Noliictu(BossBase):
                         self.attack(dt)
                     elif self.status != 'Idle':
                         self.play_animation('Idle')
+
+    def take_damage(self, amount):
+        self.hp -= amount
+        if self.hp <= 0 and not self.dying:
+            self.hp = 0
+            self.dying = True
+            self.play_animation('TeleportOut')
 
     def draw_detection_rect(self, surface):
         if self.detection_active:

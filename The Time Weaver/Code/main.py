@@ -20,7 +20,7 @@ class Game:
         self.all_sprites = AllSprites()
         self.collision_sprites = pygame.sprite.Group()
 
-        self.level = 6
+        self.level = 4
         self.mapz = {
             1: "lvl1.tmx",
             2: "lvl2.tmx",
