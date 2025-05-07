@@ -1,24 +1,9 @@
-import pygame
 from settings import *
-from bossbase import BossBase
+from noliictu import Noliictu
 from os import listdir
 from os.path import join, dirname, abspath
-from abc import ABC, abstractmethod
 
 #-----------------------------Sprite thingy------------------------------------------
-class AllSprites(pygame.sprite.Group):
-    def __init__(self):
-        super().__init__()
-        self.display_surface = pygame.display.get_surface()
-        self.offset = pygame.Vector2(0, 0)
-
-    def draw(self, target_pos):
-        self.offset.x = -(target_pos[0] - WINDOW_WIDTH / 2)
-        self.offset.y = -(target_pos[1] - WINDOW_HEIGHT / 2)
-
-        for sprite in self:
-            self.display_surface.blit(sprite.image, sprite.rect.topleft + self.offset)
-
 class Sprite(pygame.sprite.Sprite):
     def __init__(self, pos, surf, groups):
         super().__init__(groups)
@@ -160,7 +145,7 @@ class Player(Entity):
                 for enemy in self.groupss:
                     if isinstance(enemy, Humanoid) and hitbox.colliderect(enemy.entity_hitbox):
                         enemy.take_damage(1)
-                    if isinstance(enemy, BossBase) and hitbox.colliderect(enemy.rect):
+                    if isinstance(enemy, Noliictu) and hitbox.colliderect(enemy.hitbox):
                         enemy.take_damage(100)
                         print(f"{enemy.boss_name} collided with the player's attack! HP: {enemy.hp}")
 
@@ -174,7 +159,7 @@ class Player(Entity):
                 for enemy in self.groupss:
                     if isinstance(enemy, Humanoid) and hitbox.colliderect(enemy.entity_hitbox):
                         enemy.take_damage(1)
-                    if isinstance(enemy, BossBase) and hitbox.colliderect(enemy.rect):
+                    if isinstance(enemy, Noliictu) and hitbox.colliderect(enemy.hitbox):
                         enemy.take_damage(100)
                         print(f"{enemy.boss_name} collided with the player's attack! HP: {enemy.hp}")
                         
