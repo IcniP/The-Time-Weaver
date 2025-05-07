@@ -1,4 +1,3 @@
-import pygame
 from settings import *
 from entity import *
 from bossbase import BossBase
@@ -26,7 +25,7 @@ class Knive(pygame.sprite.Sprite):
         self.mask = pygame.mask.from_surface(self.image)
 
         self.speed = 320 #projectile speed
-        self.damage = 0  # Damage ke player
+        self.damage = 1  # Damage ke player
 
     def update(self, dt):
         move = self.direction * self.speed * dt
@@ -56,8 +55,17 @@ class Noliictu(BossBase):
         }
         super().__init__(pos, groups, player, boss_name='Noliictu', animation_paths=animation_paths)
 
+        self.hitwidth = 16
+        self.hitheight = 32
+        self.hitbox = pygame.Rect(0, 0, self.hitwidth, self.hitheight)
+
+        #mengoveridde image & rect parent karna dibutuhin utk hitboxny
+        self.image = self.animations['Idle'][0]  # atau frame default lainnya
+        self.rect = self.image.get_rect(center=pos)
+        self.hitbox.center = self.rect.center
+
         self.hp = 3000
-        self.detection_rect = pygame.Rect(self.rect.centerx - 100, self.rect.centery - 100, 200, 200)
+        self.detection_rect = pygame.Rect(self.hitbox.centerx - 100, self.hitbox.centery - 100, 200, 200)
         self.detection_active = False
         self.time_in_rect = 0
         self.teleporting = False
@@ -90,6 +98,7 @@ class Noliictu(BossBase):
         # after ult teleport
         self.after_ult_teleport = False
 
+
     def ult(self):
         self.is_uliting = True
         self.ult_timer = 0
@@ -98,7 +107,7 @@ class Noliictu(BossBase):
         for marker in map.get_layer_by_name('entities'):
             if marker.name == 'Ult':
                 teleport_pos = (marker.x, marker.y)
-                self.rect.center = teleport_pos
+                self.hitbox.center = teleport_pos
                 break
             
     def attack(self, dt):
@@ -113,8 +122,8 @@ class Noliictu(BossBase):
             self.knife_timer = 0
             self.knives_fired += 1
 
-            offset = pygame.Vector2(70, 0) if self.player.rect.centerx > self.rect.centerx else pygame.Vector2(-70, 0)
-            spawn_pos = pygame.Vector2(self.rect.center) - offset
+            offset = pygame.Vector2(70, 0) if self.player.rect.centerx > self.hitbox.centerx else pygame.Vector2(-70, 0)
+            spawn_pos = pygame.Vector2(self.hitbox.center) - offset
             Knive(spawn_pos, self.player.player_hitbox.midbottom, [self.knive_group], self.player)
 
         if self.knives_fired >= self.max_knives:
@@ -124,7 +133,7 @@ class Noliictu(BossBase):
 
     def update(self, dt):
         super().update(dt)
-        self.detection_rect.center = self.rect.center
+        self.detection_rect.center = self.hitbox.center
         num = random.randint(1, 9)
 
         if self.dying:
@@ -169,7 +178,7 @@ class Noliictu(BossBase):
                 if possible_markers:
                     teleport_marker = random.choice(possible_markers)
                     teleport_pos = (teleport_marker.x, teleport_marker.y)
-                    self.rect.center = teleport_pos
+                    self.hitbox.center = teleport_pos
                 self.play_animation('TeleportIn')
             elif self.status == 'TeleportIn' and self.frame_index >= len(frames) - 1:
                 self.after_ult_teleport = False
@@ -192,7 +201,7 @@ class Noliictu(BossBase):
                 for marker in map.get_layer_by_name('entities'):
                     if marker.name == f'{num}':
                         teleport_pos = (marker.x, marker.y)
-                        self.rect.center = teleport_pos
+                        self.hitbox.center = teleport_pos
                         break
                 self.play_animation('TeleportIn')
             elif self.status == 'TeleportIn' and self.frame_index >= len(frames) - 1:
@@ -221,6 +230,8 @@ class Noliictu(BossBase):
                         self.attack(dt)
                     elif self.status != 'Idle':
                         self.play_animation('Idle')
+        
+        self.hitbox.center = self.rect.center
 
     def take_damage(self, amount):
         self.hp -= amount
