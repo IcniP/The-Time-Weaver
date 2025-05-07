@@ -364,6 +364,10 @@ class Humanoid(Entity):
 
     def take_damage(self, damage):
         self.hp -= damage
+        mask = pygame.mask.from_surface(self.image)
+        white_surf = mask.to_surface(setcolor=(255, 255, 255), unsetcolor=(0, 0, 0, 0))
+        white_surf.set_colorkey((0, 0, 0))
+        self.image = white_surf
         if self.hp <= 0:
             self.die()
     
