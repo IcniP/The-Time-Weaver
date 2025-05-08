@@ -1,6 +1,10 @@
+import pygame
 from settings import *
 from bossbase import BossBase
 from noliictu import Noliictu
+from os import listdir
+from os.path import join, dirname, abspath
+from abc import ABC, abstractmethod
 
 #-----------------------------Sprite thingy------------------------------------------
 class AllSprites(pygame.sprite.Group):
@@ -322,10 +326,17 @@ class Humanoid(Entity):
         self.collision_sprites = collision_sprites
         
         # movement n jump
-        self.direction = pygame.math.Vector2(0, 0)
-        self.speed = 100  # pixels per second
+        self.left_bound = None
+        self.right_bound = None
+        self.direction = pygame.math.Vector2(-1, 0)
+        self.speed = 60  # pixels per second
         self.gravity = 50
-        self.facing_right = True
+        self.facing_right = False
+        self.wander_timer = 0
+        self.wander_duration = 2000
+        self.idle_duration = 1000
+        self.wander_lap = pygame.time.get_ticks()
+        self.wandering = self.type in ['Sword', 'Axe']
 
         # attack
         self.attacking = False
@@ -363,10 +374,6 @@ class Humanoid(Entity):
 
     def take_damage(self, damage):
         self.hp -= damage
-        mask = pygame.mask.from_surface(self.image)
-        white_surf = mask.to_surface(setcolor=(255, 255, 255), unsetcolor=(0, 0, 0, 0))
-        white_surf.set_colorkey((0, 0, 0))
-        self.image = white_surf
         if self.hp <= 0:
             self.die()
     
@@ -385,12 +392,46 @@ class Humanoid(Entity):
 
 #-----------------------------movements and all dat------------------------------------------
     def move(self, dt):
-        pass
+        current_time = pygame.time.get_ticks()
 
+        if not self.wandering:
+            self.direction.x = 0
+            return
+
+        if self.state == 'idle':
+            self.direction.x = 0
+            if current_time - self.wander_lap >= self.idle_duration:
+                self.state = 'walk'
+                self.direction.x = 1 if self.facing_right else -1
+                self.wander_lap = current_time
+        elif self.state == 'walk':
+            if current_time - self.wander_lap >= self.wander_duration:
+                self.state = 'idle'
+                self.wander_lap = current_time
+                self.facing_right = not self.facing_right
+            
+            self.direction.x = 1 if self.facing_right else -1
+        
+        center_x = self.entity_hitbox.centerx
+        if self.left_bound is not None and self.right_bound is not None:
+            if self.entity_hitbox.centerx < self.left_bound or self.entity_hitbox.centerx > self.right_bound:
+                if center_x <= self.left_bound + 2:
+                    self.facing_right = True
+                    self.direction.x = 1
+                elif center_x >= self.right_bound - 2:
+                    self.facing_right = False
+                    self.direction.x = -1
+        
+        self.direction.x = max(-1, min(1, self.direction.x))
+
+    def patrol_bounds(self, rect):
+        if rect:
+            self.left_bound = rect.left
+            self.right_bound = rect.right
 #-----------------------------gravity stuff------------------------------------------
     def add_gravity(self, dt):
         self.direction.y += self.gravity * dt  # Apply gravity
-        self.entity_hitbox.y += self.direction.y * dt  # Apply gravity to the rect
+        self.entity_hitbox.y += self.direction.y # Apply gravity to the rect
         self.collision('vertical')
 
         self.entity_hitbox.x += self.direction.x * self.speed * dt  # Apply consistent speed
