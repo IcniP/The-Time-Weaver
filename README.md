@@ -6,6 +6,8 @@ open Terminal
 
 pip install pygame-ce
 
+pip install pytmx
+
 
 
 By 
