@@ -20,7 +20,7 @@ class Game:
         self.all_sprites = AllSprites()
         self.collision_sprites = pygame.sprite.Group()
 
-        self.level = 4
+        self.level = 1
         self.mapz = {
             1: "lvl1.tmx",
             2: "lvl2.tmx",
@@ -69,6 +69,11 @@ class Game:
         # --- sementara player kosong ---
         player_pos = None
 
+        self.patrol_zones = []
+        for obj in map.get_layer_by_name('zones'):
+            rect = pygame.Rect(obj.x, obj.y, obj.width, obj.height)
+            self.patrol_zones.append(rect)
+
         for marker in map.get_layer_by_name('entities'):
             if marker.name == 'Player':
                 player_pos = (marker.x, marker.y)
@@ -79,10 +84,12 @@ class Game:
 
         # Setelah player ada, baru spawn musuh
         for marker in map.get_layer_by_name('entities'):
-            if marker.name == 'sword':
-                Humanoid('Sword', (marker.x, marker.y), self.all_sprites, self.collision_sprites)
-            elif marker.name == 'axe':
-                Humanoid('Axe', (marker.x, marker.y), self.all_sprites, self.collision_sprites)
+            if marker.name in ['sword', 'axe']:
+                enemy = Humanoid(marker.name.capitalize(), (marker.x, marker.y), self.all_sprites, self.collision_sprites)
+                for zone in self.patrol_zones:
+                    if zone.collidepoint(marker.x, marker.y):
+                        enemy.patrol_bounds(zone)
+                        break
             elif marker.name == 'spear':
                 Humanoid('Spear', (marker.x, marker.y), self.all_sprites, self.collision_sprites)
             elif marker.name == 'Cervus':
