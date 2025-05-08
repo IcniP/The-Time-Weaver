@@ -1,5 +1,16 @@
 # Pbo-Game-Project
 Time Weaver
+how to run game currently
+
+open Terminal 
+
+pip install pygame-ce
+
+pip install pytmx
+
+From Your compiler Open the Time Weaver Folder 
+
+Run
 
 
 
