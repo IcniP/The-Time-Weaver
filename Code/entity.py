@@ -13,9 +13,12 @@ class AllSprites(pygame.sprite.Group):
         self.display_surface = pygame.display.get_surface()
         self.offset = pygame.Vector2(0, 0)
 
-    def draw(self, target_pos):
+    def draw(self, target_pos, map_w, map_h):
         self.offset.x = -(target_pos[0] - WINDOW_WIDTH / 2)
         self.offset.y = -(target_pos[1] - WINDOW_HEIGHT / 2)
+
+        self.offset.x = max(min(self.offset.x, 0), WINDOW_WIDTH - map_w)
+        self.offset.y = max(min(self.offset.y, 0), WINDOW_HEIGHT - map_h)
 
         for sprite in self:
             self.display_surface.blit(sprite.image, sprite.rect.topleft + self.offset)
@@ -69,7 +72,7 @@ class Player(Entity):
         self.max_hp = 3
         self.hp = self.max_hp
         self.invincible = True
-        self.invincibility_duration = 3000  # ms
+        self.invincibility_duration = 1000  # ms
         self.last_hit_time = 0
 
         # movement n jump
@@ -364,6 +367,10 @@ class Humanoid(Entity):
 
     def take_damage(self, damage):
         self.hp -= damage
+        mask = pygame.mask.from_surface(self.image)
+        white_surf = mask.to_surface(setcolor=(255, 255, 255), unsetcolor=(0, 0, 0, 0))
+        white_surf.set_colorkey((0, 0, 0))
+        self.image = white_surf
         if self.hp <= 0:
             self.die()
     
