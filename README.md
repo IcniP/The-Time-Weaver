@@ -8,6 +8,10 @@ pip install pygame-ce
 
 pip install pytmx
 
+From Your compiler Open the Time Weaver Folder 
+
+Run
+
 
 
 By 
