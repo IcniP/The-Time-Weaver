@@ -1,7 +1,9 @@
 # Pbo-Game-Project
 Time Weaver
 how to run game currently
+
 open Terminal 
+
 pip install pygame-ce
 
 
