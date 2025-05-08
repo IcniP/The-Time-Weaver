@@ -7,6 +7,11 @@ class MainMenuManager:
         self.game = game  # reference ke Game instance
         self.volume = 0.5
 
+        self.lvl4_music = pygame.mixer.Sound('Assets/ost/lacrimosatnbe.mp3')
+        self.lobby_music = pygame.mixer.Sound('Assets/ost/lobby.mp3')
+
+        self.lobbybg = pygame.image.load('Assets/lobby/1.png').convert_alpha()
+
         self.start_button = self.create_button("Start", (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 30))
         self.setting_button = self.create_button("Settings", (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 60))
         self.exit_button = self.create_button("Exit", (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 90))
@@ -36,6 +41,10 @@ class MainMenuManager:
         title_font = pygame.font.Font('Assets/Fonts/m5x7.ttf', 100)
         title_surface = title_font.render('The Time Weaver', True, 'White')
 
+        # Play lobby music kalau belum aktif
+        if not pygame.mixer.get_busy():
+            self.lobby_music.play(loops=-1)
+
         while not self.game.game_active and self.game.running:
             mouse_pos = pygame.mouse.get_pos()
 
@@ -51,12 +60,18 @@ class MainMenuManager:
                     if action == "start":
                         self.game.reset_game()
                         self.game.game_active = True
+                        self.lobby_music.stop()
+
+                        if self.game.level == 4:
+                            self.lvl4_music.play(loops=-1)
+
                     elif action == "settings":
                         self.settings_menu()
                     elif action == "exit":
                         self.game.running = False
 
             self.screen.fill('black')
+            self.screen.blit(self.lobbybg, (0, 0))
             self.screen.blit(title_surface, (WINDOW_WIDTH // 2 - title_surface.get_width() // 2, WINDOW_HEIGHT // 3 - title_surface.get_height() // 2))
             self.screen.blit(self.start_button["surface"], self.start_button["rect"])
             self.screen.blit(self.setting_button["surface"], self.setting_button["rect"])
@@ -84,6 +99,8 @@ class MainMenuManager:
                     elif action == "return":
                         self.game.game_active = False
                         self.game.paused = False
+                        self.lvl4_music.stop()
+                        self.lobby_music.play(loops=-1)
                     elif action == "settings":
                         self.settings_menu()
                     elif action == "save":
@@ -96,7 +113,11 @@ class MainMenuManager:
             self.screen.blit(self.save_button["surface"], self.save_button["rect"])
 
             pygame.display.update()
-            self.game.clock.tick(FRAMERATE)  # <-- Add this line
+            self.game.clock.tick(FRAMERATE)
+
+    def set_all_volume(self, volume):
+        self.lvl4_music.set_volume(volume)
+        self.lobby_music.set_volume(volume*1.5)
 
     def settings_menu(self):
         while self.game.running:
@@ -113,10 +134,10 @@ class MainMenuManager:
                     })
                     if action == "volume_up":
                         self.volume = min(1.0, self.volume + 0.1)
-                        pygame.mixer.music.set_volume(self.volume)
+                        self.set_all_volume(self.volume)
                     elif action == "volume_down":
                         self.volume = max(0.0, self.volume - 0.1)
-                        pygame.mixer.music.set_volume(self.volume)
+                        self.set_all_volume(self.volume)
                     elif action == "back":
                         return
 
