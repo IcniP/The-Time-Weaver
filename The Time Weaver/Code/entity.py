@@ -13,9 +13,12 @@ class AllSprites(pygame.sprite.Group):
         self.display_surface = pygame.display.get_surface()
         self.offset = pygame.Vector2(0, 0)
 
-    def draw(self, target_pos):
+    def draw(self, target_pos, map_w, map_h):
         self.offset.x = -(target_pos[0] - WINDOW_WIDTH / 2)
         self.offset.y = -(target_pos[1] - WINDOW_HEIGHT / 2)
+
+        self.offset.x = max(min(self.offset.x, 0), WINDOW_WIDTH - map_w)
+        self.offset.y = max(min(self.offset.y, 0), WINDOW_HEIGHT - map_h)
 
         for sprite in self:
             self.display_surface.blit(sprite.image, sprite.rect.topleft + self.offset)

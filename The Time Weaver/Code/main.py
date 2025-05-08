@@ -57,6 +57,9 @@ class Game:
 
     def map1(self):
         map = load_pygame(join('data', 'maps', self.mapz))
+        self.map_w = map.width * TILE_SIZE
+        self.map_h = map.height * TILE_SIZE
+
         for x, y, image in map.get_layer_by_name('ground').tiles():
             Sprite((x * TILE_SIZE, y * TILE_SIZE), image, (self.all_sprites, self.collision_sprites))
 
@@ -107,7 +110,7 @@ class Game:
                     self.all_sprites.update(dt)
 
                 self.screen.blit(self.map_scaled, (0, 0))
-                self.all_sprites.draw(self.player.rect.center)
+                self.all_sprites.draw(self.player.rect.center, self.map_w, self.map_h)
                 pygame.display.update()
             else:
                 self.menu_manager.main_menu()
