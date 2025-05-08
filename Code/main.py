@@ -1,8 +1,6 @@
 from settings import *
 from entity import *
 from cervus import Cervus
-import xml.etree.ElementTree as ET
-from pathlib import Path
 from mainmenu import MainMenuManager
 from noliictu import Noliictu
 

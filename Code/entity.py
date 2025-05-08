@@ -1,10 +1,6 @@
-import pygame
 from settings import *
 from bossbase import BossBase
 from noliictu import Noliictu
-from os import listdir
-from os.path import join, dirname, abspath
-from abc import ABC, abstractmethod
 
 #-----------------------------Sprite thingy------------------------------------------
 class AllSprites(pygame.sprite.Group):
