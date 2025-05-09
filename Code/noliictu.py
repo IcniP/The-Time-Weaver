@@ -142,12 +142,13 @@ class Noliictu(BossBase):
         if self.teleport_cooldown > 0:
             self.teleport_cooldown -= dt
 
-        if self.hp <= 1500:
+        if self.hp <= 3000:
             self.ult_cooldown_timer += dt
-            if self.ult_cooldown_timer >= self.ult_cooldown and not self.is_uliting and not self.after_ult_teleport and not self.recovering_after_ult and not self.attacking:
-                self.ult()
-                self.ult_cooldown_timer = 0
-                return
+            if self.hp<= 1500:
+                if self.ult_cooldown_timer >= self.ult_cooldown and not self.is_uliting and not self.after_ult_teleport and not self.recovering_after_ult and not self.attacking:
+                    self.ult()
+                    self.ult_cooldown_timer = 0
+                    return
 
         if self.can_ult and not self.is_uliting:
             self.ult()
