@@ -21,14 +21,18 @@ class Game:
         self.all_sprites = AllSprites()
         self.collision_sprites = pygame.sprite.Group()
 
-        self.level = 4
-        self.mapz = {
-            1: "lvl1.tmx",
-            2: "lvl2.tmx",
-            3: "lvl3.tmx",
-            4: "lvl4.tmx",
-            5: "lvl5.tmx"
-        }.get(self.level, "test.tmx")
+        self.level = f'{1}-{1}'
+        self.level_map = {
+            '1-0': "lvl1.tmx",
+            '1-1': "lvl1-1.tmx",
+            '1-2': "lvl1-2.tmx",
+            #'1-3': "boss1.tmx",
+            '2-0': "lvl2.tmx",
+            '3-0': "lvl3.tmx",
+            '4-0': "lvl4.tmx",
+            '5-0': "lvl5.tmx"
+        }
+        self.mapz = self.level_map.get(self.level, 'test.tmx')
 
         self.player = Player((WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2), self.all_sprites, self.collision_sprites)
         self.fix_tmx_tileset('data/maps', 'Assets/Tilesets')
@@ -38,6 +42,7 @@ class Game:
         self.menu_manager = MainMenuManager(self.screen, self)
         self.ui = UserInterface(self.screen)
 
+# ========================= Map thingy =========================
     def fix_tmx_tileset(self, map_folder, tileset_folder):
         map_folder = Path(map_folder)
         tileset_folder = Path(tileset_folder)
@@ -71,18 +76,21 @@ class Game:
         # --- sementara player kosong ---
         player_pos = None
 
+        self.transition_zones = {}
         self.patrol_zones = []
         for obj in map.get_layer_by_name('zones'):
-            rect = pygame.Rect(obj.x, obj.y, obj.width, obj.height)
-            self.patrol_zones.append(rect)
+            if obj.name in ['forward', 'back']:
+                self.transition_zones[obj.name] = pygame.Rect(obj.x, obj.y, obj.width, obj.height)
+            else:
+                rect = pygame.Rect(obj.x, obj.y, obj.width, obj.height)
+                self.patrol_zones.append(rect)
 
+        #player spawn
+        spawn_marker = getattr(self, 'respawn_marker', 'Player')
         for marker in map.get_layer_by_name('entities'):
-            if marker.name == 'Player':
-                player_pos = (marker.x, marker.y)
-
-        # Setelah semua marker dicek, baru spawn player
-        if player_pos:
-            self.player = Player(player_pos, self.all_sprites, self.collision_sprites)
+            if marker.name == spawn_marker:
+                self.player = Player((marker.x, marker.y), self.all_sprites, self.collision_sprites)
+                break
 
         # Setelah player ada, baru spawn musuh
         for marker in map.get_layer_by_name('entities'):
@@ -99,6 +107,24 @@ class Game:
             elif marker.name == 'Noliictu':
                 self.noliictu = Noliictu((marker.x, marker.y), self.all_sprites, self.player)
 
+    def next_level(self):
+        world, stage = map(int, self.level.split('-'))
+        next_stage = stage + 1
+        self.level = f'{world}-{next_stage}'
+        self.mapz = self.level_map.get(self.level, 'test.tmx')
+        self.respawn_marker = 'Player'
+        self.reset_game()
+    
+    def previous_level(self):
+        world, stage = map(int, self.level.split('-'))
+        prev_stage = max(stage - 1, 0)
+        self.level = f'{world}-{prev_stage}'
+        self.mapz = self.level_map.get(self.level, 'test.tmx')
+        self.respawn_marker = 'Player_back'
+        self.reset_game()
+        self.player.facing_right = False
+
+# ========================= GAME LOOP =========================
     def run(self):
         while self.running:
             if not self.paused:
@@ -122,6 +148,14 @@ class Game:
                 self.all_sprites.draw(self.player.rect.center, self.map_w, self.map_h)
                 self.ui.draw(self.player)
                 pygame.display.update()
+
+                if 'forward' in self.transition_zones and self.player.player_hitbox.colliderect(self.transition_zones['forward']):
+                    self.next_level()
+                
+                if 'back' in self.transition_zones and self.player.player_hitbox.colliderect(self.transition_zones['back']):
+                    self.previous_level()
+
+
             else:
                 self.menu_manager.main_menu()
 

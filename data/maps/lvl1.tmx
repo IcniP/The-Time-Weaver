@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="77" height="40" tilewidth="32" tileheight="32" infinite="0" nextlayerid="7" nextobjectid="81">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="77" height="40" tilewidth="32" tileheight="32" infinite="0" nextlayerid="7" nextobjectid="83">
  <tileset firstgid="1" source="../tilesets/timeweavertileset.tsx" />
  <layer id="1" name="ground" width="77" height="40">
   <data encoding="csv">
@@ -103,7 +103,10 @@
   <object id="20" name="axe" x="320" y="1024">
    <point />
   </object>
-  <object id="21" name="Player" x="61.5" y="1105">
+  <object id="21" name="Player" x="64" y="1184">
+   <point />
+  </object>
+  <object id="82" name="Player_back" x="2446.5" y="1054.5">
    <point />
   </object>
  </objectgroup>
@@ -126,5 +129,6 @@
   <object id="78" x="1486.86" y="1055" width="145.136" height="35" />
   <object id="79" x="1759.5" y="1086.5" width="225.5" height="35.5" />
   <object id="80" x="2080" y="1088" width="288" height="34.5" />
+  <object id="81" name="forward" x="2461.67" y="1071" width="17.6667" height="49" />
  </objectgroup>
 </map>

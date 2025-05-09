@@ -75,7 +75,7 @@ class Player(Entity):
         #stamina---------
         self.max_stamina = 4
         self.stamina = self.max_stamina
-        self.stamina_regen = 1
+        self.stamina_regen = 0.5
         self.stamina_drain_attack = 0.5
         self.last_stamina_use = pygame.time.get_ticks()
         
@@ -281,7 +281,7 @@ class Player(Entity):
         time_since_use = (pygame.time.get_ticks() - self.last_stamina_use) / 1000
         regen_amount = self.stamina_regen * dt
         # 1 detik
-        if time_since_use > 1 and self.stamina < self.max_stamina and not self.attack_button_pressed:
+        if time_since_use > 1 and self.stamina < self.max_stamina and not self.attack_button_pressed and not self.jumping:
             self.stamina = min(self.stamina + regen_amount, self.max_stamina)
 
         #playa invicible, utk testing
