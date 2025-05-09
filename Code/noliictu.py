@@ -23,7 +23,7 @@ class Knive(pygame.sprite.Sprite):
         self.mask = pygame.mask.from_surface(self.image)
 
         self.speed = 520 #projectile speed
-        self.damage = 0  # Damage ke player
+        self.damage = 1  # Damage ke player
 
     def update(self, dt):
         move = self.direction * self.speed * dt

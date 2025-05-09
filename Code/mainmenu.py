@@ -146,3 +146,40 @@ class MainMenuManager:
             self.screen.blit(self.back_button["surface"], self.back_button["rect"])
 
             pygame.display.update()
+
+class Transition:
+    def __init__(self, duration):
+        self.duration = duration
+        self.timer = 0
+        self.active = False
+        self.alpha = 0
+        self.next_state = None
+    
+    def start(self, mode='fade'):
+        self.start_time = pygame.time.get_ticks()
+        self.active = True
+        self.fade_in = (mode == 'fadein')
+
+    def update(self, dt):
+        if not self.active:
+            return
+        
+        elapsed = pygame.time.get_ticks() - self.start_time
+        if elapsed > self.duration:
+            self.active = False
+            return
+            
+
+    def draw(self, surface):
+        if not self.active:
+            return
+        elapsed = pygame.time.get_ticks() - self.start_time
+        alpha = int((elapsed / self.duration) * 255)
+        if self.fade_in:
+            alpha = 255 - alpha
+        alpha = max(0, min(alpha, 255))
+
+        fade_surf = pygame.Surface(surface.get_size())
+        fade_surf.fill((0, 0, 0))
+        fade_surf.set_alpha(alpha)
+        surface.blit(fade_surf, (0, 0))
