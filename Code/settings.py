@@ -1,14 +1,16 @@
 import pygame
-from os import walk
-from os.path import join
-from pathlib import Path
-from os import listdir
-from os.path import join, dirname, abspath
 from pytmx.util_pygame import load_pygame
-from abc import ABC, abstractmethod
-import xml.etree.ElementTree as ET
+
+import sys
 import random
 import math
+from abc import ABC, abstractmethod
+
+from os import walk, listdir
+from os.path import join, dirname, abspath
+from pathlib import Path
+import xml.etree.ElementTree as ET
+
 
 # Default resolution
 WINDOW_WIDTH, WINDOW_HEIGHT = 640, 360

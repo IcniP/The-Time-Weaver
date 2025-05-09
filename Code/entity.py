@@ -6,146 +6,134 @@ from os import listdir
 from os.path import join, dirname, abspath
 from abc import ABC, abstractmethod
 
-#-----------------------------Sprite thingy------------------------------------------
+# ========================= Sprite Groups =========================
 class AllSprites(pygame.sprite.Group):
     def __init__(self):
         super().__init__()
         self.display_surface = pygame.display.get_surface()
         self.offset = pygame.Vector2(0, 0)
 
+    #for camera
     def draw(self, target_pos, map_w, map_h):
-        self.offset.x = -(target_pos[0] - WINDOW_WIDTH / 2)
-        self.offset.y = -(target_pos[1] - WINDOW_HEIGHT / 2)
-
-        self.offset.x = max(min(self.offset.x, 0), WINDOW_WIDTH - map_w)
-        self.offset.y = max(min(self.offset.y, 0), WINDOW_HEIGHT - map_h)
+        self.offset.x = max(min(-(target_pos[0] - WINDOW_WIDTH / 2), 0), WINDOW_WIDTH - map_w)
+        self.offset.y = max(min(-(target_pos[1] - WINDOW_HEIGHT / 2), 0), WINDOW_HEIGHT - map_h)
 
         for sprite in self:
             self.display_surface.blit(sprite.image, sprite.rect.topleft + self.offset)
+
 
 class Sprite(pygame.sprite.Sprite):
     def __init__(self, pos, surf, groups):
         super().__init__(groups)
         self.image = surf
-        self.rect = self.image.get_frect(topleft = pos)
+        self.rect = self.image.get_frect(topleft=pos)
+
 
 class CollisionSprite(pygame.sprite.Sprite):
     def __init__(self, pos, surf, groups):
         super().__init__(groups)
         self.image = surf
-        self.rect = self.image.get_frect(topleft = pos)
+        self.rect = self.image.get_frect(topleft=pos)
 
-#-----------------------------Entity->Player n Enemies------------------------------------------
+
+# ========================= Abstract Entity Class =========================
 class Entity(pygame.sprite.Sprite, ABC):
     def __init__(self, groups):
         super().__init__(groups)
-    @abstractmethod
-    def import_assets(self):
-        pass
 
     @abstractmethod
-    def import_folder(self, path):
-        pass
+    def import_assets(self): pass
 
     @abstractmethod
-    def move(self):
-        pass
+    def import_folder(self, path): pass
 
     @abstractmethod
-    def update(self, dt):
-        pass
+    def move(self): pass
 
+    @abstractmethod
+    def update(self, dt): pass
+
+# ========================= Player Class =========================
 class Player(Entity):
     def __init__(self, pos, groups, collision_sprites):
         super().__init__(groups)
-        self.animations = {'Idle': [], 'Move': [], 'Attack': [], 'Attack2': [], 'Jump': [], 'Fall': []}
+        self.animations = {k: [] for k in ['Idle', 'Move', 'Attack', 'Attack2', 'Jump', 'Fall']}
         self.import_assets()
         self.frame_index = 0
         self.animation_speed = 6
         self.state = 'idle'
+
         self.image = self.animations[self.get_animation_key()][self.frame_index]
         self.rect = self.image.get_rect(midbottom=pos)
         self.collision_sprites = collision_sprites
-        self.groupss = groups #all_sprites
+        self.groupss = groups
 
-        #hp
-        self.max_hp = 3
+        # Stats
+        #hp-----------
+        self.max_hp = 4
         self.hp = self.max_hp
-        self.invincible = True
-        self.invincibility_duration = 1000  # ms
+        #stamina---------
+        self.max_stamina = 4
+        self.stamina = self.max_stamina
+        self.stamina_regen = 0.5
+        self.stamina_drain_attack = 0.5
+        self.last_stamina_use = pygame.time.get_ticks()
+        
+
+        self.invincible = False
+        self.invincibility_duration = 1000
         self.last_hit_time = 0
 
-        # movement n jump
+        # Movement
         self.direction = pygame.math.Vector2(0, 0)
-        self.speed = 200  # pixels per second
-        self.gravity = 50
-        self.jump_speed = -15
+        self.speed = 200
+        self.gravity = 30
+        self.jump_speed = -11.6
         self.jumping = False
         self.facing_right = True
 
-        # attack
+        # Attack
         self.attacking = False
         self.attacking_two = False
         self.attack_locked = False
         self.attack_button_pressed = False
         self.max_combo = 2
         self.current_combo = 1
-        self.combo_reset_time = 1000  # miliseconds before combo reset
-        self.last_attack_time = 0  # for combo timing
+        self.combo_reset_time = 900
+        self.last_attack_time = 0
 
-        self.player_hitwidth = 16
-        self.player_hitheight = 32
-        self.player_hitbox = pygame.Rect(0, 0, self.player_hitwidth, self.player_hitheight)
-        
+        self.player_hitbox = pygame.Rect(0, 0, 16, 32)
 
-#-----------------------------Import------------------------------------------
+#-----------------------------------------------Importing thingy-----------------------------------------------
     def import_assets(self):
         base_path = join(dirname(abspath(__file__)), '..', 'Assets', 'Player')
-        for action in self.animations.keys():
+        for action in self.animations:
             full_path = join(base_path, action)
             self.animations[action] = self.import_folder(full_path)
 
     def import_folder(self, path):
-        images = []
-        for file_name in sorted(listdir(path), key=lambda x: int(x.split('.')[0])):
-            full_path = join(path, file_name)
-            image = pygame.image.load(full_path).convert_alpha()
-            images.append(image)
-        return images
+        return [pygame.image.load(join(path, f)).convert_alpha()
+                for f in sorted(listdir(path), key=lambda x: int(x.split('.')[0]))]
 
-
-#-----------------------------movements and all dat------------------------------------------
-    #method jump
+##-----------------------------------------------Movement-----------------------------------------------
     def jump(self, keys):
         if keys[pygame.K_SPACE] and self.on_ground() and not self.jumping:
             self.direction.y = self.jump_speed
             self.jumping = True
-            
-    #method move / for input etc
+
     def move(self):
         keys = pygame.key.get_pressed()
         mouse_pressed = pygame.mouse.get_pressed()
 
-        # Horizontal movement
-        self.direction.x = 0
-        if keys[pygame.K_a]:
-            self.direction.x = -1
-        if keys[pygame.K_d]:
-            self.direction.x = 1
+        self.direction.x = keys[pygame.K_d] - keys[pygame.K_a]
 
-        #direction move
-        if self.direction.x > 0:
-            self.facing_right = True
-        elif self.direction.x < 0:
-            self.facing_right = False
+        if self.direction.x != 0:
+            self.facing_right = self.direction.x > 0
 
-        # Jump
         self.jump(keys)
-
-        # Attack input (mouse click)
         self.attack(mouse_pressed)
-    
-    #method attack
+
+#-----------------------------------------------attacking thingy-----------------------------------------------
     def attack(self, mouse_pressed):
         current_time = pygame.time.get_ticks()
         if current_time - self.last_attack_time > self.combo_reset_time:
@@ -154,48 +142,43 @@ class Player(Entity):
         if mouse_pressed[0] and not self.attack_button_pressed:
             self.attack_button_pressed = True
             self.last_attack_time = current_time
+
             if self.current_combo == 1 and not self.attacking:
-                self.attacking = True
-                self.attack_locked = True
-                self.frame_index = 0
-                self.state = 'attack1'
-
-                hitbox = self.attack_hitbox()
-                for enemy in self.groupss:
-                    if isinstance(enemy, Humanoid) and hitbox.colliderect(enemy.entity_hitbox):
-                        enemy.take_damage(1)
-                    if isinstance(enemy, Noliictu) and hitbox.colliderect(enemy.hitbox):
-                        enemy.take_damage(100)
-                        print(f"{enemy.boss_name} collided with the player's attack! HP: {enemy.hp}")
-
+                self._start_attack('attack1')
             elif self.current_combo == 2 and not self.attacking_two:
-                self.attacking_two = True
-                self.attack_locked = True
-                self.frame_index = 0
-                self.state = 'attack2'
+                self._start_attack('attack2')
 
-                hitbox = self.attack_hitbox()
-                for enemy in self.groupss:
-                    if isinstance(enemy, Humanoid) and hitbox.colliderect(enemy.entity_hitbox):
-                        enemy.take_damage(1)
-                    if isinstance(enemy, Noliictu) and hitbox.colliderect(enemy.hitbox):
-                        enemy.take_damage(100)
-                        print(f"{enemy.boss_name} collided with the player's attack! HP: {enemy.hp}")
-                        
         elif not mouse_pressed[0]:
             self.attack_button_pressed = False
-    
+
+    def _start_attack(self, state):
+        if state in ['attack1', 'attack2']: stamina_cost = self.stamina_drain_attack 
+        if self.stamina < stamina_cost:
+            print('Not enough stamina!')
+            return
+        self.stamina -= stamina_cost
+        self.last_stamina_use = pygame.time.get_ticks()
+
+        setattr(self, 'attacking' if state == 'attack1' else 'attacking_two', True)
+        self.attack_locked = True
+        self.frame_index = 0
+        self.state = state
+
+        hitbox = self.attack_hitbox()
+        for enemy in self.groupss:
+            if isinstance(enemy, (Humanoid, Noliictu)):
+                target_hitbox = getattr(enemy, 'entity_hitbox', getattr(enemy, 'hitbox', None))
+                if target_hitbox and hitbox.colliderect(target_hitbox):
+                    damage = 100 if isinstance(enemy, Noliictu) else 1
+                    enemy.take_damage(damage)
+
     def attack_hitbox(self):
         hitbox = self.player_hitbox.copy()
-        hitbox.height = 32  # Set the height of the attack hitbox to match the player's height
-        if self.facing_right:
-            hitbox.width += 25
-        else:
-            hitbox.width -= 45
+        hitbox.height = 32
+        hitbox.width += 25 if self.facing_right else -45
         return hitbox
-    
+
     def take_damage(self, damage):
-        current_time = pygame.time.get_ticks()
         if not self.invincible:
             self.hp -= damage
             print(f"Player terkena damage! HP sekarang: {self.hp}")
@@ -203,86 +186,70 @@ class Player(Entity):
                 self.die()
             else:
                 self.invincible = True
-                self.last_hit_time = current_time
+                self.last_hit_time = pygame.time.get_ticks()
 
     def die(self):
         print("Player mati!")
-        # Bisa tambahkan animasi kematian, freeze game, dsb.
         self.kill()
-    
-#-----------------------------gravity stuff------------------------------------------
+
+#-----------------------------------------------Physics thingy-----------------------------------------------
     def add_gravity(self, dt):
-        self.direction.y += self.gravity * dt  # Apply gravity
+        self.direction.y += self.gravity * dt
         self.player_hitbox.y += self.direction.y
         self.collision('vertical')
 
-        self.player_hitbox.x += self.direction.x * self.speed * dt #Apply consistent speed
+        self.player_hitbox.x += self.direction.x * self.speed * dt
         self.collision('horizontal')
 
-        self.rect.center = self.player_hitbox.center  # Update the rect position
-    
+        self.rect.center = self.player_hitbox.center
+
     def collision(self, direction):
         for sprite in self.collision_sprites:
             if sprite.rect.colliderect(self.player_hitbox):
                 if direction == 'horizontal':
                     if self.direction.x > 0: self.player_hitbox.right = sprite.rect.left
-                    if self.direction.x < 0: self.player_hitbox.left = sprite.rect.right
-                if direction == 'vertical':
-                    if self.direction.y > 0: 
+                    elif self.direction.x < 0: self.player_hitbox.left = sprite.rect.right
+                elif direction == 'vertical':
+                    if self.direction.y > 0:
                         self.player_hitbox.bottom = sprite.rect.top
                         self.direction.y = 0
                         self.jumping = False
-                    if self.direction.y < 0: 
+                    elif self.direction.y < 0:
                         self.player_hitbox.top = sprite.rect.bottom
                         self.direction.y = 0
-        self.rect.center = self.player_hitbox.center  # Update the rect position
+        self.rect.center = self.player_hitbox.center
 
-    #method for on ground check
     def on_ground(self):
-        self.player_hitbox.y += 1  # Temporarily move the player down by 1 pixel
-        for sprite in self.collision_sprites:
-            if sprite.rect.colliderect(self.player_hitbox):
-                self.player_hitbox.y -= 1  # Reset the player's position
-                return True
-        self.player_hitbox.y -= 1  # Reset the player's position
-        return False
+        self.player_hitbox.y += 1
+        grounded = any(sprite.rect.colliderect(self.player_hitbox) for sprite in self.collision_sprites)
+        self.player_hitbox.y -= 1
+        return grounded
 
-#-----------------------------animation matter------------------------------------------
+#-----------------------------------------------Animations thingy-----------------------------------------------
     def get_animation_key(self):
-        mapping = {
-            'idle': 'Idle',
-            'move': 'Move',
-            'jump': 'Jump',
-            'fall': 'Fall',
-            'attack1': 'Attack',
-            'attack2': 'Attack2'
-        }
-        return mapping[self.state]
+        return {
+            'idle': 'Idle', 'move': 'Move', 'jump': 'Jump',
+            'fall': 'Fall', 'attack1': 'Attack', 'attack2': 'Attack2'
+        }[self.state]
 
     def update_state(self):
         if self.attacking or self.attacking_two:
-            return  # Don't change state mid-attack
-
+            return
         if self.direction.y < 0:
             self.state = 'jump'
-            self.collision('vertical')
         elif self.direction.y > 1 and not self.on_ground():
             self.state = 'fall'
-            self.collision('vertical')
         elif self.direction.x != 0:
             self.state = 'move'
-            self.collision('horizontal')
         else:
             self.state = 'idle'
 
     def update_animation(self, dt):
         frames = self.animations[self.get_animation_key()]
-        self.frame_index += 6 * dt if 'attack' not in self.state else 8 * dt
+        self.frame_index += (8 if 'attack' in self.state else 6) * dt
 
         if self.frame_index >= len(frames):
             self.frame_index = 0
-
-            # Finish attack
             if self.state == 'attack1':
                 self.attacking = False
                 self.attack_locked = False
@@ -297,7 +264,8 @@ class Player(Entity):
         self.image = frames[int(self.frame_index)]
         if not self.facing_right:
             self.image = pygame.transform.flip(self.image, True, False)
-        
+
+#-----------------------------------------------Update-----------------------------------------------
     def update(self, dt):
         self.player_hitbox.center = self.rect.center
         self.move()
@@ -305,94 +273,89 @@ class Player(Entity):
         self.update_state()
         self.update_animation(dt)
 
-        # Reset combo if too much time passed
+        #combo reset
         if pygame.time.get_ticks() - self.last_attack_time > self.combo_reset_time:
             self.current_combo = 1
-        if self.invincible:
-            if pygame.time.get_ticks() - self.last_hit_time > self.invincibility_duration:
-                self.invincible = False
 
+        #regen stamina
+        time_since_use = (pygame.time.get_ticks() - self.last_stamina_use) / 1000
+        regen_amount = self.stamina_regen * dt
+        # 1 detik
+        if time_since_use > 1 and self.stamina < self.max_stamina and not self.attack_button_pressed and not self.jumping:
+            self.stamina = min(self.stamina + regen_amount, self.max_stamina)
+
+        #playa invicible, utk testing
+        if self.invincible and pygame.time.get_ticks() - self.last_hit_time > self.invincibility_duration:
+            self.invincible = False
+
+# ========================= Humanoid Class =========================
 class Humanoid(Entity):
     def __init__(self, type, pos, groups, collision_sprites):
         super().__init__(groups)
         self.type = type
-        self.animations = {'Idle': [], 'Move': [], 'Attack': []}
+        self.animations = {k: [] for k in ['Idle', 'Move', 'Attack']}
         self.import_assets()
         self.frame_index = 0
         self.animation_speed = 6
         self.state = 'idle'
+
         self.image = self.animations[self.get_animation_key()][self.frame_index]
         self.rect = self.image.get_rect(midbottom=pos)
         self.collision_sprites = collision_sprites
-        
-        # movement n jump
-        self.left_bound = None
-        self.right_bound = None
+
+        # Movement
         self.direction = pygame.math.Vector2(-1, 0)
-        self.speed = 60  # pixels per second
+        self.speed = 60
         self.gravity = 50
         self.facing_right = False
+        self.left_bound = None
+        self.right_bound = None
+
+        # Wandering
+        self.wandering = self.type in ['Sword', 'Axe']
         self.wander_timer = 0
         self.wander_duration = 2000
         self.idle_duration = 1000
         self.wander_lap = pygame.time.get_ticks()
-        self.wandering = self.type in ['Sword', 'Axe']
 
-        # attack
+        # Combat
         self.attacking = False
+        self.entity_hitbox = pygame.Rect(0, 0, 16, 32)
 
-        self.entity_hitwidth = 16
-        self.entity_hitheight = 32
-        self.entity_hitbox = pygame.Rect(0, 0, self.entity_hitwidth, self.entity_hitheight)
-
-        #hp
-        if self.type == 'Sword':
-            self.hp = 2
-        elif self.type == 'Spear':
-            self.hp = 3
-        elif self.type == 'Axe':
-            self.hp = 4
-        
+        # Health
+        self.hp = {'Sword': 2, 'Spear': 3, 'Axe': 4}.get(self.type, 1)
         self.death_time = 0
         self.death_duration = 400
 
-#-----------------------------Import------------------------------------------
+#-----------------------------------------------Importing thingy-----------------------------------------------
     def import_assets(self):
         base_path = join(dirname(abspath(__file__)), '..', 'Assets', 'Enemy', 'Skelly', self.type)
-        for action in self.animations.keys():
+        for action in self.animations:
             full_path = join(base_path, action)
             self.animations[action] = self.import_folder(full_path)
 
     def import_folder(self, path):
-        images = []
-        for file_name in sorted(listdir(path), key=lambda x: int(x.split('.')[0])):
-            full_path = join(path, file_name)
-            image = pygame.image.load(full_path).convert_alpha()
-            images.append(image)
-        return images
+        return [pygame.image.load(join(path, f)).convert_alpha()
+                for f in sorted(listdir(path), key=lambda x: int(x.split('.')[0]))]
 
-
+#-----------------------------------------------status thingy-----------------------------------------------
     def take_damage(self, damage):
         self.hp -= damage
         if self.hp <= 0:
             self.die()
-    
+
     def die(self):
         self.death_time = pygame.time.get_ticks()
-        
         mask = pygame.mask.from_surface(self.image)
-        white_surf = mask.to_surface(setcolor=(255, 100, 0), unsetcolor=(0, 0, 0, 0))
-        white_surf.set_colorkey((0, 0, 0))
-        self.image = white_surf
-
-        # Stop all movement and actions
+        surf = mask.to_surface(setcolor=(255, 100, 0), unsetcolor=(0, 0, 0, 0))
+        surf.set_colorkey((0, 0, 0))
+        self.image = surf
         self.direction = pygame.math.Vector2(0, 0)
         self.attacking = False
 
-
-#-----------------------------movements and all dat------------------------------------------
+#-----------------------------------------------movement thingy-----------------------------------------------
     def move(self, dt):
-        current_time = pygame.time.get_ticks()
+        now = pygame.time.get_ticks()
 
         if not self.wandering:
             self.direction.x = 0
@@ -400,96 +363,75 @@ class Humanoid(Entity):
 
         if self.state == 'idle':
             self.direction.x = 0
-            if current_time - self.wander_lap >= self.idle_duration:
+            if now - self.wander_lap >= self.idle_duration:
                 self.state = 'walk'
                 self.direction.x = 1 if self.facing_right else -1
-                self.wander_lap = current_time
+                self.wander_lap = now
         elif self.state == 'walk':
-            if current_time - self.wander_lap >= self.wander_duration:
+            if now - self.wander_lap >= self.wander_duration:
                 self.state = 'idle'
-                self.wander_lap = current_time
+                self.wander_lap = now
                 self.facing_right = not self.facing_right
-            
             self.direction.x = 1 if self.facing_right else -1
-        
-        center_x = self.entity_hitbox.centerx
+
         if self.left_bound is not None and self.right_bound is not None:
-            if self.entity_hitbox.centerx < self.left_bound or self.entity_hitbox.centerx > self.right_bound:
-                if center_x <= self.left_bound + 2:
+            cx = self.entity_hitbox.centerx
+            if cx < self.left_bound or cx > self.right_bound:
+                if cx <= self.left_bound + 2:
                     self.facing_right = True
                     self.direction.x = 1
-                elif center_x >= self.right_bound - 2:
+                elif cx >= self.right_bound - 2:
                     self.facing_right = False
                     self.direction.x = -1
-        
+
         self.direction.x = max(-1, min(1, self.direction.x))
 
     def patrol_bounds(self, rect):
         if rect:
             self.left_bound = rect.left
             self.right_bound = rect.right
-#-----------------------------gravity stuff------------------------------------------
+
+#-----------------------------------------------Physics thingy-----------------------------------------------
     def add_gravity(self, dt):
-        self.direction.y += self.gravity * dt  # Apply gravity
-        self.entity_hitbox.y += self.direction.y # Apply gravity to the rect
+        self.direction.y += self.gravity * dt
+        self.entity_hitbox.y += self.direction.y
         self.collision('vertical')
 
-        self.entity_hitbox.x += self.direction.x * self.speed * dt  # Apply consistent speed
+        self.entity_hitbox.x += self.direction.x * self.speed * dt
         self.collision('horizontal')
 
-        self.rect.center = self.entity_hitbox.center  # Update the rect position
+        self.rect.center = self.entity_hitbox.center
 
     def collision(self, direction):
         for sprite in self.collision_sprites:
             if sprite.rect.colliderect(self.entity_hitbox):
                 if direction == 'horizontal':
                     if self.direction.x > 0: self.entity_hitbox.right = sprite.rect.left
-                    if self.direction.x < 0: self.entity_hitbox.left = sprite.rect.right
-                if direction == 'vertical':
-                    if self.direction.y > 0: 
+                    elif self.direction.x < 0: self.entity_hitbox.left = sprite.rect.right
+                elif direction == 'vertical':
+                    if self.direction.y > 0:
                         self.entity_hitbox.bottom = sprite.rect.top
                         self.direction.y = 0
-                    if self.direction.y < 0: 
+                    elif self.direction.y < 0:
                         self.entity_hitbox.top = sprite.rect.bottom
                         self.direction.y = 0
-        self.rect.center = self.entity_hitbox.center  # Update the rect position
-    
-    # def on_ground(self):
-    #     self.entity_hitbox.y += 1
-    #     for sprite in self.collision_sprites:
-    #         if sprite.rect.colliderect(self.entity_hitbox):
-    #             self.entity_hitbox.y -= 1
-    #             return True
-    #     self.entity_hitbox.y -= 1
-    #     return False
+        self.rect.center = self.entity_hitbox.center
 
-#-----------------------------animation matter------------------------------------------
+#-----------------------------------------------Animations thingy-----------------------------------------------
     def get_animation_key(self):
-        mapping = {
-            'idle': 'Idle',
-            'move': 'Move',
-            'attack': 'Attack'
-        }
-        return mapping[self.state]
-        
+        return {'idle': 'Idle', 'move': 'Move', 'attack': 'Attack'}[self.state]
+
     def update_state(self):
         if self.attacking:
             return
-        
-        if self.direction.x != 0:
-            self.state = 'move'
-            self.collision('horizontal')
-        else:
-            self.state = 'idle'
-    
+        self.state = 'move' if self.direction.x != 0 else 'idle'
+
     def update_animation(self, dt):
         frames = self.animations[self.get_animation_key()]
-        self.frame_index += 6 * dt if 'attack' not in self.state else 8 * dt
+        self.frame_index += (8 if 'attack' in self.state else 6) * dt
 
         if self.frame_index >= len(frames):
             self.frame_index = 0
-
-            # Finish attack
             if self.state == 'attack':
                 self.attacking = False
                 self.state = 'idle'
@@ -497,16 +439,17 @@ class Humanoid(Entity):
         self.image = frames[int(self.frame_index)]
         if not self.facing_right:
             self.image = pygame.transform.flip(self.image, True, False)
-    
+
+#-----------------------------------------------Update-----------------------------------------------
     def update(self, dt):
-        current_time = pygame.time.get_ticks()
+        now = pygame.time.get_ticks()
         if self.death_time == 0:
             self.entity_hitbox.center = self.rect.center
             self.move(dt)
             self.add_gravity(dt)
             self.update_state()
             self.update_animation(dt)
-        else:
-            if current_time - self.death_time >= self.death_duration:
-                self.kill()
+        elif now - self.death_time >= self.death_duration:
+            self.kill()
+
         
