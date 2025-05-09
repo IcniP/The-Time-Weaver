@@ -4,7 +4,7 @@ from interface import *
 from cervus import Cervus
 import xml.etree.ElementTree as ET
 from pathlib import Path
-from mainmenu import MainMenuManager
+from mainmenu import MainMenuManager, Transition
 from noliictu import Noliictu
 
 class Game:
@@ -38,6 +38,8 @@ class Game:
         self.fix_tmx_tileset('data/maps', 'Assets/Tilesets')
         self.game_active = False
         self.paused = False
+        self.transition = Transition(1000)
+        self.transition_target = None
 
         self.menu_manager = MainMenuManager(self.screen, self)
         self.ui = UserInterface(self.screen)
@@ -72,9 +74,6 @@ class Game:
 
         for collision in map.get_layer_by_name('pits'):
             CollisionSprite((collision.x, collision.y), pygame.Surface((collision.width, collision.height)), self.collision_sprites)
-
-        # --- sementara player kosong ---
-        player_pos = None
 
         self.transition_zones = {}
         self.patrol_zones = []
@@ -113,7 +112,10 @@ class Game:
         self.level = f'{world}-{next_stage}'
         self.mapz = self.level_map.get(self.level, 'test.tmx')
         self.respawn_marker = 'Player'
-        self.reset_game()
+        self.transition.start('fade')
+        self.transition_target = 'forward'
+
+
     
     def previous_level(self):
         world, stage = map(int, self.level.split('-'))
@@ -121,43 +123,59 @@ class Game:
         self.level = f'{world}-{prev_stage}'
         self.mapz = self.level_map.get(self.level, 'test.tmx')
         self.respawn_marker = 'Player_back'
-        self.reset_game()
         self.player.facing_right = False
+        self.transition.start('fade')
+        self.transition_target = 'back'
 
 # ========================= GAME LOOP =========================
     def run(self):
-        while self.running:
+        while True:
             if not self.paused:
-                dt = self.clock.tick(FRAMERATE) / 1000
+                dt = self.clock.tick(FRAMERATE) / 1000  # proper delta time
             else:
                 self.clock.tick(FRAMERATE)
-                dt = 0
+                dt = 0  # freeze updates while paused
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    self.running = False
+                    pygame.quit()
+                    sys.exit()
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                     if self.game_active:
-                        self.menu_manager.pause_menu()
+                        self.menu_manager.pause_menu()  # toggle pause
 
-            if self.game_active:
-                if not self.paused:
-                    self.all_sprites.update(dt)
+            # Menu control
+            if not self.game_active:
+                self.menu_manager.main_menu()
+                continue
 
-                self.screen.blit(self.map_scaled, (0, 0))
-                self.all_sprites.draw(self.player.rect.center, self.map_w, self.map_h)
-                self.ui.draw(self.player)
-                pygame.display.update()
+            # Game logic (only if not transitioning and not paused)
+            if not self.transition.active and not self.paused:
+                self.all_sprites.update(dt)
 
+                # Zone transitions
                 if 'forward' in self.transition_zones and self.player.player_hitbox.colliderect(self.transition_zones['forward']):
                     self.next_level()
-                
+
                 if 'back' in self.transition_zones and self.player.player_hitbox.colliderect(self.transition_zones['back']):
                     self.previous_level()
 
+            # Drawing
+            self.screen.blit(self.map_scaled, (0, 0))
+            self.all_sprites.draw(self.player.rect.center, self.map_w, self.map_h)
+            self.ui.draw(self.player)
 
-            else:
-                self.menu_manager.main_menu()
+            # Transition effect (draw on top)
+            if self.transition.active:
+                self.transition.draw(self.screen)
+                self.transition.update(self.clock.get_time())
+
+            # If transition just finished, reset game
+            if self.transition_target and not self.transition.active:
+                self.reset_game()
+                self.transition_target = None
+
+            pygame.display.update()
 
         pygame.quit()
 

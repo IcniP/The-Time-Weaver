@@ -87,8 +87,8 @@ class Player(Entity):
         # Movement
         self.direction = pygame.math.Vector2(0, 0)
         self.speed = 200
-        self.gravity = 50
-        self.jump_speed = -15
+        self.gravity = 30
+        self.jump_speed = -11.6
         self.jumping = False
         self.facing_right = True
 
