@@ -1,5 +1,6 @@
 from settings import *
 from entity import *
+from interface import *
 from cervus import Cervus
 import xml.etree.ElementTree as ET
 from pathlib import Path
@@ -20,7 +21,7 @@ class Game:
         self.all_sprites = AllSprites()
         self.collision_sprites = pygame.sprite.Group()
 
-        self.level = 1
+        self.level = 4
         self.mapz = {
             1: "lvl1.tmx",
             2: "lvl2.tmx",
@@ -35,6 +36,7 @@ class Game:
         self.paused = False
 
         self.menu_manager = MainMenuManager(self.screen, self)
+        self.ui = UserInterface(self.screen)
 
     def fix_tmx_tileset(self, map_folder, tileset_folder):
         map_folder = Path(map_folder)
@@ -118,6 +120,7 @@ class Game:
 
                 self.screen.blit(self.map_scaled, (0, 0))
                 self.all_sprites.draw(self.player.rect.center, self.map_w, self.map_h)
+                self.ui.draw(self.player)
                 pygame.display.update()
             else:
                 self.menu_manager.main_menu()

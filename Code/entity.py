@@ -69,9 +69,18 @@ class Player(Entity):
         self.groupss = groups
 
         # Stats
-        self.max_hp = 3
+        #hp-----------
+        self.max_hp = 4
         self.hp = self.max_hp
-        self.invincible = True
+        #stamina---------
+        self.max_stamina = 4
+        self.stamina = self.max_stamina
+        self.stamina_regen = 1
+        self.stamina_drain_attack = 0.5
+        self.last_stamina_use = pygame.time.get_ticks()
+        
+
+        self.invincible = False
         self.invincibility_duration = 1000
         self.last_hit_time = 0
 
@@ -90,7 +99,7 @@ class Player(Entity):
         self.attack_button_pressed = False
         self.max_combo = 2
         self.current_combo = 1
-        self.combo_reset_time = 1000
+        self.combo_reset_time = 900
         self.last_attack_time = 0
 
         self.player_hitbox = pygame.Rect(0, 0, 16, 32)
@@ -143,6 +152,13 @@ class Player(Entity):
             self.attack_button_pressed = False
 
     def _start_attack(self, state):
+        if state in ['attack1', 'attack2']: stamina_cost = self.stamina_drain_attack 
+        if self.stamina < stamina_cost:
+            print('Not enough stamina!')
+            return
+        self.stamina -= stamina_cost
+        self.last_stamina_use = pygame.time.get_ticks()
+
         setattr(self, 'attacking' if state == 'attack1' else 'attacking_two', True)
         self.attack_locked = True
         self.frame_index = 0
@@ -257,9 +273,18 @@ class Player(Entity):
         self.update_state()
         self.update_animation(dt)
 
+        #combo reset
         if pygame.time.get_ticks() - self.last_attack_time > self.combo_reset_time:
             self.current_combo = 1
 
+        #regen stamina
+        time_since_use = (pygame.time.get_ticks() - self.last_stamina_use) / 1000
+        regen_amount = self.stamina_regen * dt
+        # 1 detik
+        if time_since_use > 1 and self.stamina < self.max_stamina and not self.attack_button_pressed:
+            self.stamina = min(self.stamina + regen_amount, self.max_stamina)
+
+        #playa invicible, utk testing
         if self.invincible and pygame.time.get_ticks() - self.last_hit_time > self.invincibility_duration:
             self.invincible = False
 
