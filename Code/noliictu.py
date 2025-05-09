@@ -2,9 +2,6 @@ import pygame
 from settings import *
 from entity import *
 from bossbase import BossBase
-from os.path import join
-import random
-import math
 
 class Knive(pygame.sprite.Sprite):
     def __init__(self, pos, target_pos, groups, player):

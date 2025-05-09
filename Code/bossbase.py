@@ -1,7 +1,5 @@
-import pygame
 from settings import *
-from os import listdir
-from os.path import join, dirname, abspath
+
 
 class BossBase(pygame.sprite.Sprite):
     def __init__(self, pos, groups, player, boss_name, animation_paths):

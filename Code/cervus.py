@@ -1,4 +1,3 @@
-import pygame
 from settings import *
 from entity import Player
 from bossbase import BossBase
