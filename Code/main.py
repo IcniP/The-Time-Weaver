@@ -1,5 +1,7 @@
 from settings import *
-from entity import *
+from player import Player
+from humanoid import Humanoid
+from entity import AllSprites, Sprite, CollisionSprite
 from interface import *
 from cervus import Cervus
 import xml.etree.ElementTree as ET
@@ -21,7 +23,7 @@ class Game:
         self.all_sprites = AllSprites()
         self.collision_sprites = pygame.sprite.Group()
 
-        self.level = f'{4}-{0}'
+        self.level = f'{1}-{0}'
         self.level_map = {
             '1-0': "lvl1.tmx",
             '1-1': "lvl1-1.tmx",

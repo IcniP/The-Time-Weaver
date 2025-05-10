@@ -1,6 +1,7 @@
 import pygame
 from settings import *
 from entity import *
+from player import *
 from bossbase import BossBase
 
 class Knive(pygame.sprite.Sprite):

@@ -1,5 +1,5 @@
 from settings import *
-from entity import Player
+from player import Player
 from bossbase import BossBase
 
 class Cervus(BossBase):
