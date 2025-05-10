@@ -3,7 +3,6 @@ from entity import *
 from humanoid import Humanoid
 from noliictu import Noliictu
 
-# ========================= Player Class =========================
 class Player(Entity):
     def __init__(self, pos, groups, collision_sprites):
         super().__init__(groups)
@@ -23,9 +22,9 @@ class Player(Entity):
         self.max_hp = 4
         self.hp = self.max_hp
         #stamina---------
-        self.max_stamina = 6
+        self.max_stamina = 4
         self.stamina = self.max_stamina
-        self.stamina_regen = 0.5
+        self.stamina_regen = 1
         self.stamina_drain_attack = 0.5
         self.last_stamina_use = pygame.time.get_ticks()
         
@@ -131,12 +130,12 @@ class Player(Entity):
     def take_damage(self, damage):
         if not self.invincible:
             self.hp -= damage
+            self.invincible = True
+            self.last_hit_time = pygame.time.get_ticks()
             print(f"Player terkena damage! HP sekarang: {self.hp}")
             if self.hp <= 0:
                 self.die()
-            else:
-                self.invincible = True
-                self.last_hit_time = pygame.time.get_ticks()
+                
 
     def die(self):
         print("Player mati!")
@@ -236,4 +235,4 @@ class Player(Entity):
 
         #playa invicible, utk testing
         if self.invincible and pygame.time.get_ticks() - self.last_hit_time > self.invincibility_duration:
-            self.invincible = False    
+            self.invincible = False

@@ -23,7 +23,7 @@ class Game:
         self.all_sprites = AllSprites()
         self.collision_sprites = pygame.sprite.Group()
 
-        self.level = f'{1}-{0}'
+        self.level = f'{1}-{1}'
         self.level_map = {
             '1-0': "lvl1.tmx",
             '1-1': "lvl1-1.tmx",
@@ -34,9 +34,9 @@ class Game:
             '4-0': "lvl4.tmx",
             '5-0': "lvl5.tmx"
         }
-        self.mapz = self.level_map.get(self.level, 'te sa t.tmx')
+        self.mapz = self.level_map.get(self.level, 'test.tmx')
 
-        self.player = Player((WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2), self.all_sprites, self.collision_sprites)
+        self.player = Player((0, 0), self.all_sprites, self.collision_sprites)
         self.fix_tmx_tileset('data/maps', 'Assets/Tilesets')
         self.game_active = False
         self.paused = False
@@ -90,19 +90,26 @@ class Game:
         spawn_marker = getattr(self, 'respawn_marker', 'Player')
         for marker in map.get_layer_by_name('entities'):
             if marker.name == spawn_marker:
-                self.player = Player((marker.x, marker.y), self.all_sprites, self.collision_sprites)
+                self.player.rect.midbottom = (marker.x, marker.y)
+                self.player.rect.midbottom = (marker.x, marker.y)
+                self.player.player_hitbox.center = self.player.rect.center
+                self.all_sprites.add(self.player)  # re-add if needed
+                self.player.collision_sprites = self.collision_sprites  # update collisions
+                self.all_sprites.add(self.player)
                 break
 
         # Setelah player ada, baru spawn musuh
         for marker in map.get_layer_by_name('entities'):
             if marker.name in ['sword', 'axe']:
                 enemy = Humanoid(marker.name.capitalize(), (marker.x, marker.y), self.all_sprites, self.collision_sprites)
+                enemy.player_ref = self.player
                 for zone in self.patrol_zones:
                     if zone.collidepoint(marker.x, marker.y):
                         enemy.patrol_bounds(zone)
                         break
             elif marker.name == 'spear':
-                Humanoid('Spear', (marker.x, marker.y), self.all_sprites, self.collision_sprites)
+                enemy = Humanoid('Spear', (marker.x, marker.y), self.all_sprites, self.collision_sprites)
+                enemy.player_ref = self.player
             elif marker.name == 'Cervus':
                 self.cervus = Cervus((marker.x, marker.y), self.all_sprites, self.player)
             elif marker.name == 'Noliictu':
@@ -131,7 +138,7 @@ class Game:
 
 # ========================= GAME LOOP =========================
     def run(self):
-        while self.running == True:
+        while self.running:
             if not self.paused:
                 dt = self.clock.tick(FRAMERATE) / 1000  # proper delta time
             else:
