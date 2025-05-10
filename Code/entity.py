@@ -73,7 +73,7 @@ class Player(Entity):
         self.max_hp = 4
         self.hp = self.max_hp
         #stamina---------
-        self.max_stamina = 4
+        self.max_stamina = 6
         self.stamina = self.max_stamina
         self.stamina_regen = 0.5
         self.stamina_drain_attack = 0.5

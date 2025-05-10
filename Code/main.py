@@ -21,7 +21,7 @@ class Game:
         self.all_sprites = AllSprites()
         self.collision_sprites = pygame.sprite.Group()
 
-        self.level = f'{1}-{1}'
+        self.level = f'{4}-{0}'
         self.level_map = {
             '1-0': "lvl1.tmx",
             '1-1': "lvl1-1.tmx",
@@ -32,7 +32,7 @@ class Game:
             '4-0': "lvl4.tmx",
             '5-0': "lvl5.tmx"
         }
-        self.mapz = self.level_map.get(self.level, 'test.tmx')
+        self.mapz = self.level_map.get(self.level, 'te sa t.tmx')
 
         self.player = Player((WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2), self.all_sprites, self.collision_sprites)
         self.fix_tmx_tileset('data/maps', 'Assets/Tilesets')

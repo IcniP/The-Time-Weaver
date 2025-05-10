@@ -40,6 +40,73 @@ class Knive(pygame.sprite.Sprite):
             self.player.take_damage(self.damage)
             self.kill()
 
+class RainKnive(pygame.sprite.Sprite):
+    def __init__(self, groups, player):
+        super().__init__(groups)
+
+        num = random.randint(0, 3)
+        original_image = pygame.image.load(join('Assets', 'Enemy', 'noliictu', 'Knive', f'{num}.png')).convert_alpha()
+        self.image = original_image
+        self.image = pygame.transform.rotate(original_image, -90)
+        self.rect = self.image.get_rect(midtop=(random.randint(0, 1900), -50))
+        self.mask = pygame.mask.from_surface(self.image)
+
+        self.speed = 400  # kecepatan jatuh
+        self.player = player
+        self.damage = 1
+
+    def update(self, dt):
+        self.rect.y += self.speed * dt
+
+        if self.rect.top > 2000:
+            self.kill()
+            return
+
+        if pygame.sprite.collide_mask(self, self.player):
+            self.player.take_damage(self.damage)
+            self.kill()
+
+class ArcSwordFollow(pygame.sprite.Sprite):
+    def __init__(self, player, pos, groups):
+        super().__init__(groups)
+
+        num = random.randint(0, 3)
+        self.image_original = pygame.image.load(join('Assets', 'Enemy', 'noliictu', 'Knive', f'{num}.png')).convert_alpha()
+        self.image = self.image_original.copy()
+        self.rect = self.image.get_rect(center=pos)
+        self.player = player
+        self.offset = pygame.math.Vector2(pos) - pygame.math.Vector2(player.rect.center)
+
+        self.mask = pygame.mask.from_surface(self.image)
+        self.follow_player = True
+        self.speed = 500
+        self.damage = 1
+        self.direction = pygame.Vector2(0, 0)
+
+    def update_follow(self):
+        self.rect.center = self.player.rect.center + self.offset
+
+    def shoot_towards_player(self):
+        self.follow_player = False
+        direction_vector = pygame.math.Vector2(self.player.rect.center) - pygame.math.Vector2(self.rect.center)
+        if direction_vector.length() != 0:
+            self.direction = direction_vector.normalize()
+        else:
+            self.direction = pygame.Vector2(0, 1)
+
+    def update(self, dt):
+        if not self.follow_player:
+            move = self.direction * self.speed * dt
+            self.rect.centerx += move.x
+            self.rect.centery += move.y
+
+            if pygame.math.Vector2(self.rect.center).distance_to(pygame.math.Vector2(self.player.rect.center)) >= 1000:
+                self.kill()
+
+            if pygame.sprite.collide_mask(self, self.player):
+                self.player.take_damage(self.damage)
+                self.kill()
+
 class Noliictu(BossBase):
     def __init__(self, pos, groups, player):
         animation_paths = {
@@ -56,9 +123,7 @@ class Noliictu(BossBase):
         self.hitwidth = 16
         self.hitheight = 32
         self.hitbox = pygame.Rect(0, 0, self.hitwidth, self.hitheight)
-
-        #mengoveridde image & rect parent karna dibutuhin utk hitboxny
-        self.image = self.animations['Idle'][0]  # atau frame default lainnya
+        self.image = self.animations['Idle'][0]  
         self.rect = self.image.get_rect(center=pos)
         self.hitbox.center = self.rect.center
 
@@ -84,7 +149,7 @@ class Noliictu(BossBase):
 
         # ult attributes
         self.can_ult = False
-        self.ult_cooldown = 25
+        self.ult_cooldown = 40
         self.ult_cooldown_timer = 0
         self.is_uliting = False
         self.ult_duration = 10
@@ -92,9 +157,52 @@ class Noliictu(BossBase):
         self.after_ult_teleport = False
         self.num = random.randint(1, 9)
         self.recovering_after_ult = False
+        self.ult_knives_group = groups  
+        self.ult_spawn_timer = 0
+        self.ult_spawn_interval = 0.1
 
-        # after ult teleport
         self.after_ult_teleport = False
+        #second attacko
+        self.arc_cooldown = 15
+        self.arc_cooldown_timer = 0
+        self.arc_swords = []
+        self.arc_ready_to_shoot = False
+        self.arc_shoot_timer = 0 
+        self.arc_shoot_delay = 0.8  
+        self.arc_sword_index_list = []
+
+    def spawn_arc_swords(self):
+        self.arc_swords.clear()
+        self.arc_ready_to_shoot = False
+        self.arc_shoot_timer = 0
+        self.arc_sword_index_list = []
+
+        gap_x = 50 
+        start_x = self.player.rect.centerx - (gap_x * 2)  
+        y = self.player.rect.top - 80
+
+        for i in range(5):
+            pos = (start_x + i * gap_x, y)
+            sword = ArcSwordFollow(self.player, pos, [self.knive_group])
+            self.arc_swords.append(sword)
+        self.arc_sword_index_list = list(range(len(self.arc_swords)))
+        random.shuffle(self.arc_sword_index_list)
+
+    def update_arc_swords(self, dt):
+        if not self.arc_swords:
+            return
+        for sword in self.arc_swords:
+            if sword.follow_player:
+                sword.update_follow()
+        self.arc_shoot_timer += dt
+        if self.arc_shoot_timer >= self.arc_shoot_delay and self.arc_sword_index_list:
+            self.arc_shoot_timer = 0
+            idx = self.arc_sword_index_list.pop()
+            sword = self.arc_swords[idx]
+            sword.shoot_towards_player()
+        if not self.arc_sword_index_list and all(not sword.follow_player for sword in self.arc_swords):
+            self.arc_swords.clear()
+            self.arc_cooldown_timer = 0  
 
     def ult(self):
         self.is_uliting = True
@@ -142,6 +250,13 @@ class Noliictu(BossBase):
         if self.teleport_cooldown > 0:
             self.teleport_cooldown -= dt
 
+        self.arc_cooldown_timer += dt
+        if self.arc_cooldown_timer >= self.arc_cooldown:
+            if not self.arc_swords:
+                self.spawn_arc_swords()
+
+        self.update_arc_swords(dt)
+
         if self.hp <= 3000:
             self.ult_cooldown_timer += dt
             if self.hp<= 1500:
@@ -162,6 +277,12 @@ class Noliictu(BossBase):
                     self.play_animation('Ult')
             elif self.status == 'Ult':
                 self.ult_timer += dt
+                self.ult_spawn_timer += dt
+
+                if self.ult_spawn_timer >= self.ult_spawn_interval:
+                    self.ult_spawn_timer = 0
+                    RainKnive([self.ult_knives_group], self.player)
+
                 if self.ult_timer >= self.ult_duration:
                     self.is_uliting = False
                     self.after_ult_teleport = True
@@ -228,6 +349,7 @@ class Noliictu(BossBase):
                         self.attack(dt)
                     elif self.status != 'Idle':
                         self.play_animation('Idle')
+            
         
         self.hitbox.center = self.rect.center
 
