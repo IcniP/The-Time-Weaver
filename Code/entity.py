@@ -19,6 +19,9 @@ class AllSprites(pygame.sprite.Group):
         for sprite in self:
             self.display_surface.blit(sprite.image, sprite.rect.topleft + self.offset)
 
+            if hasattr(sprite, 'draw'):
+                sprite.draw(self.display_surface, self.offset)
+                
 class Sprite(pygame.sprite.Sprite):
     def __init__(self, pos, surf, groups):
         super().__init__(groups)

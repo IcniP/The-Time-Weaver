@@ -127,8 +127,6 @@ class Game:
         self.transition.start('fade')
         self.transition_target = 'forward'
 
-
-    
     def previous_level(self):
         world, stage = map(int, self.level.split('-'))
         prev_stage = max(stage - 1, 0)
