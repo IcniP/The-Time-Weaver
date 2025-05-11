@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="77" height="40" tilewidth="32" tileheight="32" infinite="0" nextlayerid="14" nextobjectid="205">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="77" height="40" tilewidth="32" tileheight="32" infinite="0" nextlayerid="14" nextobjectid="208">
  <tileset firstgid="1" source="../tilesets/timeweavertileset.tsx" />
  <layer id="12" name="ground" width="77" height="40">
   <data encoding="csv">
@@ -94,6 +94,9 @@
   <object id="204" name="sword" x="1024" y="672">
    <point />
   </object>
+  <object id="206" name="Player_back" x="2400" y="704">
+   <point />
+  </object>
  </objectgroup>
  <objectgroup id="4" name="pits" />
  <objectgroup id="6" name="zones">
@@ -105,8 +108,9 @@
   <object id="194" x="1687.33" y="577.833" width="144.5" height="37.5" />
   <object id="195" x="1972" y="1214" width="145" height="38.5" />
   <object id="196" x="916" y="991" width="149.5" height="38.5" />
-  <object id="197" x="1939.73" y="673" width="157.773" height="36.5" />
+  <object id="197" x="1942.73" y="673" width="157.773" height="36.5" />
   <object id="200" x="748" y="990" width="127.667" height="40" />
   <object id="203" name="back" x="-4" y="1206.25" width="7.75" height="45.5" />
+  <object id="207" name="forward" x="2455.17" y="723" width="17.6667" height="49" />
  </objectgroup>
 </map>

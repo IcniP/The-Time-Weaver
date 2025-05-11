@@ -21,7 +21,7 @@ class AllSprites(pygame.sprite.Group):
 
             if hasattr(sprite, 'draw'):
                 sprite.draw(self.display_surface, self.offset)
-                
+
 class Sprite(pygame.sprite.Sprite):
     def __init__(self, pos, surf, groups):
         super().__init__(groups)
@@ -34,7 +34,6 @@ class CollisionSprite(pygame.sprite.Sprite):
         super().__init__(groups)
         self.image = surf
         self.rect = self.image.get_frect(topleft=pos)
-
 
 # ========================= Abstract Entity Class =========================
 class Entity(pygame.sprite.Sprite, ABC):

@@ -47,11 +47,11 @@ class Humanoid(Entity):
 
         #spear
         self.thrusting = False
-        self.thrusting_distance = TILE_SIZE * 2
-        self.thrust_speed = 100
+        self.thrusting_distance = TILE_SIZE * 5
+        self.thrust_speed = 300
         self.thrust_direction = 0
         self.thrust_progress = 0
-        self.thrust_cd = 3000
+        self.thrust_cd = 2000
         self.last_thrust_time = 0
 
         # Health
@@ -184,7 +184,7 @@ class Humanoid(Entity):
                     self.last_attack_time = current_time
 
                     hitbox = self.attack_hitbox()
-                    if hitbox.colliderect(player.player_hitbox):
+                    if hitbox.colliderect(player.player_hitbox) and not player.invincible:
                         player.take_damage(1)
         else:
             self.move()
@@ -233,7 +233,7 @@ class Humanoid(Entity):
                     self.last_attack_time = current_time
 
                     hitbox = self.attack_hitbox()
-                    if hitbox.colliderect(player.player_hitbox):
+                    if hitbox.colliderect(player.player_hitbox) and not player.invincible:
                         player.take_damage(1)
         else:
             self.move()
@@ -243,59 +243,61 @@ class Humanoid(Entity):
             return
 
         player = self.player_ref
-
         px, py = player.player_hitbox.center
         ex, ey = self.entity_hitbox.center
+        dx = px - ex
+        dy = abs(py - ey)
+        distance_x = abs(dx)
+        now = pygame.time.get_ticks()
 
-        if self.attack_ready and pygame.time.get_ticks() - self.attack_started_time >= self.attack_windup:
-            self.thrusting = True
-            self.attack_ready = False
-            self.thrust_progress = 0
-            self.last_thrust_time = pygame.time.get_ticks()
-            self.state = 'attack'
-            self.frame_index = 0
+        in_range = distance_x <= TILE_SIZE * 5 and dy < TILE_SIZE
 
-        # thrust execution
+        # Always face the player while in range
+        if in_range:
+            self.facing_right = dx > 0
+
+        # --- Thrusting logic ---
         if self.thrusting:
-            self.spear_direction.x = self.thrust_direction
-            move = self.spear_direction.x * self.thrust_speed * dt
+            move = self.thrust_direction * self.thrust_speed * dt
             self.entity_hitbox.x += move
             self.thrust_progress += abs(move)
             self.rect.center = self.entity_hitbox.center
 
+            # Thrust hitbox
             thrust_hitbox = pygame.Rect(0, 0, TILE_SIZE, TILE_SIZE)
             if self.facing_right:
                 thrust_hitbox.midleft = self.entity_hitbox.midright
             else:
                 thrust_hitbox.midright = self.entity_hitbox.midleft
 
-            if thrust_hitbox.colliderect(player.player_hitbox):
+            if thrust_hitbox.colliderect(player.player_hitbox) and not player.invincible:
                 player.take_damage(1)
 
-            # Check collision with player during thrust
-            if self.entity_hitbox.colliderect(player.player_hitbox):
-                player.take_damage(1)
-            
             if self.thrust_progress >= self.thrusting_distance:
                 self.thrusting = False
-                self.spear_direction.x = 0
                 self.state = 'idle'
+                self.frame_index = 0
             return
 
-        # Not currently thrusting — check for trigger
-        dx = px - ex
-        dy = abs(py - ey)
-        distance_x = abs(dx)
+        # --- Windup logic (start only once when player first enters range) ---
+        if in_range and not self.attack_ready:
+            self.attack_ready = True
+            self.attack_started_time = now
+            self.state = 'attack'
+            self.frame_index = 0
 
-        if distance_x <= TILE_SIZE * 2 and dy < TILE_SIZE:
-            current_time = pygame.time.get_ticks()
-            if current_time - self.last_thrust_time >= self.thrust_cd:
-                self.attack_started_time = current_time
-                self.attack_ready = True
-                self.state = 'attack'
-                self.frame_index = 0
+        # --- Do the thrust after 3s passed (even if player left range) ---
+        if self.attack_ready and now - self.attack_started_time >= 3000:
+            if now - self.last_thrust_time >= self.thrust_cd:
+                self.thrusting = True
+                self.thrust_progress = 0
                 self.thrust_direction = 1 if dx > 0 else -1
                 self.facing_right = self.thrust_direction > 0
+                self.state = 'attack'
+                self.frame_index = 0
+                self.last_thrust_time = now
+                self.attack_ready = False  # reset windup flag
+
 #-----------------------------------------------Attack---------------------------------
     def attack_hitbox(self):
         hitbox = self.entity_hitbox.copy()
@@ -357,9 +359,10 @@ class Humanoid(Entity):
             return
 
         if self.type == 'Spear':
-            self.state = 'idle'
-        else:
-            self.state = 'move' if self.direction.x != 0 else 'idle'
+            if self.thrusting:
+                self.state = 'attack'
+            else:
+                self.state = 'idle'
 
     def update_animation(self, dt):
         frames = self.animations[self.get_animation_key()]

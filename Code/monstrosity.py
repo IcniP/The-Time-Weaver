@@ -124,7 +124,6 @@ class Monstrosity(Entity):
         player_hitbox = self.player_ref.player_hitbox
 
         if (left_hitbox.colliderect(player_hitbox) or right_hitbox.colliderect(player_hitbox)) and not self.player_ref.invincible:
-            print("BOOKIE STOMPED PLAYER!")
             self.player_ref.take_damage(1)
     
     def take_damage(self, damage):
@@ -144,7 +143,7 @@ class Monstrosity(Entity):
     
     def die(self):
         self.death_time = pygame.time.get_ticks()
-        mask = pygame.mask.from_surface(self.image)
+        mask = pygame.mask.from_surface(self.animations['Jump'])
         surf = mask.to_surface(setcolor=(255, 100, 0), unsetcolor=(0, 0, 0, 0))
         surf.set_colorkey((0, 0, 0))
         self.image = surf

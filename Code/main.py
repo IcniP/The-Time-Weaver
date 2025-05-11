@@ -24,13 +24,13 @@ class Game:
         self.all_sprites = AllSprites()
         self.collision_sprites = pygame.sprite.Group()
 
-        self.level = f'{1}-{1}'
+        self.level = f'{1}-{0}'
         self.level_map = {
             '1-0': "lvl1-0.tmx",
             '1-1': "lvl1-1.tmx",
             '1-2': "lvl1-2.tmx",
-            #'1-3': "boss1.tmx",
-            '2-0': "lvl2.tmx",
+            '1-3': "lvl1-3.tmx",
+            '2-0': "lvl2-0.tmx",
             '3-0': "lvl3.tmx",
             '4-0': "lvl4.tmx",
             '5-0': "lvl5.tmx"
@@ -121,7 +121,15 @@ class Game:
     def next_level(self):
         world, stage = map(int, self.level.split('-'))
         next_stage = stage + 1
-        self.level = f'{world}-{next_stage}'
+        next_level_key = f'{world}-{next_stage}'
+
+        # If next stage doesn't exist, go to next world 0
+        if next_level_key not in self.level_map:
+            world += 1
+            next_stage = 0
+            next_level_key = f'{world}-{next_stage}'
+
+        self.level = next_level_key
         self.mapz = self.level_map.get(self.level, 'test.tmx')
         self.respawn_marker = 'Player'
         self.transition.start('fade')
