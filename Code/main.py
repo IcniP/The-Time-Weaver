@@ -25,7 +25,7 @@ class Game:
 
         self.level = f'{1}-{1}'
         self.level_map = {
-            '1-0': "lvl1.tmx",
+            '1-0': "lvl1-0.tmx",
             '1-1': "lvl1-1.tmx",
             '1-2': "lvl1-2.tmx",
             #'1-3': "boss1.tmx",

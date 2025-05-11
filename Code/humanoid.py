@@ -123,13 +123,14 @@ class Humanoid(Entity):
 
         if self.left_bound is not None and self.right_bound is not None:
             cx = self.entity_hitbox.centerx
-            if cx < self.left_bound or cx > self.right_bound:
-                if cx <= self.left_bound + 2:
-                    self.facing_right = True
-                    self.direction.x = 1
-                elif cx >= self.right_bound - 2:
-                    self.facing_right = False
-                    self.direction.x = -1
+            if cx <= self.left_bound:
+                self.facing_right = True
+                self.state = 'move'
+                self.wander_lap = now
+            elif cx >= self.right_bound:
+                self.facing_right = False
+                self.state = 'move'
+                self.wander_lap = now
 
         self.direction.x = max(-1, min(1, self.direction.x))
 
@@ -251,8 +252,8 @@ class Humanoid(Entity):
             self.attack_ready = False
             self.thrust_progress = 0
             self.last_thrust_time = pygame.time.get_ticks()
-            self.state = 'attack'  # ✅ set animation state
-            self.frame_index = 0   # ✅ reset animation frame
+            self.state = 'attack'
+            self.frame_index = 0
 
         # thrust execution
         if self.thrusting:
@@ -286,7 +287,7 @@ class Humanoid(Entity):
         dy = abs(py - ey)
         distance_x = abs(dx)
 
-        if distance_x <= TILE_SIZE * 3 and dy < TILE_SIZE:
+        if distance_x <= TILE_SIZE * 2 and dy < TILE_SIZE:
             current_time = pygame.time.get_ticks()
             if current_time - self.last_thrust_time >= self.thrust_cd:
                 self.attack_started_time = current_time
