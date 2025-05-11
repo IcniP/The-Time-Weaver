@@ -19,7 +19,6 @@ class AllSprites(pygame.sprite.Group):
         for sprite in self:
             self.display_surface.blit(sprite.image, sprite.rect.topleft + self.offset)
 
-
 class Sprite(pygame.sprite.Sprite):
     def __init__(self, pos, surf, groups):
         super().__init__(groups)
@@ -41,9 +40,6 @@ class Entity(pygame.sprite.Sprite, ABC):
 
     @abstractmethod
     def import_assets(self): pass
-
-    @abstractmethod
-    def import_folder(self, path): pass
 
     @abstractmethod
     def move(self): pass

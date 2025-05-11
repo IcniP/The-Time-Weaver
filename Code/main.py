@@ -1,6 +1,7 @@
 from settings import *
 from player import Player
 from humanoid import Humanoid
+from monstrosity import Monstrosity
 from entity import AllSprites, Sprite, CollisionSprite
 from interface import *
 from cervus import Cervus
@@ -110,6 +111,8 @@ class Game:
             elif marker.name == 'spear':
                 enemy = Humanoid('Spear', (marker.x, marker.y), self.all_sprites, self.collision_sprites)
                 enemy.player_ref = self.player
+            elif marker.name == 'bookie':
+                enemy = Monstrosity((marker.x, marker.y), self.all_sprites, self.collision_sprites, self.player)
             elif marker.name == 'Cervus':
                 self.cervus = Cervus((marker.x, marker.y), self.all_sprites, self.player)
             elif marker.name == 'Noliictu':
