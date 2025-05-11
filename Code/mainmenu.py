@@ -4,7 +4,7 @@ class MainMenuManager:
     def __init__(self, screen, game):
         self.screen = screen
         self.game = game  # reference ke Game instance
-        self.volume = 0.5
+        self.volume = 0.2
 
         self.lvl4_music = pygame.mixer.Sound('Assets/ost/lacrimosatnbe.mp3')
         self.lobby_music = pygame.mixer.Sound('Assets/ost/lobby.mp3')
@@ -61,7 +61,7 @@ class MainMenuManager:
                         self.game.game_active = True
                         self.lobby_music.stop()
 
-                        if self.game.level == 4:
+                        if self.game.level == '4-0':
                             self.lvl4_music.play(loops=-1)
 
                     elif action == "settings":

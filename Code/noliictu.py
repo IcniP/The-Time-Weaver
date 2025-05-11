@@ -330,6 +330,7 @@ class Noliictu(BossBase):
                 self.attack_cooldown_timer = self.attack_cooldown
                 self.attacking = False
                 self.play_animation('Idle')
+                self.attack(0)
         else:
             if self.detection_rect.colliderect(self.player.rect):
                 self.time_in_rect += dt
