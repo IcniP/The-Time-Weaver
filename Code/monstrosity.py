@@ -10,6 +10,12 @@ class Monstrosity(Entity):
         self.frame_index = 0
         self.animation_speed = 6
 
+        self.stomp_dust = False
+        self.dust_index = 0
+        self.dust_timer = 0
+        self.dust_frame_duration = 100
+        self.dust_pos = None
+
         self.collision_sprites = collision_sprites
         self.direction = pygame.math.Vector2(0, 0)
         self.gravity = 30
@@ -44,6 +50,12 @@ class Monstrosity(Entity):
         self.animations['Jump'] = pygame.image.load(join(base_path, 'jump.png')).convert_alpha()
         self.animations['Fall'] = pygame.image.load(join(base_path, 'fall.png')).convert_alpha()
 
+        #for dust
+        self.dust_frames = []
+        dust_path = join(dirname(abspath(__file__)), '..', 'Assets', 'Enemy', 'Bookie', 'dust')
+        for i in range(3):
+            frame = pygame.image.load(join(dust_path, f'{i}.png')).convert_alpha()
+            self.dust_frames.append(frame)
 #-----------------------------------------------World interaction thingy-----------------------------------------------
     def add_gravity(self, dt):
         self.direction.y += self.gravity * dt
@@ -94,6 +106,13 @@ class Monstrosity(Entity):
         self.has_impacted = True
         self.state = 'idle'
 
+        self.stomp_dust = True
+        self.dust_index = 0
+        self.dust_timer = pygame.time.get_ticks()
+
+        self.dust_pos = pygame.Rect(0, 0, 176, 32)
+        self.dust_pos.midbottom = self.entity_hitbox.midbottom
+
         # Left stomp area
         left_hitbox = pygame.Rect(0, 0, TILE_SIZE * 2, TILE_SIZE)
         left_hitbox.bottomright = self.entity_hitbox.bottomleft
@@ -105,7 +124,6 @@ class Monstrosity(Entity):
         player_hitbox = self.player_ref.player_hitbox
 
         if (left_hitbox.colliderect(player_hitbox) or right_hitbox.colliderect(player_hitbox)) and not self.player_ref.invincible:
-            print("BOOKIE STOMPED PLAYER!")
             self.player_ref.take_damage(1)
     
     def take_damage(self, damage):
@@ -125,7 +143,7 @@ class Monstrosity(Entity):
     
     def die(self):
         self.death_time = pygame.time.get_ticks()
-        mask = pygame.mask.from_surface(self.image)
+        mask = pygame.mask.from_surface(self.animations['Jump'])
         surf = mask.to_surface(setcolor=(255, 100, 0), unsetcolor=(0, 0, 0, 0))
         surf.set_colorkey((0, 0, 0))
         self.image = surf
@@ -133,6 +151,12 @@ class Monstrosity(Entity):
         self.attacking = False
 
 #-----------------------------------------------Animation thingy-----------------------------------------------
+    def draw(self, surface, offset):
+        if self.stomp_dust and self.dust_pos:
+            if self.dust_index < len(self.dust_frames):
+                frame = self.dust_frames[self.dust_index]
+                surface.blit(frame, self.dust_pos.topleft + offset)
+    
     def get_animation_key(self):
         if self.direction.y < 0:
             return 'Jump'
@@ -163,3 +187,11 @@ class Monstrosity(Entity):
             self.update_animation()
         elif now - self.death_time >= self.death_duration:
             self.kill()
+        
+        if self.stomp_dust:
+            if now - self.dust_timer >= self.dust_frame_duration:
+                self.dust_index += 1
+                self.dust_timer = now
+
+                if self.dust_index >= len(self.dust_frames):
+                    self.stomp_dust = False
