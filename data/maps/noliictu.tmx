@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="32" height="32" tilewidth="32" tileheight="32" infinite="0" nextlayerid="6" nextobjectid="22">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="32" height="32" tilewidth="32" tileheight="32" infinite="0" nextlayerid="6" nextobjectid="26">
  <tileset firstgid="1" source="../tilesets/timeweavertileset.tsx" />
  <layer id="1" name="ground" width="32" height="32">
   <data encoding="csv">
@@ -27,8 +27,8 @@
 6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,
 6,0,1,2,2,3,0,0,0,0,0,0,0,0,1,2,2,3,0,0,0,0,0,0,0,0,1,2,2,3,0,4,
 6,0,0,0,0,7,3,0,0,0,0,0,0,1,8,8,8,8,3,0,0,0,0,0,0,1,9,0,0,0,0,4,
-6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,
-6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 5,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,5,
 5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,
 5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,
@@ -37,7 +37,10 @@
 5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5
 </data>
  </layer>
- <objectgroup id="5" name="zones" />
+ <objectgroup id="5" name="zones">
+  <object id="22" name="back" x="-2.5" y="766.5" width="19.5" height="69.5" />
+  <object id="23" name="forward" x="1013.67" y="764.333" width="16.6667" height="71.3333" />
+ </objectgroup>
  <objectgroup id="2" name="entities">
   <object id="1" name="Ult" x="512" y="512">
    <point />
@@ -73,6 +76,9 @@
    <point />
   </object>
   <object id="15" name="Player" x="96" y="800">
+   <point />
+  </object>
+  <object id="25" name="player_back" x="960" y="800">
    <point />
   </object>
  </objectgroup>

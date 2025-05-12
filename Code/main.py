@@ -18,21 +18,22 @@ class Game:
         self.clock = pygame.time.Clock()
         self.running = True
 
-        self.map = pygame.image.load('Assets/Bg/1.png').convert_alpha()
+        self.map = pygame.image.load('Assets/Bg/2.png').convert_alpha()
         self.map_scaled = pygame.transform.scale(self.map, (WINDOW_WIDTH, WINDOW_HEIGHT))
 
         self.all_sprites = AllSprites()
         self.collision_sprites = pygame.sprite.Group()
 
-        self.level = f'{1}-{0}'
+        self.level = f'{2}-{2}'
         self.level_map = {
             '1-0': "lvl1-0.tmx",
             '1-1': "lvl1-1.tmx",
             '1-2': "lvl1-2.tmx",
-            '1-3': "lvl1-3.tmx",
+            '1-3': "boss1.tmx",
             '2-0': "lvl2-0.tmx",
-            '3-0': "lvl3.tmx",
-            '4-0': "lvl4.tmx",
+            '2-1': 'lvl2-1.tmx',
+            '2-2': "lvl2-2.tmx",
+            '2-3': "noliictu.tmx",
             '5-0': "lvl5.tmx"
         }
         self.mapz = self.level_map.get(self.level, 'test.tmx')

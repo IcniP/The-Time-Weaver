@@ -20,7 +20,7 @@ class Player(Entity):
 
         # Stats
         #hp-----------
-        self.max_hp = 6000
+        self.max_hp = 4
         self.hp = self.max_hp
         #stamina---------
         self.max_stamina = 4

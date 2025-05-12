@@ -209,7 +209,7 @@ class Noliictu(BossBase):
         self.is_uliting = True
         self.ult_timer = 0
         self.play_animation('UltIn')
-        map = load_pygame(join('data', 'maps', 'lvl4.tmx'))
+        map = load_pygame(join('data', 'maps', 'noliictu.tmx'))
         for marker in map.get_layer_by_name('entities'):
             if marker.name == 'Ult':
                 teleport_pos = (marker.x, marker.y)
@@ -293,7 +293,7 @@ class Noliictu(BossBase):
         if self.after_ult_teleport:
             frames = self.animations[self.status]
             if self.status == 'TeleportOut' and self.frame_index >= len(frames) - 1:
-                map = load_pygame(join('data', 'maps', 'lvl4.tmx'))
+                map = load_pygame(join('data', 'maps', 'noliictu.tmx'))
                 possible_markers = [marker for marker in map.get_layer_by_name('entities') if marker.name.isdigit()]
                 if possible_markers:
                     teleport_marker = random.choice(possible_markers)
@@ -317,7 +317,7 @@ class Noliictu(BossBase):
         if self.teleporting:
             frames = self.animations[self.status]
             if self.status == 'TeleportOut' and self.frame_index >= len(frames) - 1:
-                map = load_pygame(join('data', 'maps', 'lvl4.tmx'))
+                map = load_pygame(join('data', 'maps', 'noliictu.tmx'))
                 for marker in map.get_layer_by_name('entities'):
                     if marker.name == f'{num}':
                         teleport_pos = (marker.x, marker.y)
