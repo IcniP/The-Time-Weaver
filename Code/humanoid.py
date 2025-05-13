@@ -38,6 +38,7 @@ class Humanoid(Entity):
         self.attack_windup = 1000  # milliseconds before the attack executes
         self.attack_started_time = 0
         self.attack_ready = False  # set True when wind-up ends
+        self.damage_applied = False
         
         #sword n axe
         self.attacking = False

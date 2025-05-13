@@ -24,7 +24,7 @@ class Game:
         self.all_sprites = AllSprites()
         self.collision_sprites = pygame.sprite.Group()
 
-        self.level = f'{2}-{2}'
+        self.level = f'{3}-{2}'
         self.level_map = {
             '1-0': "lvl1-0.tmx",
             '1-1': "lvl1-1.tmx",
@@ -34,7 +34,10 @@ class Game:
             '2-1': 'lvl2-1.tmx',
             '2-2': "lvl2-2.tmx",
             '2-3': "noliictu.tmx",
-            '5-0': "lvl5.tmx"
+            '3-0': "lvl3-0.tmx",
+            '3-1': "lvl3-1.tmx",
+            '3-2': "lvl3-2.tmx",
+            '3-3': "cervus.tmx"
         }
         self.mapz = self.level_map.get(self.level, 'test.tmx')
 

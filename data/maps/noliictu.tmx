@@ -38,7 +38,7 @@
 </data>
  </layer>
  <objectgroup id="5" name="zones">
-  <object id="22" name="back" x="-2.5" y="766.5" width="19.5" height="69.5" />
+  <object id="22" name="back" x="0.833333" y="765.5" width="19.5" height="69.5" />
   <object id="23" name="forward" x="1013.67" y="764.333" width="16.6667" height="71.3333" />
  </objectgroup>
  <objectgroup id="2" name="entities">
@@ -75,10 +75,10 @@
   <object id="11" name="9" x="832" y="800">
    <point />
   </object>
-  <object id="15" name="Player" x="96" y="800">
+  <object id="15" name="Player" x="96.3333" y="803">
    <point />
   </object>
-  <object id="25" name="player_back" x="960" y="800">
+  <object id="25" name="Player_back" x="960" y="803">
    <point />
   </object>
  </objectgroup>
