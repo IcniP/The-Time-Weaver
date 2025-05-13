@@ -303,9 +303,10 @@ class Noliictu(BossBase):
             elif self.status == 'TeleportIn' and self.frame_index >= len(frames) - 1:
                 self.after_ult_teleport = False
                 self.recovering_after_ult = True
-                self.attack_cooldown_timer = self.attack_cooldown  # tunggu cooldown dulu baru attack
+                self.attack_cooldown_timer = self.attack_cooldown  # supaya bisa langsung menyerang setelah recover
                 self.attacking = False
                 self.play_animation('Idle')
+                self.attack(0)
             return
 
         if self.recovering_after_ult:
