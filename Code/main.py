@@ -24,7 +24,7 @@ class Game:
         self.all_sprites = AllSprites()
         self.collision_sprites = pygame.sprite.Group()
 
-        self.level = f'{3}-{2}'
+        self.level = f'{1}-{1}'
         self.level_map = {
             '1-0': "lvl1-0.tmx",
             '1-1': "lvl1-1.tmx",
@@ -40,6 +40,17 @@ class Game:
             '3-3': "cervus.tmx"
         }
         self.mapz = self.level_map.get(self.level, 'test.tmx')
+
+        #parallax thingy
+        self.parallax_layers = [
+            #(pygame.image.load('Assets/Bg/skynmoon.png').convert_alpha(), 0.1),
+            (pygame.image.load('Assets/Bg/smoke.png').convert_alpha(), 0.2),
+            (pygame.image.load('Assets/Bg/castle.png').convert_alpha(), 0.35),
+            (pygame.image.load('Assets/Bg/bloodtree.png').convert_alpha(), 0.5),
+            (pygame.image.load('Assets/Bg/fronttree.png').convert_alpha(), 0.7),
+        ]
+        self.branches_above = pygame.image.load('Assets/Bg/branchesabove.png').convert_alpha()
+        self.branches_above_speed = 0.9
 
         self.player = Player((0, 0), self.all_sprites, self.collision_sprites)
         self.fix_tmx_tileset('data/maps', 'Assets/Tilesets')
@@ -122,6 +133,24 @@ class Game:
             elif marker.name == 'Noliictu':
                 self.noliictu = Noliictu((marker.x, marker.y), self.all_sprites, self.player)
 
+    def draw_parallax_layers(self, target_pos):
+        for image, speed in self.parallax_layers:
+            image_width = image.get_width()
+
+            offset_x = (target_pos[0] - self.map_w // 2) * speed
+
+            draw_x = -offset_x + (WINDOW_WIDTH // 2 - image_width // 2)
+
+            self.screen.blit(image, (draw_x, 0))
+    
+    def draw_branches_layer(self, target_pos):
+        image = self.branches_above
+        speed = self.branches_above_speed
+        image_width = image.get_width()
+        offset_x = (target_pos[0] - self.map_w // 2) * speed
+        draw_x = -offset_x + (WINDOW_WIDTH // 2 - image_width // 2)
+        self.screen.blit(image, (draw_x, 0))
+
     def next_level(self):
         world, stage = map(int, self.level.split('-'))
         next_stage = stage + 1
@@ -194,7 +223,9 @@ class Game:
 
             # Drawing
             self.screen.blit(self.map_scaled, (0, 0))
+            self.draw_parallax_layers(self.player.rect.center)
             self.all_sprites.draw(self.player.rect.center, self.map_w, self.map_h)
+            self.draw_branches_layer(self.player.rect.center)
             self.ui.draw(self.player)
 
             # Transition effect (draw on top)
