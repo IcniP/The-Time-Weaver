@@ -177,6 +177,7 @@ class Humanoid(Entity):
                     self.attack_started_time = current_time
                     self.attack_ready = True
                     self.state = 'attack'
+                    self.damage_applied = False
                     self.frame_index = 0
                     return
 
@@ -185,10 +186,6 @@ class Humanoid(Entity):
                     self.attacking = True
                     self.attack_ready = False
                     self.last_attack_time = current_time
-
-                    hitbox = self.attack_hitbox()
-                    if hitbox.colliderect(player.player_hitbox) and not player.invincible:
-                        player.take_damage(1)
         else:
             self.move()
     
@@ -229,6 +226,7 @@ class Humanoid(Entity):
                     self.attack_started_time = current_time
                     self.attack_ready = True
                     self.state = 'attack'
+                    self.damage_applied = False
                     self.frame_index = 0
                     return
 
@@ -237,10 +235,6 @@ class Humanoid(Entity):
                     self.attacking = True
                     self.attack_ready = False
                     self.last_attack_time = current_time
-
-                    hitbox = self.attack_hitbox()
-                    if hitbox.colliderect(player.player_hitbox) and not player.invincible:
-                        player.take_damage(1)
         else:
             self.move()
 
@@ -373,6 +367,12 @@ class Humanoid(Entity):
     def update_animation(self, dt):
         frames = self.animations[self.get_animation_key()]
         self.frame_index += (8 if 'attack' in self.state else 6) * dt
+
+        if self.state == 'attack' and int(self.frame_index) == 2 and not self.damage_applied:
+            hitbox = self.attack_hitbox()
+            if hitbox.colliderect(self.player_ref.player_hitbox) and not self.player_ref.invincible:
+                self.player_ref.take_damage(1)
+            self.damage_applied = True
 
         if self.frame_index >= len(frames):
             self.frame_index = 0
