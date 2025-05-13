@@ -1,7 +1,7 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="77" height="40" tilewidth="32" tileheight="32" infinite="0" nextlayerid="7" nextobjectid="99">
- <tileset firstgid="1" source="../tilesets/timeweavertileset.tsx"/>
- <tileset firstgid="10" source="../tilesets/outdoor.tsx"/>
+ <tileset firstgid="1" source="../tilesets/timeweavertileset.tsx" />
+ <tileset firstgid="10" source="../tilesets/outdoor.tsx" />
  <layer id="1" name="ground" width="77" height="40">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -48,41 +48,41 @@
  </layer>
  <objectgroup id="3" name="entities">
   <object id="21" name="Player" x="64" y="1184">
-   <point/>
+   <point />
   </object>
   <object id="82" name="Player_back" x="2400" y="1184">
-   <point/>
+   <point />
   </object>
   <object id="88" name="bookie" x="736" y="1120">
-   <point/>
+   <point />
   </object>
   <object id="89" name="bookie" x="2016" y="1120">
-   <point/>
+   <point />
   </object>
   <object id="91" name="spear" x="1600" y="1056">
-   <point/>
+   <point />
   </object>
   <object id="92" name="axe" x="1408" y="960">
-   <point/>
+   <point />
   </object>
   <object id="93" x="1344" y="832">
-   <point/>
+   <point />
   </object>
   <object id="94" x="640" y="960">
-   <point/>
+   <point />
   </object>
   <object id="95" x="1920" y="960">
-   <point/>
+   <point />
   </object>
   <object id="96" name="sword" x="1152" y="1056">
-   <point/>
+   <point />
   </object>
  </objectgroup>
- <objectgroup id="4" name="pits"/>
+ <objectgroup id="4" name="pits" />
  <objectgroup id="6" name="zones">
-  <object id="81" name="forward" x="2459" y="1199.25" width="17.6667" height="49"/>
-  <object id="87" name="back" x="-6" y="1196.83" width="13" height="52.3333"/>
-  <object id="97" x="1101.5" y="1055" width="94" height="37"/>
-  <object id="98" x="1235.5" y="958.5" width="178" height="37"/>
+  <object id="81" name="forward" x="2459" y="1199.25" width="17.6667" height="49" />
+  <object id="87" name="back" x="-6" y="1196.83" width="13" height="52.3333" />
+  <object id="97" x="1101.5" y="1055" width="94" height="37" />
+  <object id="98" x="1235.5" y="958.5" width="178" height="37" />
  </objectgroup>
 </map>
