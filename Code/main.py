@@ -138,7 +138,17 @@ class Game:
 
     def previous_level(self):
         world, stage = map(int, self.level.split('-'))
-        prev_stage = max(stage - 1, 0)
+        prev_stage = stage - 1
+
+        if prev_stage < 0:
+            world -= 1
+            # Find the highest stage that exists in the previous world
+            candidate_stages = [int(k.split('-')[1]) for k in self.level_map if k.startswith(f"{world}-") and k.split('-')[1].isdigit()]
+            if candidate_stages:
+                prev_stage = max(candidate_stages)
+            else:
+                prev_stage = 0  # fallback if no stages found
+
         self.level = f'{world}-{prev_stage}'
         self.mapz = self.level_map.get(self.level, 'test.tmx')
         self.respawn_marker = 'Player_back'

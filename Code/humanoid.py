@@ -141,7 +141,7 @@ class Humanoid(Entity):
                 self.zone = rect
     
     def sword_behavior(self):
-        if not hasattr(self, 'player_ref') or self.attacking:
+        if not hasattr(self, 'player_ref'):
             self.move()
             return
         
@@ -170,6 +170,9 @@ class Humanoid(Entity):
             else:
                 self.direction.x = 0
 
+                if pygame.time.get_ticks() - self.last_attack_time < self.attack_cd:
+                    return
+                
                 if not self.attack_ready:
                     self.attack_started_time = current_time
                     self.attack_ready = True
@@ -190,7 +193,7 @@ class Humanoid(Entity):
             self.move()
     
     def axe_behavior(self):
-        if not hasattr(self, 'player_ref') or self.attacking:
+        if not hasattr(self, 'player_ref'):
             self.move()
             return
         
@@ -219,6 +222,9 @@ class Humanoid(Entity):
             else:
                 self.direction.x = 0
 
+                if pygame.time.get_ticks() - self.last_attack_time < self.attack_cd:
+                    return
+                    
                 if not self.attack_ready:
                     self.attack_started_time = current_time
                     self.attack_ready = True
@@ -373,6 +379,7 @@ class Humanoid(Entity):
             if self.state == 'attack':
                 self.attacking = False
                 self.state = 'idle'
+                self.last_attack_time = pygame.time.get_ticks()
 
         self.image = frames[int(self.frame_index)]
         if not self.facing_right:
