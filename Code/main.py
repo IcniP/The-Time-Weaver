@@ -2,6 +2,7 @@ from settings import *
 from player import Player
 from humanoid import Humanoid
 from monstrosity import Monstrosity
+from fly import Fly
 from entity import AllSprites, Sprite, CollisionSprite
 from interface import *
 from cervus import Cervus
@@ -23,8 +24,9 @@ class Game:
 
         self.all_sprites = AllSprites()
         self.collision_sprites = pygame.sprite.Group()
+        self.spike_sprites = pygame.sprite.Group()
 
-        self.level = f'{1}-{1}'
+        self.level = f'{3}-{0}'
         self.level_map = {
             '1-0': "lvl1-0.tmx",
             '1-1': "lvl1-1.tmx",
@@ -45,12 +47,12 @@ class Game:
         self.parallax_layers = [
             #(pygame.image.load('Assets/Bg/skynmoon.png').convert_alpha(), 0.1),
             (pygame.image.load('Assets/Bg/smoke.png').convert_alpha(), 0.2),
-            (pygame.image.load('Assets/Bg/castle.png').convert_alpha(), 0.35),
-            (pygame.image.load('Assets/Bg/bloodtree.png').convert_alpha(), 0.5),
-            (pygame.image.load('Assets/Bg/fronttree.png').convert_alpha(), 0.7),
+            (pygame.image.load('Assets/Bg/castle.png').convert_alpha(), 0.3),
+            (pygame.image.load('Assets/Bg/bloodtree.png').convert_alpha(), 0.4),
+            (pygame.image.load('Assets/Bg/fronttree.png').convert_alpha(), 0.5),
         ]
         self.branches_above = pygame.image.load('Assets/Bg/branchesabove.png').convert_alpha()
-        self.branches_above_speed = 0.9
+        self.branches_above_speed = 0.6
 
         self.player = Player((0, 0), self.all_sprites, self.collision_sprites)
         self.fix_tmx_tileset('data/maps', 'Assets/Tilesets')
@@ -87,11 +89,20 @@ class Game:
         self.map_w = map.width * TILE_SIZE
         self.map_h = map.height * TILE_SIZE
 
+        self.range_rects = [pygame.Rect(obj.x, obj.y, obj.width, obj.height)
+                            for obj in map.get_layer_by_name('range')]
+
         for x, y, image in map.get_layer_by_name('ground').tiles():
             Sprite((x * TILE_SIZE, y * TILE_SIZE), image, (self.all_sprites, self.collision_sprites))
 
-        for collision in map.get_layer_by_name('pits'):
-            CollisionSprite((collision.x, collision.y), pygame.Surface((collision.width, collision.height)), self.collision_sprites)
+        for pit in map.get_layer_by_name('pits'):
+            spike_rect = pygame.Rect(pit.x, pit.y, pit.width, pit.height)
+            spike = pygame.sprite.Sprite(self.spike_sprites)
+            spike.rect = spike_rect
+            spike.image = pygame.Surface((pit.width, pit.height))
+        
+        for x, y, image in map.get_layer_by_name('spikes').tiles():
+            Sprite((x * TILE_SIZE, y * TILE_SIZE), image, (self.all_sprites, self.spike_sprites))
 
         self.transition_zones = {}
         self.patrol_zones = []
@@ -128,6 +139,13 @@ class Game:
                 enemy.player_ref = self.player
             elif marker.name == 'bookie':
                 enemy = Monstrosity((marker.x, marker.y), self.all_sprites, self.collision_sprites, self.player)
+            elif marker.name == 'wraith':
+                self.range_rect = None
+                for r in self.range_rects:
+                    if r.collidepoint(marker.x, marker.y):
+                        self.range_rect = r
+                        break
+                enemy = Fly((marker.x, marker.y), self.all_sprites, self.collision_sprites, self.player, self.range_rect)
             elif marker.name == 'Cervus':
                 self.cervus = Cervus((marker.x, marker.y), self.all_sprites, self.player)
             elif marker.name == 'Noliictu':
@@ -213,6 +231,11 @@ class Game:
             # Game logic (only if not transitioning and not paused)
             if not self.transition.active and not self.paused:
                 self.all_sprites.update(dt)
+
+                for spike in self.spike_sprites:
+                    if spike.rect.colliderect(self.player.player_hitbox):
+                        self.player.die()
+                        break
 
                 # Zone transitions
                 if 'forward' in self.transition_zones and self.player.player_hitbox.colliderect(self.transition_zones['forward']):
