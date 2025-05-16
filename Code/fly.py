@@ -26,7 +26,7 @@ class Fly(Entity):
         self.right_bound = self.start_pos.x + TILE_SIZE * 4
 
         # Attack
-        self.attack_cd = 2000  # ms
+        self.attack_cd = 3000  # ms
         self.last_attack_time = 0
         self.projectiles = groups  # will spawn projectiles into AllSprites
     
@@ -118,7 +118,7 @@ class Projectile(pygame.sprite.Sprite):
 
         self.mask = pygame.mask.from_surface(self.image)
 
-        self.speed = 200
+        self.speed = 100
         self.range = 800
         self.start_pos = self.pos.copy()
         self.damage = 1

@@ -100,6 +100,7 @@ class Player(Entity):
                 self.state = 'dash'
                 self.attack_locked = True
                 self.dash_pressed = True
+                self.invincible = True
 
                 self.stamina -= stamina_cost
                 self.last_stamina_use = pygame.time.get_ticks()
@@ -118,6 +119,7 @@ class Player(Entity):
 
             if self.dash_timer >= self.dash_duration:
                 self.is_dashing = False
+                self.invincible = False
                 self.attack_locked = False
                 self.last_dash_end_time = pygame.time.get_ticks()
                 self.state = 'idle'
@@ -191,7 +193,7 @@ class Player(Entity):
         return hitbox
 
     def take_damage(self, damage):
-        if not self.invincible:
+        if  self.invincible == False:
             self.hp -= damage
             self.invincible = True
             self.last_hit_time = pygame.time.get_ticks()
@@ -294,17 +296,17 @@ class Player(Entity):
         self.update_state()
         self.update_animation(dt)
 
-        #combo reset
+        #combo reset-------------
         if pygame.time.get_ticks() - self.last_attack_time > self.combo_reset_time:
             self.current_combo = 1
 
-        #regen stamina
+        #regen stamina-----------
         time_since_use = (pygame.time.get_ticks() - self.last_stamina_use) / 1000
         regen_amount = self.stamina_regen * dt
         # 1 detik
         if time_since_use > 1 and self.stamina < self.max_stamina and not self.attack_button_pressed and not self.jumping and not self.is_dashing:
             self.stamina = min(self.stamina + regen_amount, self.max_stamina)
 
-        #playa invicible, utk testing
+        #playa invicible, utk testing----------
         if self.invincible and pygame.time.get_ticks() - self.last_hit_time > self.invincibility_duration:
             self.invincible = False
