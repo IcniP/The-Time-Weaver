@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="77" height="40" tilewidth="32" tileheight="32" infinite="0" nextlayerid="7" nextobjectid="101">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="77" height="40" tilewidth="32" tileheight="32" infinite="0" nextlayerid="8" nextobjectid="104">
  <tileset firstgid="1" source="../tilesets/timeweavertileset.tsx" />
  <tileset firstgid="10" source="../tilesets/outdoor.tsx" />
  <layer id="1" name="ground" width="77" height="40">
@@ -59,13 +59,13 @@
   <object id="89" name="sword" x="1728" y="1120">
    <point />
   </object>
-  <object id="90" x="1216" y="1024">
+  <object id="90" name="wraith" x="1216" y="1024">
    <point />
   </object>
-  <object id="91" x="544" y="896">
+  <object id="91" name="wraith" x="544" y="896">
    <point />
   </object>
-  <object id="92" x="1920" y="928">
+  <object id="92" name="wraith" x="1920" y="928">
    <point />
   </object>
   <object id="93" name="bookie" x="1312" y="832">
@@ -86,5 +86,10 @@
   <object id="96" x="1587.5" y="1119" width="148" height="35.5" />
   <object id="97" x="1971" y="1086.5" width="59.5" height="36.5" />
   <object id="98" x="430.75" y="1086.75" width="65.5" height="35.5" />
+ </objectgroup>
+ <objectgroup id="7" name="range">
+  <object id="101" x="254.667" y="858.667" width="606.667" height="329.333" />
+  <object id="102" x="893.333" y="924" width="648" height="182.667" />
+  <object id="103" x="1822" y="927" width="385" height="271" />
  </objectgroup>
 </map>

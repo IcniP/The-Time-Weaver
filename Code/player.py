@@ -7,7 +7,7 @@ from noliictu import Noliictu
 class Player(Entity):
     def __init__(self, pos, groups, collision_sprites):
         super().__init__(groups)
-        self.animations = {k: [] for k in ['Idle', 'Move', 'Attack', 'Attack2', 'Jump', 'Fall']}
+        self.animations = {k: [] for k in ['Idle', 'Move', 'Attack', 'Attack2', 'Jump', 'Fall', 'Dash']}
         self.import_assets()
         self.frame_index = 0
         self.animation_speed = 6
@@ -26,7 +26,6 @@ class Player(Entity):
         self.max_stamina = 4
         self.stamina = self.max_stamina
         self.stamina_regen = 1
-        self.stamina_drain_attack = 0.5
         self.last_stamina_use = pygame.time.get_ticks()
         
 
@@ -34,7 +33,7 @@ class Player(Entity):
         self.invincibility_duration = 1000
         self.last_hit_time = 0
 
-        # Movement
+        # Movement---------
         self.direction = pygame.math.Vector2(0, 0)
         self.speed = 200
         self.gravity = 30
@@ -42,7 +41,21 @@ class Player(Entity):
         self.jumping = False
         self.facing_right = True
 
-        # Attack
+        #dash---------
+        self.can_dash = True
+        self.is_dashing = False
+        self.air_dash = False
+        self.dash_pressed = False
+        self.dash_timer = 0
+        self.dash_duration = 0.3
+        self.dash_speed = 300
+        self.dash_cd = 1
+        self.time_since_last_dash = 0
+
+        self.attack_cd_after_dash = 500
+        self.last_dash_end_time = 0
+
+        # Attack---------
         self.attacking = False
         self.attacking_two = False
         self.attack_locked = False
@@ -70,8 +83,50 @@ class Player(Entity):
         if keys[pygame.K_SPACE] and self.on_ground() and not self.jumping:
             self.direction.y = self.jump_speed
             self.jumping = True
+    
+    def dash(self, keys, dt):
+        self.time_since_last_dash += dt
+        stamina_cost = 0.5
 
-    def move(self):
+        if keys[pygame.K_LSHIFT] and not self.dash_pressed and not self.is_dashing and not self.attack_locked:
+            
+            if self.stamina < stamina_cost:
+                return
+
+            if self.on_ground() or not self.air_dash:
+                self.is_dashing = True
+                self.dash_timer = 0
+                self.frame_index = 0
+                self.state = 'dash'
+                self.attack_locked = True
+                self.dash_pressed = True
+
+                self.stamina -= stamina_cost
+                self.last_stamina_use = pygame.time.get_ticks()
+
+                if not self.on_ground():
+                    self.air_dash = True  # mark dashed in air
+
+        if not keys[pygame.K_LSHIFT]:
+            self.dash_pressed = False
+
+        # Dash movement
+        if self.is_dashing:
+            self.dash_timer += dt
+            dash_dir = 1 if self.facing_right else -1
+            self.player_hitbox.x += dash_dir * self.dash_speed * dt
+
+            if self.dash_timer >= self.dash_duration:
+                self.is_dashing = False
+                self.attack_locked = False
+                self.last_dash_end_time = pygame.time.get_ticks()
+                self.state = 'idle'
+
+        # Reset air dash when grounded
+        if self.on_ground():
+            self.air_dash = False
+
+    def move(self, dt):
         keys = pygame.key.get_pressed()
         mouse_pressed = pygame.mouse.get_pressed()
 
@@ -80,12 +135,18 @@ class Player(Entity):
         if self.direction.x != 0:
             self.facing_right = self.direction.x > 0
 
+        self.dash(keys, dt)
         self.jump(keys)
         self.attack(mouse_pressed)
 
 #-----------------------------------------------attacking thingy-----------------------------------------------
     def attack(self, mouse_pressed):
         current_time = pygame.time.get_ticks()
+
+        #biar nggk bisa attack klo pas nge dash sma cd setelah dashny blm brakhir
+        if self.is_dashing or current_time - self.last_dash_end_time < self.attack_cd_after_dash:
+            return
+
         if current_time - self.last_attack_time > self.combo_reset_time:
             self.current_combo = 1
 
@@ -94,18 +155,19 @@ class Player(Entity):
             self.last_attack_time = current_time
 
             if self.current_combo == 1 and not self.attacking:
-                self._start_attack('attack1')
+                self.start_attack('attack1')
             elif self.current_combo == 2 and not self.attacking_two:
-                self._start_attack('attack2')
+                self.start_attack('attack2')
 
         elif not mouse_pressed[0]:
             self.attack_button_pressed = False
 
-    def _start_attack(self, state):
-        if state in ['attack1', 'attack2']: stamina_cost = self.stamina_drain_attack 
+    def start_attack(self, state):
+        stamina_cost = 0.5
+
         if self.stamina < stamina_cost:
-            print('Not enough stamina!')
             return
+
         self.stamina -= stamina_cost
         self.last_stamina_use = pygame.time.get_ticks()
 
@@ -178,12 +240,17 @@ class Player(Entity):
 #-----------------------------------------------Animations thingy-----------------------------------------------
     def get_animation_key(self):
         return {
-            'idle': 'Idle', 'move': 'Move', 'jump': 'Jump',
-            'fall': 'Fall', 'attack1': 'Attack', 'attack2': 'Attack2'
+            'idle': 'Idle', 
+            'move': 'Move', 
+            'jump': 'Jump',
+            'fall': 'Fall', 
+            'attack1': 'Attack', 
+            'attack2': 'Attack2', 
+            'dash': 'Dash'
         }[self.state]
 
     def update_state(self):
-        if self.attacking or self.attacking_two:
+        if self.attacking or self.attacking_two or self.is_dashing:
             return
         if self.direction.y < 0:
             self.state = 'jump'
@@ -196,7 +263,7 @@ class Player(Entity):
 
     def update_animation(self, dt):
         frames = self.animations[self.get_animation_key()]
-        self.frame_index += (8 if 'attack' in self.state else 6) * dt
+        self.frame_index += (8 if 'attack' in self.state or self.state == 'Dash' else 6) * dt
 
         if self.frame_index >= len(frames):
             self.frame_index = 0
@@ -210,6 +277,10 @@ class Player(Entity):
                 self.attack_locked = False
                 self.current_combo = 1
                 self.state = 'idle'
+            elif self.state == 'dash':
+                self.is_dashing = False
+                self.attack_locked = False
+                self.state = 'idle'
 
         self.image = frames[int(self.frame_index)]
         if not self.facing_right:
@@ -218,7 +289,7 @@ class Player(Entity):
 #-----------------------------------------------Update-----------------------------------------------
     def update(self, dt):
         self.player_hitbox.center = self.rect.center
-        self.move()
+        self.move(dt)
         self.add_gravity(dt)
         self.update_state()
         self.update_animation(dt)
@@ -231,7 +302,7 @@ class Player(Entity):
         time_since_use = (pygame.time.get_ticks() - self.last_stamina_use) / 1000
         regen_amount = self.stamina_regen * dt
         # 1 detik
-        if time_since_use > 1 and self.stamina < self.max_stamina and not self.attack_button_pressed and not self.jumping:
+        if time_since_use > 1 and self.stamina < self.max_stamina and not self.attack_button_pressed and not self.jumping and not self.is_dashing:
             self.stamina = min(self.stamina + regen_amount, self.max_stamina)
 
         #playa invicible, utk testing

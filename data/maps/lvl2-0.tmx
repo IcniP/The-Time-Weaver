@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="77" height="40" tilewidth="32" tileheight="32" infinite="0" nextlayerid="7" nextobjectid="107">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="77" height="40" tilewidth="32" tileheight="32" infinite="0" nextlayerid="8" nextobjectid="107">
  <tileset firstgid="1" source="../tilesets/timeweavertileset.tsx" />
  <tileset firstgid="10" source="../tilesets/outdoor.tsx" />
  <layer id="1" name="ground" width="77" height="40">
@@ -95,4 +95,5 @@
   <object id="105" x="2101.5" y="1213.5" width="120.667" height="39.3333" />
   <object id="106" x="873.5" y="798.5" width="44" height="39.5" />
  </objectgroup>
+ <objectgroup id="7" name="range" />
 </map>
