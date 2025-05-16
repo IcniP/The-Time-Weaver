@@ -26,7 +26,7 @@ class Game:
         self.collision_sprites = pygame.sprite.Group()
         self.spike_sprites = pygame.sprite.Group()
 
-        self.level = f'{3}-{0}'
+        self.level = f'{3}-{1}'
         self.level_map = {
             '1-0': "lvl1-0.tmx",
             '1-1': "lvl1-1.tmx",
@@ -54,7 +54,9 @@ class Game:
         self.branches_above = pygame.image.load('Assets/Bg/branchesabove.png').convert_alpha()
         self.branches_above_speed = 0.6
 
-        self.player = Player((0, 0), self.all_sprites, self.collision_sprites)
+        camera_group = self.all_sprites
+        self.player = Player((0, 0), self.all_sprites, self.collision_sprites, camera_group)
+        
         self.fix_tmx_tileset('data/maps', 'Assets/Tilesets')
         self.game_active = False
         self.paused = False

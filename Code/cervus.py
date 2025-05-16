@@ -34,6 +34,7 @@ class Cervus(BossBase):
         self.rect = self.image.get_rect(midbottom=pos)
 
         # Buat entity_hitbox sebagai atribut utama yang dipakai player
+        self.deer_hitbox = pygame.Rect(0, 0, 32, 32)
         self.entity_hitbox = self.rect.inflate(-30, -10)
         self.entity_hitbox.center = self.rect.center
 
@@ -93,33 +94,33 @@ class Cervus(BossBase):
 
     def add_gravity(self, dt):
         self.direction.y += self.gravity * dt
-        self.entity_hitbox.y += self.direction.y
+        self.deer_hitbox.y += self.direction.y
         self.collision('vertical')
 
-        self.entity_hitbox.x += self.direction.x * self.speed * dt
+        self.deer_hitbox.x += self.direction.x * self.speed * dt
         self.collision('horizontal')
 
-        self.rect.midbottom = self.entity_hitbox.midbottom  # PENTING!
+        self.rect.center = self.deer_hitbox.center  # PENTING!
 
     def collision(self, direction):
         for sprite in self.collision_sprites:
-            if sprite.rect.colliderect(self.entity_hitbox):
+            if sprite.rect.colliderect(self.deer_hitbox):
                 if direction == 'horizontal':
                     if self.direction.x > 0:
-                        self.entity_hitbox.right = sprite.rect.left
+                        self.deer_hitbox.right = sprite.rect.left
                     elif self.direction.x < 0:
-                        self.entity_hitbox.left = sprite.rect.right
+                        self.deer_hitbox.left = sprite.rect.right
                     self.direction.x = 0
                 elif direction == 'vertical':
                     if self.direction.y > 0:
-                        self.entity_hitbox.bottom = sprite.rect.top
+                        self.deer_hitbox.bottom = sprite.rect.top
                         self.direction.y = 0
                         self.jumping = False
                     elif self.direction.y < 0:
-                        self.entity_hitbox.top = sprite.rect.bottom
+                        self.deer_hitbox.top = sprite.rect.bottom
                         self.direction.y = 0
 
-        self.rect.midbottom = self.entity_hitbox.midbottom
+        self.rect.midbottom = self.deer_hitbox.midbottom
 
     # ---------------------------- Phase 2: Hands ----------------------------
 

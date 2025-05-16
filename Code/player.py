@@ -6,7 +6,7 @@ from noliictu import Noliictu
 from bossbase import BossBase
 
 class Player(Entity):
-    def __init__(self, pos, groups, collision_sprites):
+    def __init__(self, pos, groups, collision_sprites, camera_group):
         super().__init__(groups)
         self.animations = {k: [] for k in ['Idle', 'Move', 'Attack', 'Attack2', 'Jump', 'Fall', 'Dash']}
         self.import_assets()
@@ -18,6 +18,7 @@ class Player(Entity):
         self.rect = self.image.get_rect(midbottom=pos)
         self.collision_sprites = collision_sprites
         self.groupss = groups
+        self.camera_group = camera_group
 
         # Stats
         #hp-----------
@@ -203,16 +204,22 @@ class Player(Entity):
         return hitbox
     
     def throw_knife(self, mouse_pressed):
-        if mouse_pressed[2] and not self.throwing:
+         if mouse_pressed[2] and not self.throwing:
             self.throwing = True
             self.throw_frame_index = 0
             self.attack_locked = True
 
-
             mouse_pos = pygame.Vector2(pygame.mouse.get_pos())
-            world_mouse = mouse_pos - (pygame.Vector2(WINDOW_WIDTH, WINDOW_HEIGHT) / 2) + self.rect.center
-            self.throw_direction = (world_mouse - pygame.Vector2(self.rect.center)).normalize()
+
+            # ✅ get player screen position using camera offset
+            player_screen_pos = pygame.Vector2(self.rect.center) + self.camera_group.offset
+
+            # ✅ direction and facing based on actual screen space
+            self.throw_direction = (mouse_pos - player_screen_pos).normalize()
             self.facing_right = self.throw_direction.x >= 0
+
+            # ✅ determine where the knife will go in world coordinates
+            world_mouse = self.rect.center + (mouse_pos - player_screen_pos)
 
             enemies = [s for s in self.groupss if isinstance(s, (Humanoid, Monstrosity, Noliictu))]
             PlayerKnife(self.rect.center, world_mouse, self.groupss, enemies)
@@ -298,6 +305,7 @@ class Player(Entity):
                 self.throwing = False
                 self.hand_image = None
                 self.state = 'idle'
+                self.attack_locked = False
                 return
 
             self.image = self.throw_body[int(self.throw_frame_index)]
