@@ -146,10 +146,12 @@ class Game:
                         self.range_rect = r
                         break
                 enemy = Fly((marker.x, marker.y), self.all_sprites, self.collision_sprites, self.player, self.range_rect)
-            elif marker.name == 'Cervus':
-                self.cervus = Cervus((marker.x, marker.y), self.all_sprites, self.player)
             elif marker.name == 'Noliictu':
                 self.noliictu = Noliictu((marker.x, marker.y), self.all_sprites, self.player)
+            elif marker.name == 'Cervus':
+                self.cervus = Cervus((marker.x, marker.y), self.all_sprites, self.player, self.collision_sprites)
+                self.all_sprites.add(self.cervus)
+
 
     def draw_parallax_layers(self, target_pos):
         for image, speed in self.parallax_layers:
@@ -231,6 +233,8 @@ class Game:
             # Game logic (only if not transitioning and not paused)
             if not self.transition.active and not self.paused:
                 self.all_sprites.update(dt)
+            if hasattr(self, 'cervus'):
+                self.cervus.update(dt)
 
                 for spike in self.spike_sprites:
                     if spike.rect.colliderect(self.player.player_hitbox):

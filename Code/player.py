@@ -3,6 +3,7 @@ from entity import *
 from humanoid import Humanoid
 from monstrosity import Monstrosity
 from noliictu import Noliictu
+from bossbase import BossBase
 
 class Player(Entity):
     def __init__(self, pos, groups, collision_sprites):
@@ -189,7 +190,7 @@ class Player(Entity):
 
         hitbox = self.attack_hitbox()
         for enemy in self.groupss:
-            if isinstance(enemy, (Humanoid, Monstrosity, Noliictu)):
+            if isinstance(enemy, (Humanoid, Monstrosity, Noliictu, BossBase)):
                 target_hitbox = getattr(enemy, 'entity_hitbox', getattr(enemy, 'hitbox', None))
                 if target_hitbox and hitbox.colliderect(target_hitbox):
                     damage = 100 if isinstance(enemy, Noliictu) else 1
