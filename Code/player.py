@@ -211,14 +211,11 @@ class Player(Entity):
 
             mouse_pos = pygame.Vector2(pygame.mouse.get_pos())
 
-            # ✅ get player screen position using camera offset
             player_screen_pos = pygame.Vector2(self.rect.center) + self.camera_group.offset
 
-            # ✅ direction and facing based on actual screen space
             self.throw_direction = (mouse_pos - player_screen_pos).normalize()
             self.facing_right = self.throw_direction.x >= 0
 
-            # ✅ determine where the knife will go in world coordinates
             world_mouse = self.rect.center + (mouse_pos - player_screen_pos)
 
             enemies = [s for s in self.groupss if isinstance(s, (Humanoid, Monstrosity, Noliictu))]

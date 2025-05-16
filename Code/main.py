@@ -235,8 +235,6 @@ class Game:
             # Game logic (only if not transitioning and not paused)
             if not self.transition.active and not self.paused:
                 self.all_sprites.update(dt)
-            if hasattr(self, 'cervus'):
-                self.cervus.update(dt)
 
                 for spike in self.spike_sprites:
                     if spike.rect.colliderect(self.player.player_hitbox):
@@ -249,6 +247,9 @@ class Game:
 
                 if 'back' in self.transition_zones and self.player.player_hitbox.colliderect(self.transition_zones['back']):
                     self.previous_level()
+
+            if hasattr(self, 'cervus'):
+                self.cervus.update(dt)
 
             # Drawing
             self.screen.blit(self.map_scaled, (0, 0))
