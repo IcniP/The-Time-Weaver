@@ -22,6 +22,10 @@ class AllSprites(pygame.sprite.Group):
             if hasattr(sprite, 'draw'):
                 sprite.draw(self.display_surface, self.offset)
 
+            if hasattr(sprite, 'hand_image') and sprite.hand_image is not None:
+                hand_offset = pygame.Vector2(0, -5)
+                self.display_surface.blit(sprite.hand_image, sprite.rect.topleft + hand_offset + self.offset)
+
 class Sprite(pygame.sprite.Sprite):
     def __init__(self, pos, surf, groups):
         super().__init__(groups)

@@ -3,6 +3,7 @@ from entity import *
 from humanoid import Humanoid
 from monstrosity import Monstrosity
 from noliictu import Noliictu
+from bossbase import BossBase
 
 class Player(Entity):
     def __init__(self, pos, groups, collision_sprites):
@@ -22,6 +23,7 @@ class Player(Entity):
         #hp-----------
         self.max_hp = 4
         self.hp = self.max_hp
+        self.dead = False
         #stamina---------
         self.max_stamina = 4
         self.stamina = self.max_stamina
@@ -64,6 +66,13 @@ class Player(Entity):
         self.current_combo = 1
         self.combo_reset_time = 900
         self.last_attack_time = 0
+
+
+        self.throw_hand = self.import_folder('Assets/Player/Throw/hand')
+        self.throw_body = self.import_folder('Assets/Player/Throw/base')
+        self.throw_frame_index = 0
+        self.throwing = False
+        self.throw_direction = pygame.Vector2(1, 0)
 
         self.player_hitbox = pygame.Rect(0, 0, 16, 32)
 
@@ -140,6 +149,7 @@ class Player(Entity):
         self.dash(keys, dt)
         self.jump(keys)
         self.attack(mouse_pressed)
+        self.throw_knife(mouse_pressed)
 
 #-----------------------------------------------attacking thingy-----------------------------------------------
     def attack(self, mouse_pressed):
@@ -180,7 +190,7 @@ class Player(Entity):
 
         hitbox = self.attack_hitbox()
         for enemy in self.groupss:
-            if isinstance(enemy, (Humanoid, Monstrosity, Noliictu)):
+            if isinstance(enemy, (Humanoid, Monstrosity, Noliictu, BossBase)):
                 target_hitbox = getattr(enemy, 'entity_hitbox', getattr(enemy, 'hitbox', None))
                 if target_hitbox and hitbox.colliderect(target_hitbox):
                     damage = 100 if isinstance(enemy, Noliictu) else 1
@@ -191,6 +201,21 @@ class Player(Entity):
         hitbox.height = 32
         hitbox.width += 25 if self.facing_right else -45
         return hitbox
+    
+    def throw_knife(self, mouse_pressed):
+        if mouse_pressed[2] and not self.throwing:
+            self.throwing = True
+            self.throw_frame_index = 0
+            self.attack_locked = True
+
+
+            mouse_pos = pygame.Vector2(pygame.mouse.get_pos())
+            world_mouse = mouse_pos - (pygame.Vector2(WINDOW_WIDTH, WINDOW_HEIGHT) / 2) + self.rect.center
+            self.throw_direction = (world_mouse - pygame.Vector2(self.rect.center)).normalize()
+            self.facing_right = self.throw_direction.x >= 0
+
+            enemies = [s for s in self.groupss if isinstance(s, (Humanoid, Monstrosity, Noliictu))]
+            PlayerKnife(self.rect.center, world_mouse, self.groupss, enemies)
 
     def take_damage(self, damage):
         if  self.invincible == False:
@@ -203,8 +228,10 @@ class Player(Entity):
                 
 
     def die(self):
-        print("Player mati!")
-        self.kill()
+        if not self.dead:
+            self.dead = True
+            print("Player mati!")
+            self.kill()
 
 #-----------------------------------------------Physics thingy-----------------------------------------------
     def add_gravity(self, dt):
@@ -264,6 +291,25 @@ class Player(Entity):
             self.state = 'idle'
 
     def update_animation(self, dt):
+        if self.throwing:
+            self.throw_frame_index += 8 * dt
+            if self.throw_frame_index >= len(self.throw_hand):
+                self.throw_frame_index = 0
+                self.throwing = False
+                self.hand_image = None
+                self.state = 'idle'
+                return
+
+            self.image = self.throw_body[int(self.throw_frame_index)]
+            self.hand_image = self.throw_hand[int(self.throw_frame_index)]
+
+            if not self.facing_right:
+                self.image = pygame.transform.flip(self.image, True, False)
+                self.hand_image = pygame.transform.flip(self.hand_image, True, False)
+            return  # skip rest while throwing
+
+
+
         frames = self.animations[self.get_animation_key()]
         self.frame_index += (8 if 'attack' in self.state or self.state == 'Dash' else 6) * dt
 
@@ -283,7 +329,7 @@ class Player(Entity):
                 self.is_dashing = False
                 self.attack_locked = False
                 self.state = 'idle'
-
+        
         self.image = frames[int(self.frame_index)]
         if not self.facing_right:
             self.image = pygame.transform.flip(self.image, True, False)
@@ -310,3 +356,43 @@ class Player(Entity):
         #playa invicible, utk testing----------
         if self.invincible and pygame.time.get_ticks() - self.last_hit_time > self.invincibility_duration:
             self.invincible = False
+
+
+class PlayerKnife(pygame.sprite.Sprite):
+    def __init__(self, pos, target_pos, groups, enemies):
+        super().__init__(groups)
+        self.image_original = pygame.image.load(join('Assets', 'Player', 'Throw', 'knife', '0.png')).convert_alpha()
+
+        self.start_pos = pygame.Vector2(pos)
+        direction_vector = pygame.Vector2(target_pos) - self.start_pos
+        self.direction = direction_vector.normalize() if direction_vector.length() > 0 else pygame.Vector2(1, 0)
+
+        angle = math.degrees(math.atan2(self.direction.y, self.direction.x))
+        self.image = pygame.transform.rotate(self.image_original, -angle)
+        self.rect = self.image.get_rect(center=pos)
+        self.mask = pygame.mask.from_surface(self.image)
+
+        self.speed = 600
+        self.range = 1000
+        self.enemies = enemies  # Sprite group to collide with
+        self.damage = 1
+
+    def update(self, dt):
+        move = self.direction * self.speed * dt
+        self.rect.centerx += move.x
+        self.rect.centery += move.y
+
+        current_pos = pygame.Vector2(self.rect.center)
+        if self.start_pos.distance_to(current_pos) >= self.range:
+            self.kill()
+            return
+
+        for enemy in self.enemies:
+            target_hitbox = getattr(enemy, 'entity_hitbox', getattr(enemy, 'hitbox', None))
+            if target_hitbox and self.rect.colliderect(target_hitbox):
+                if isinstance(enemy, Noliictu):
+                    enemy.take_damage(100)
+                else:
+                    enemy.take_damage(self.damage)
+                self.kill()
+                return
