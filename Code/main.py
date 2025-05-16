@@ -24,6 +24,7 @@ class Game:
 
         self.all_sprites = AllSprites()
         self.collision_sprites = pygame.sprite.Group()
+        self.spike_sprites = pygame.sprite.Group()
 
         self.level = f'{3}-{0}'
         self.level_map = {
@@ -94,8 +95,14 @@ class Game:
         for x, y, image in map.get_layer_by_name('ground').tiles():
             Sprite((x * TILE_SIZE, y * TILE_SIZE), image, (self.all_sprites, self.collision_sprites))
 
-        for collision in map.get_layer_by_name('pits'):
-            CollisionSprite((collision.x, collision.y), pygame.Surface((collision.width, collision.height)), self.collision_sprites)
+        for pit in map.get_layer_by_name('pits'):
+            spike_rect = pygame.Rect(pit.x, pit.y, pit.width, pit.height)
+            spike = pygame.sprite.Sprite(self.spike_sprites)
+            spike.rect = spike_rect
+            spike.image = pygame.Surface((pit.width, pit.height))
+        
+        for x, y, image in map.get_layer_by_name('spikes').tiles():
+            Sprite((x * TILE_SIZE, y * TILE_SIZE), image, (self.all_sprites, self.spike_sprites))
 
         self.transition_zones = {}
         self.patrol_zones = []
@@ -224,6 +231,11 @@ class Game:
             # Game logic (only if not transitioning and not paused)
             if not self.transition.active and not self.paused:
                 self.all_sprites.update(dt)
+
+                for spike in self.spike_sprites:
+                    if spike.rect.colliderect(self.player.player_hitbox):
+                        self.player.die()
+                        break
 
                 # Zone transitions
                 if 'forward' in self.transition_zones and self.player.player_hitbox.colliderect(self.transition_zones['forward']):

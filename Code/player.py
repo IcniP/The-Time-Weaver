@@ -86,7 +86,7 @@ class Player(Entity):
     
     def dash(self, keys, dt):
         self.time_since_last_dash += dt
-        stamina_cost = 0.5
+        stamina_cost = 1
 
         if keys[pygame.K_LSHIFT] and not self.dash_pressed and not self.is_dashing and not self.attack_locked:
             
