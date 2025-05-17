@@ -24,6 +24,8 @@ class Humanoid(Entity):
         self.facing_right = False
         self.left_bound = None
         self.right_bound = None
+        self.knockback_timer = 0
+        self.knockback_duration = 200
 
         # Wandering
         self.wandering = self.type in ['Sword', 'Axe']
@@ -75,19 +77,16 @@ class Humanoid(Entity):
     def take_damage(self, damage):
         self.hp -= damage
 
-        if self.type != 'Spear' and hasattr(self, 'player_ref'):
+        if hasattr(self, 'player_ref'):
             dx = self.entity_hitbox.centerx - self.player_ref.player_hitbox.centerx
-            self.direction.x = 1 if dx > 0 else -1
-
             knockback_speed = 100
             knockback_upward = -300
+
+            self.direction.x = 1 if dx > 0 else -1
             self.direction.x *= knockback_speed / self.speed
             self.direction.y = knockback_upward / self.gravity
 
-        elif self.type == 'Spear':
-            # still apply vertical knockback only
-            knockback_upward = -300
-            self.direction.y = knockback_upward / self.gravity
+            self.knockback_timer = pygame.time.get_ticks()
 
         if self.hp <= 0:
             self.die()
@@ -242,6 +241,9 @@ class Humanoid(Entity):
     def spear_behavior(self, dt):
         if not hasattr(self, 'player_ref'):
             return
+        
+        if pygame.time.get_ticks() - self.knockback_timer < self.knockback_duration:
+            return
 
         player = self.player_ref
         px, py = player.player_hitbox.center
@@ -328,10 +330,14 @@ class Humanoid(Entity):
         self.entity_hitbox.y += self.direction.y
         self.collision('vertical')
 
-        if self.type == 'Spear' and self.thrusting:
-            self.entity_hitbox.x += self.spear_direction.x * self.thrust_speed * dt
-        elif self.type != 'Spear':
+        if self.type == 'Spear':
+            if self.thrusting:
+                self.entity_hitbox.x += self.spear_direction.x * self.thrust_speed * dt
+            else:
+                self.entity_hitbox.x += self.direction.x * self.speed * dt
+        else:
             self.entity_hitbox.x += self.direction.x * self.speed * dt
+            
         self.collision('horizontal')
 
         self.rect.center = self.entity_hitbox.center
@@ -392,15 +398,19 @@ class Humanoid(Entity):
         if self.death_time == 0:
             self.entity_hitbox.center = self.rect.center
 
-            if self.type == 'Sword':
-                self.sword_behavior()
-            elif self.type == 'Axe':
-                self.axe_behavior()
-            elif self.type == 'Spear':
-                self.spear_behavior(dt)
+            if now - self.knockback_timer < self.knockback_duration:                
+                pass
+            else:
+                if self.type == 'Sword':
+                    self.sword_behavior()
+                elif self.type == 'Axe':
+                    self.axe_behavior()
+                elif self.type == 'Spear':
+                    self.spear_behavior(dt)
 
             if self.type == 'Spear' and not self.thrusting:
-                self.direction.x = 0
+                if pygame.time.get_ticks() - self.knockback_timer >= self.knockback_duration:
+                    self.direction.x = 0
 
             self.add_gravity(dt)
             self.update_state()
