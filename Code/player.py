@@ -70,7 +70,8 @@ class Player(Entity):
         self.throw_frame_index = 0
         self.throwing = False
         self.throw_direction = pygame.Vector2(1, 0)
-        self.knives = 2
+        self.knives = 4
+        self.max_knives = 4
 
 
 

@@ -149,7 +149,7 @@ class Projectile(pygame.sprite.Sprite):
 
         self.mask = pygame.mask.from_surface(self.image)
 
-        self.speed = 100
+        self.speed = 200
         self.range = 800
         self.start_pos = self.pos.copy()
         self.damage = 1

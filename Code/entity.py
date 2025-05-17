@@ -1,7 +1,5 @@
 import pygame
 from settings import *
-from os import listdir
-from os.path import join, dirname, abspath
 from abc import ABC, abstractmethod
 
 # ========================= Sprite Groups =========================

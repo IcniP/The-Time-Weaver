@@ -6,6 +6,7 @@ class UserInterface:
         
         self.health_bars = self.load_frames('Assets/ui/hp_bar')
         self.stamina_bars = self.load_frames('Assets/ui/stamina_bar')
+        self.knives = self.load_frames('Assets/ui/knives')
     
     def load_frames(self, folder_path):
         frames = []
@@ -38,4 +39,10 @@ class UserInterface:
             current = player.stamina,
             max_value = player.max_stamina,
             position = (10, 10),
+        )
+        self.draw_bar(
+            frames = self.knives,
+            current = player.knives,
+            max_value = player.max_knives,
+            position = (10, 68)
         )
