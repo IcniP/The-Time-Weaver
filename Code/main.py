@@ -3,7 +3,7 @@ from player import Player
 from humanoid import Humanoid
 from monstrosity import Monstrosity
 from fly import Fly
-from entity import AllSprites, Sprite, CollisionSprite
+from entity import AllSprites, Sprite
 from interface import *
 from cervus import Cervus
 import xml.etree.ElementTree as ET

@@ -29,6 +29,12 @@ class Fly(Entity):
         self.attack_cd = 3000  # ms
         self.last_attack_time = 0
         self.projectiles = groups  # will spawn projectiles into AllSprites
+
+        self.entity_hitbox = pygame.Rect(0, 0, 32, 32)
+
+        self.hp = 1
+        self.death_time = 0
+        self.death_duration = 400
     
     def import_assets(self):
         base_path = join(dirname(abspath(__file__)), '..', 'Assets', 'Enemy', 'Wraith')
@@ -46,6 +52,25 @@ class Fly(Entity):
                 if rect.rect.collidepoint(pos):
                     return rect.rect
         return None
+
+    def take_damage(self, damage):
+        self.hp -= damage
+
+        if hasattr(self, 'player_ref'):
+            dx = self.entity_hitbox.centerx - self.player_ref.player_hitbox.centerx
+            self.direction.x = 1 if dx > 0 else -1
+
+        if self.hp <= 0:
+            self.die()
+    
+    def die(self):
+        self.death_time = pygame.time.get_ticks()
+        mask = pygame.mask.from_surface(self.image)
+        surf = mask.to_surface(setcolor=(255, 100, 0), unsetcolor=(0, 0, 0, 0))
+        surf.set_colorkey((0, 0, 0))
+        self.image = surf
+        self.direction = pygame.math.Vector2(0, 0)
+        self.attacking = False
 
     def move(self, dt):
         self.rect.x += self.direction.x * self.speed * dt
@@ -90,10 +115,16 @@ class Fly(Entity):
             self.image = pygame.transform.flip(self.image, True, False)
 
     def update(self, dt):
-        self.move(dt)
-        if self.can_attack():
-            self.shoot()
-        self.update_animation(dt)
+        now = pygame.time.get_ticks()
+
+        if self.death_time == 0:
+            self.entity_hitbox.center = self.rect.center
+            self.move(dt)
+            if self.can_attack():
+                self.shoot()
+            self.update_animation(dt)
+        elif now - self.death_time >= self.death_duration:
+            self.kill()
 
 
 class Projectile(pygame.sprite.Sprite):

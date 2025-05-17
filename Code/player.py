@@ -1,7 +1,5 @@
 from settings import *
 from entity import *
-from humanoid import Humanoid
-from monstrosity import Monstrosity
 from noliictu import Noliictu
 from bossbase import BossBase
 
@@ -30,7 +28,6 @@ class Player(Entity):
         self.stamina = self.max_stamina
         self.stamina_regen = 1
         self.last_stamina_use = pygame.time.get_ticks()
-        
 
         self.invincible = False
         self.invincibility_duration = 1000
@@ -54,7 +51,6 @@ class Player(Entity):
         self.dash_speed = 300
         self.dash_cd = 1
         self.time_since_last_dash = 0
-
         self.attack_cd_after_dash = 500
         self.last_dash_end_time = 0
 
@@ -68,12 +64,15 @@ class Player(Entity):
         self.combo_reset_time = 900
         self.last_attack_time = 0
 
-
+        #throwing knife attack----------
         self.throw_hand = self.import_folder('Assets/Player/Throw/hand')
         self.throw_body = self.import_folder('Assets/Player/Throw/base')
         self.throw_frame_index = 0
         self.throwing = False
         self.throw_direction = pygame.Vector2(1, 0)
+        self.knives = 2
+
+
 
         self.player_hitbox = pygame.Rect(0, 0, 16, 32)
 
@@ -191,7 +190,7 @@ class Player(Entity):
 
         hitbox = self.attack_hitbox()
         for enemy in self.groupss:
-            if isinstance(enemy, (Humanoid, Monstrosity, Noliictu, BossBase)):
+            if isinstance(enemy, (Entity, BossBase)):
                 target_hitbox = getattr(enemy, 'entity_hitbox', getattr(enemy, 'hitbox', None))
                 if target_hitbox and hitbox.colliderect(target_hitbox):
                     damage = 100 if isinstance(enemy, Noliictu) else 1
@@ -204,22 +203,24 @@ class Player(Entity):
         return hitbox
     
     def throw_knife(self, mouse_pressed):
-         if mouse_pressed[2] and not self.throwing:
-            self.throwing = True
-            self.throw_frame_index = 0
-            self.attack_locked = True
+         if self.knives != 0:
+            if mouse_pressed[2] and not self.throwing:
+                self.throwing = True
+                self.throw_frame_index = 0
+                self.attack_locked = True
 
-            mouse_pos = pygame.Vector2(pygame.mouse.get_pos())
+                mouse_pos = pygame.Vector2(pygame.mouse.get_pos())
 
-            player_screen_pos = pygame.Vector2(self.rect.center) + self.camera_group.offset
+                player_screen_pos = pygame.Vector2(self.rect.center) + self.camera_group.offset
 
-            self.throw_direction = (mouse_pos - player_screen_pos).normalize()
-            self.facing_right = self.throw_direction.x >= 0
+                self.throw_direction = (mouse_pos - player_screen_pos).normalize()
+                self.facing_right = self.throw_direction.x >= 0
 
-            world_mouse = self.rect.center + (mouse_pos - player_screen_pos)
+                world_mouse = self.rect.center + (mouse_pos - player_screen_pos)
 
-            enemies = [s for s in self.groupss if isinstance(s, (Humanoid, Monstrosity, Noliictu))]
-            PlayerKnife(self.rect.center, world_mouse, self.groupss, enemies)
+                enemies = [s for s in self.groupss if isinstance(s, (Entity, BossBase))]
+                PlayerKnife(self.rect.center, world_mouse, self.groupss, enemies)
+                self.knives -= 1
 
     def take_damage(self, damage):
         if  self.invincible == False:

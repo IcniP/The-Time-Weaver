@@ -32,13 +32,6 @@ class Sprite(pygame.sprite.Sprite):
         self.image = surf
         self.rect = self.image.get_frect(topleft=pos)
 
-
-class CollisionSprite(pygame.sprite.Sprite):
-    def __init__(self, pos, surf, groups):
-        super().__init__(groups)
-        self.image = surf
-        self.rect = self.image.get_frect(topleft=pos)
-
 # ========================= Abstract Entity Class =========================
 class Entity(pygame.sprite.Sprite, ABC):
     def __init__(self, groups):
