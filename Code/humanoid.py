@@ -1,4 +1,5 @@
 from settings import *
+from effects import *
 from entity import *
 
 # ========================= Humanoid Class =========================
@@ -77,6 +78,7 @@ class Humanoid(Entity):
 #-----------------------------------------------status thingy-----------------------------------------------
     def take_damage(self, damage):
         self.hp -= damage
+        skelly_hit.play()
 
         if hasattr(self, 'player_ref'):
             dx = self.entity_hitbox.centerx - self.player_ref.player_hitbox.centerx
@@ -90,6 +92,7 @@ class Humanoid(Entity):
             self.knockback_timer = pygame.time.get_ticks()
 
         if self.hp <= 0:
+            skelly_die.play()
             self.die()
 
     def die(self, instant = False):

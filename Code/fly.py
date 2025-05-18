@@ -66,6 +66,7 @@ class Fly(Entity):
     
     def die(self):
         self.death_time = pygame.time.get_ticks()
+        wraith_hit.play()
         mask = pygame.mask.from_surface(self.image)
         surf = mask.to_surface(setcolor=(255, 100, 0), unsetcolor=(0, 0, 0, 0))
         surf.set_colorkey((0, 0, 0))
@@ -96,6 +97,7 @@ class Fly(Entity):
         return False
 
     def shoot(self):
+        wraith_attack.play()
         projectile = FireBall(self.rect.center, self.player.player_hitbox.center, self.projectiles, self.player, self.collision_sprites)
         self.projectiles.add(projectile)
 

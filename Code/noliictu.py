@@ -240,6 +240,9 @@ class Noliictu(BossBase):
             self.attack_cooldown_timer = 0
             self.play_animation('Idle')
 
+    def move():
+        pass
+
     def update(self, dt):
         super().update(dt)
         self.detection_rect.center = self.rect.center
