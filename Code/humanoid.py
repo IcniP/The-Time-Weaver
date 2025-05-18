@@ -181,7 +181,7 @@ class Humanoid(Entity):
             else:
                 self.direction.x = 0
 
-                if pygame.time.get_ticks() - self.last_attack_time < self.attack_cd:
+                if pygame.time.get_ticks() - self.last_attack_time <= self.attack_cd:
                     return
                 
                 if not self.attack_ready:
@@ -230,7 +230,7 @@ class Humanoid(Entity):
             else:
                 self.direction.x = 0
 
-                if pygame.time.get_ticks() - self.last_attack_time < self.attack_cd:
+                if pygame.time.get_ticks() - self.last_attack_time <= self.attack_cd:
                     return
                     
                 if not self.attack_ready:

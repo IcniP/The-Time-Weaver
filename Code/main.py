@@ -24,19 +24,18 @@ class Game:
         self.collision_sprites = pygame.sprite.Group()
         self.spike_sprites = pygame.sprite.Group()
 
-        self.level = f'{3}-{2}'
+        self.level = f'{1}-{0}'
         self.level_map = {
             '1-0': "lvl1-0.tmx",
             '1-1': "lvl1-1.tmx",
             '1-2': "lvl1-2.tmx",
-            '1-3': "boss1.tmx",
-            '2-0': "lvl2-0.tmx",
-            '2-1': 'lvl2-1.tmx',
-            '2-2': "lvl2-2.tmx",
-            '2-3': "noliictu.tmx",
-            '3-0': "lvl3-0.tmx",
-            '3-1': "lvl3-1.tmx",
-            '3-2': "lvl3-2.tmx",
+            '1-3': "lvl2-0.tmx",
+            '1-4': "noliictu.tmx",
+            '2-0': 'lvl2-1.tmx',
+            '2-1': "lvl2-2.tmx",
+            '2-2': "lvl3-0.tmx",
+            '2-3': "lvl3-1.tmx",
+            '2-4': "lvl3-2.tmx",
             '3-3': "cervus.tmx"
         }
         self.mapz = self.level_map.get(self.level, 'test.tmx')
@@ -65,7 +64,7 @@ class Game:
         self.fix_tmx_tileset('data/maps', 'Assets/Tilesets')
         self.game_active = False
         self.paused = False
-        self.transition = Transition(1000)
+        self.transition = Transition(2000)
         self.transition_target = None
 
         self.menu_manager = MainMenuManager(self.screen, self)
@@ -283,8 +282,15 @@ class Game:
 
             # If transition just finished, reset game
             if self.transition_target and not self.transition.active:
-                self.reset_game()
-                self.transition_target = None
+                if self.transition_target == 'respawn':
+                    self.player.dead = False
+                    self.player.hp = self.player.max_hp
+                    self.player.knives = self.player.max_knives
+                    self.reset_game()
+                    self.transition_target = None
+                else:
+                    self.reset_game()
+                    self.transition_target = None
 
             pygame.display.update()
 

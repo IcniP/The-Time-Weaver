@@ -38,6 +38,7 @@ class Monstrosity(Entity):
         self.hp = 5
         self.death_time = 0
         self.death_duration = 400
+        
 
 #-----------------------------------------------Importing thingy-----------------------------------------------
     def import_assets(self):
@@ -93,14 +94,12 @@ class Monstrosity(Entity):
     def handle_impact(self):
         if self.has_impacted:
             return
-        self.has_impacted = True
-        self.state = 'idle'
-
+        
         self.has_impacted = True
         self.state = 'idle'
         dust_pos = self.entity_hitbox.midbottom
-        bookie_stomp.play()
         StompDust(dust_pos, self.groups())
+        bookie_stomp.play()
 
         # Left stomp area
         left_hitbox = pygame.Rect(0, 0, TILE_SIZE * 2, TILE_SIZE)
