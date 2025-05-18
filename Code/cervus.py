@@ -165,7 +165,7 @@ class CervusPhase2(BossBase):
         self.right_hand.add(*groups) if isinstance(groups, (list, tuple)) else self.right_hand.add(groups)
 
         self.cooldowns = {'left': 0, 'right': 0}
-        self.cooldown_time = {'left': 3000, 'right': 3000}
+        self.cooldown_time = {'left': 30000, 'right': 30000}
 
     def move(self):
         pass
