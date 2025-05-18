@@ -6,6 +6,7 @@ class Monstrosity(Entity):
     def __init__(self, pos, groups, collision_sprites, player):
         super().__init__(groups)
         self.player_ref = player
+        self.groupss = groups
         self.animations = {}
         self.state = 'idle'
         self.frame_index = 0
