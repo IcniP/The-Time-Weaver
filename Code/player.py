@@ -1,5 +1,6 @@
 from settings import *
 from entity import *
+from effects import *
 from noliictu import Noliictu
 from bossbase import BossBase
 
@@ -17,6 +18,7 @@ class Player(Entity):
         self.collision_sprites = collision_sprites
         self.groupss = groups
         self.camera_group = camera_group
+        self.game = None
 
         # Stats
         #hp-----------
@@ -196,6 +198,13 @@ class Player(Entity):
                 if target_hitbox and hitbox.colliderect(target_hitbox):
                     damage = 100 if isinstance(enemy, Noliictu) else 1
                     enemy.take_damage(damage)
+
+                    effect_pos = target_hitbox.center
+                    SlashEffect(effect_pos, self.groupss)
+                    
+                    if self.game:
+                        self.game.shake_timer = 0.2  # shake for 0.2 seconds
+                        self.game.shake_duration = 0.2
 
     def attack_hitbox(self):
         hitbox = self.player_hitbox.copy()

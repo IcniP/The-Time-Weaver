@@ -19,14 +19,12 @@ class Game:
         self.clock = pygame.time.Clock()
         self.running = True
 
-        self.map = pygame.image.load('Assets/Bg/2.png').convert_alpha()
-        self.map_scaled = pygame.transform.scale(self.map, (WINDOW_WIDTH, WINDOW_HEIGHT))
-
+        #sprites groups
         self.all_sprites = AllSprites()
         self.collision_sprites = pygame.sprite.Group()
         self.spike_sprites = pygame.sprite.Group()
 
-        self.level = f'{3}-{2}'
+        self.level = f'{1}-{0}'
         self.level_map = {
             '1-0': "lvl1-0.tmx",
             '1-1': "lvl1-1.tmx",
@@ -43,9 +41,11 @@ class Game:
         }
         self.mapz = self.level_map.get(self.level, 'test.tmx')
 
+        #load map
+        self.map = pygame.image.load('Assets/Bg/2.png').convert_alpha()
+        self.map_scaled = pygame.transform.scale(self.map, (WINDOW_WIDTH, WINDOW_HEIGHT))
         #parallax thingy
         self.parallax_layers = [
-            #(pygame.image.load('Assets/Bg/skynmoon.png').convert_alpha(), 0.1),
             (pygame.image.load('Assets/Bg/smoke.png').convert_alpha(), 0.2),
             (pygame.image.load('Assets/Bg/castle.png').convert_alpha(), 0.3),
             (pygame.image.load('Assets/Bg/bloodtree.png').convert_alpha(), 0.4),
@@ -56,7 +56,12 @@ class Game:
 
         camera_group = self.all_sprites
         self.player = Player((0, 0), self.all_sprites, self.collision_sprites, camera_group)
-        
+        self.player.game = self
+
+        self.shake_duration = 0
+        self.shake_timer = 0
+        self.shake_intensity = 2
+
         self.fix_tmx_tileset('data/maps', 'Assets/Tilesets')
         self.game_active = False
         self.paused = False
@@ -235,6 +240,12 @@ class Game:
             # Game logic (only if not transitioning and not paused)
             if not self.transition.active and not self.paused:
                 self.all_sprites.update(dt)
+                if self.shake_timer > 0:
+                    self.shake_timer -= dt
+                    self.shake_offset.x = random.randint(-self.shake_intensity, self.shake_intensity)
+                    self.shake_offset.y = random.randint(-self.shake_intensity, self.shake_intensity)
+                else:
+                    self.shake_offset = pygame.Vector2(0, 0)
 
                 for spike in self.spike_sprites:
                     if spike.rect.colliderect(self.player.player_hitbox):
@@ -261,7 +272,7 @@ class Game:
             # Drawing
             self.screen.blit(self.map_scaled, (0, 0))
             self.draw_parallax_layers(self.player.rect.center)
-            self.all_sprites.draw(self.player.rect.center, self.map_w, self.map_h)
+            self.all_sprites.draw(self.player.rect.center + self.shake_offset, self.map_w, self.map_h)
             self.draw_branches_layer(self.player.rect.center)
             self.ui.draw(self.player)
 

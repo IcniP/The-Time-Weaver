@@ -14,15 +14,19 @@ class AllSprites(pygame.sprite.Group):
         self.offset.x = max(min(-(target_pos[0] - WINDOW_WIDTH / 2), 0), WINDOW_WIDTH - map_w)
         self.offset.y = max(min(-(target_pos[1] - WINDOW_HEIGHT / 2), 0), WINDOW_HEIGHT - map_h)
 
+        # Add shake
+        game = pygame.display.get_wm_info().get('window')  # dirty hack to get Game reference
+        if hasattr(game, 'shake_timer') and game.shake_timer > 0:
+            shake_x = random.randint(-game.shake_intensity, game.shake_intensity)
+            shake_y = random.randint(-game.shake_intensity, game.shake_intensity)
+            self.offset += pygame.Vector2(shake_x, shake_y)
+
         for sprite in self:
             self.display_surface.blit(sprite.image, sprite.rect.topleft + self.offset)
-
             if hasattr(sprite, 'draw'):
                 sprite.draw(self.display_surface, self.offset)
-
             if hasattr(sprite, 'hand_image') and sprite.hand_image is not None:
-                hand_offset = pygame.Vector2(0, -5)
-                self.display_surface.blit(sprite.hand_image, sprite.rect.topleft + hand_offset + self.offset)
+                self.display_surface.blit(sprite.hand_image, sprite.rect.topleft + pygame.Vector2(0, -5) + self.offset)
 
 class Sprite(pygame.sprite.Sprite):
     def __init__(self, pos, surf, groups):

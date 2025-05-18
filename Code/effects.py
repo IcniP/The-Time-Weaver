@@ -1,5 +1,27 @@
 from settings import *
 
+class SlashEffect(pygame.sprite.Sprite):
+    def __init__(self, pos, groups):
+        super().__init__(groups)
+        self.frames = self.import_frames()
+        self.frame_index = 0
+        self.animation_speed = 10  # adjust as needed
+        self.image = self.frames[self.frame_index]
+        self.rect = self.image.get_rect(center=pos)
+        self.timer = 0
+
+    def import_frames(self):
+        path = join('Assets', 'Player', 'slasheffect')
+        return [pygame.image.load(join(path, f)).convert_alpha()
+                for f in sorted(listdir(path), key=lambda x: int(x.split('.')[0]))]
+
+    def update(self, dt):
+        self.timer += self.animation_speed * dt
+        if self.timer >= len(self.frames):
+            self.kill()
+        else:
+            self.image = self.frames[int(self.timer)]
+
 #Impact Blastny si Wraith
 class FireBlast(pygame.sprite.Sprite):
     def __init__(self, pos, groups):
