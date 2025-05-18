@@ -157,7 +157,6 @@ class CervusPhase2(BossBase):
         offset_x = 50
         offset_y = -120
 
-
         # LEFT HAND
         self.left_hand = pygame.sprite.Sprite()
         self.left_hand.image = pygame.transform.scale2x(self.animations['Hand'][0])
@@ -191,29 +190,6 @@ class CervusPhase2(BossBase):
 
     def move(self):
         pass
-
-    def idle_behavior(self, dt):
-        # Cervus is invulnerable and just idles until hit
-        if not hasattr(self, 'invulnerable'):
-            self.idle_image = self.animations['Idle2'][0]
-            self.image = self.idle_image
-            self.mask = pygame.mask.from_surface(self.idle_image)
-            self.invulnerable = True
-            self.dead = False
-            self.idle_health = 50  # Optional health for idle form
-
-        # Simple idle mask-based damage detection
-        if self.player.attacking:
-            offset = (self.rect.x - self.player.rect.x, self.rect.y - self.player.rect.y)
-            if self.player.mask.overlap(self.mask, offset):
-                self.idle_health -= self.player.attack_damage
-                self.player.attacking = False
-                print(f"[Idle Phase] Hit! Remaining HP: {self.idle_health}")
-
-                if self.idle_health <= 0:
-                    self.dead = True
-                    self.kill()
-                    print("[Idle Phase] Cervus idle form defeated")
 
     def create_hand(self, is_left):
         hand = pygame.sprite.Sprite()
