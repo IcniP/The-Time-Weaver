@@ -184,8 +184,8 @@ class Transition:
         fade_surf.set_alpha(alpha)
         surface.blit(fade_surf, (0, 0))
 
-        if self.next_state == 'respawn' or (hasattr(self, 'fade_reason') and self.fade_reason == 'respawn'):
-            font = pygame.font.Font('Assets/Fonts/m5x7.ttf', 80)
-            text = font.render("YOU DIED", True, 'Red')
-            rect = text.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2))
-            surface.blit(text, rect)
+        # if self.next_state == 'respawn' or (hasattr(self, 'fade_reason') and self.fade_reason == 'respawn'):
+        #     font = pygame.font.Font('Assets/Fonts/m5x7.ttf', 80)
+        #     text = font.render("YOU DIED", True, 'Red')
+        #     rect = text.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2))
+        #     surface.blit(text, rect)

@@ -248,10 +248,15 @@ class Player(Entity):
         if not self.dead:
             self.dead = True
             print("Player mati!")
-            self.game.transition.start('fade')
-            self.game.transition_target = 'respawn'
-            self.game.transition.fade_reason = 'respawn'
             #self.kill()
+
+    def respawn_player(self):
+        self.player.dead = False
+        self.player.hp = self.player.max_hp
+        self.player.stamina = self.player.max_stamina
+        self.player.rect.midbottom = self.get_checkpoint_pos()  # custom method to retrieve checkpoint
+        self.player.player_hitbox.center = self.player.rect.center
+        self.all_sprites.add(self.player)
 
 #-----------------------------------------------Physics thingy-----------------------------------------------
     def add_gravity(self, dt):
@@ -328,8 +333,6 @@ class Player(Entity):
                 self.image = pygame.transform.flip(self.image, True, False)
                 self.hand_image = pygame.transform.flip(self.hand_image, True, False)
             return  # skip rest while throwing
-
-
 
         frames = self.animations[self.get_animation_key()]
         self.frame_index += (8 if 'attack' in self.state or self.state == 'Dash' else 6) * dt
