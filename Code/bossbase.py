@@ -1,6 +1,7 @@
 from settings import *
+from entity import Entity
 
-class BossBase(pygame.sprite.Sprite):
+class BossBase(Entity):
     def __init__(self, pos, groups, player, boss_name, animation_paths):
         super().__init__(groups)
         self.player = player
