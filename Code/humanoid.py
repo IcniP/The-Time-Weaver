@@ -5,6 +5,7 @@ from entity import *
 class Humanoid(Entity):
     def __init__(self, type, pos, groups, collision_sprites):
         super().__init__(groups)
+        self.groupss = groups
         self.type = type
         self.animations = {k: [] for k in ['Idle', 'Move', 'Attack']}
         self.import_assets()
@@ -91,7 +92,11 @@ class Humanoid(Entity):
         if self.hp <= 0:
             self.die()
 
-    def die(self):
+    def die(self, instant = False):
+        if instant:
+            self.kill()
+            return
+
         self.death_time = pygame.time.get_ticks()
         mask = pygame.mask.from_surface(self.image)
         surf = mask.to_surface(setcolor=(255, 100, 0), unsetcolor=(0, 0, 0, 0))
@@ -99,6 +104,9 @@ class Humanoid(Entity):
         self.image = surf
         self.direction = pygame.math.Vector2(0, 0)
         self.attacking = False
+
+        if random.randint(1, 100) <= 40:
+            KnifeDrop(self.rect.center, self.groupss, self.player_ref)
 
 #-----------------------------------------------movement thingy-----------------------------------------------
     def move(self):

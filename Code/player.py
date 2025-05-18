@@ -191,7 +191,7 @@ class Player(Entity):
 
         hitbox = self.attack_hitbox()
         for enemy in self.groupss:
-            if isinstance(enemy, (Entity, BossBase)):
+            if isinstance(enemy, (Entity)):
                 target_hitbox = getattr(enemy, 'entity_hitbox', getattr(enemy, 'hitbox', None))
                 if target_hitbox and hitbox.colliderect(target_hitbox):
                     damage = 100 if isinstance(enemy, Noliictu) else 1
@@ -219,7 +219,7 @@ class Player(Entity):
 
                 world_mouse = self.rect.center + (mouse_pos - player_screen_pos)
 
-                enemies = [s for s in self.groupss if isinstance(s, (Entity, BossBase))]
+                enemies = [s for s in self.groupss if isinstance(s, (Entity))]
                 PlayerKnife(self.rect.center, world_mouse, self.groupss, enemies)
                 self.knives -= 1
 

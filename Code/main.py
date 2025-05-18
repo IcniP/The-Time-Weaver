@@ -26,7 +26,7 @@ class Game:
         self.collision_sprites = pygame.sprite.Group()
         self.spike_sprites = pygame.sprite.Group()
 
-        self.level = f'{2}-{2}'
+        self.level = f'{3}-{2}'
         self.level_map = {
             '1-0': "lvl1-0.tmx",
             '1-1': "lvl1-1.tmx",
@@ -240,6 +240,13 @@ class Game:
                     if spike.rect.colliderect(self.player.player_hitbox):
                         self.player.die()
                         break
+                
+                    for sprite in self.all_sprites:
+                        if isinstance(sprite, (Humanoid, Monstrosity)):
+                            hitbox = getattr(sprite, 'entity_hitbox', getattr(sprite, 'hitbox', sprite.rect))
+                            if spike.rect.colliderect(hitbox):
+                                if hasattr(sprite, 'die'):
+                                    sprite.die(instant = True)
 
                 # Zone transitions
                 if 'forward' in self.transition_zones and self.player.player_hitbox.colliderect(self.transition_zones['forward']):
