@@ -31,8 +31,6 @@ class Cervus(BossBase):
         self.direction = pygame.Vector2(0, 0)
         self.jumping = False
 
-        self.rect = self.image.get_rect(midbottom=pos)
-
         # Buat entity_hitbox sebagai atribut utama yang dipakai player
         self.rect = self.image.get_rect(midbottom=pos)
         self.deer_hitbox = pygame.Rect(0, 0, 32, 32)

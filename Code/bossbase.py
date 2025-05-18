@@ -1,5 +1,5 @@
 from settings import *
-from entity import Entity
+from entity import *
 
 class BossBase(Entity):
     def __init__(self, pos, groups, player, boss_name, animation_paths):

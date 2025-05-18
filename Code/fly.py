@@ -1,5 +1,6 @@
 from settings import *
 from entity import *
+from effects import *
 
 class Fly(Entity):
     def __init__(self, pos, groups, collision_sprites, player, range_rect = None):
@@ -95,7 +96,7 @@ class Fly(Entity):
         return False
 
     def shoot(self):
-        projectile = Projectile(self.rect.center, self.player.player_hitbox.center, self.projectiles, self.player, self.collision_sprites)
+        projectile = FireBall(self.rect.center, self.player.player_hitbox.center, self.projectiles, self.player, self.collision_sprites)
         self.projectiles.add(projectile)
 
         self.state = 'attack'
@@ -127,7 +128,7 @@ class Fly(Entity):
             self.kill()
 
 
-class Projectile(pygame.sprite.Sprite):
+class FireBall(pygame.sprite.Sprite):
     def __init__(self, pos, target_pos, groups, player, collision_sprites):
         super().__init__(groups)
         self.player = player
@@ -161,17 +162,20 @@ class Projectile(pygame.sprite.Sprite):
 
         # Range check
         if self.start_pos.distance_to(self.pos) > self.range:
+            FireBlast(self.rect.center, self.groups())
             self.kill()
             return
 
         # Hit player
         if pygame.sprite.collide_mask(self, self.player):
             self.player.take_damage(self.damage)
+            FireBlast(self.rect.center, self.groups())
             self.kill()
             return
 
         # Hit ground
         for sprite in self.collision_sprites:
             if self.rect.colliderect(sprite.rect):
+                FireBlast(self.rect.center, self.groups())
                 self.kill()
                 return
