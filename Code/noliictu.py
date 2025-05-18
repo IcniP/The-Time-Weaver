@@ -172,6 +172,9 @@ class Noliictu(BossBase):
         self.arc_shoot_delay = 0.8  
         self.arc_sword_index_list = []
 
+    def move(self):
+        pass
+
     def spawn_arc_swords(self):
         self.arc_swords.clear()
         self.arc_ready_to_shoot = False

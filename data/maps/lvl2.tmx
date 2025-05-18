@@ -1,6 +1,6 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="75" height="32" tilewidth="32" tileheight="32" infinite="0" nextlayerid="8" nextobjectid="82">
- <tileset firstgid="1" source="../tilesets/timeweavertileset.tsx"/>
+ <tileset firstgid="1" source="../tilesets/timeweavertileset.tsx" />
  <layer id="1" name="ground" width="75" height="32">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -75,96 +75,96 @@
  </layer>
  <objectgroup id="3" name="entities">
   <object id="1" name="boss" x="1920" y="608">
-   <point/>
+   <point />
   </object>
   <object id="4" name="Player" x="1728" y="608">
-   <point/>
+   <point />
   </object>
   <object id="5" name="axe" x="640" y="796.667">
-   <point/>
+   <point />
   </object>
   <object id="18" name="axe" x="928" y="384">
-   <point/>
+   <point />
   </object>
   <object id="20" name="axe" x="192" y="544">
-   <point/>
+   <point />
   </object>
   <object id="21" name="sword" x="512" y="544">
-   <point/>
+   <point />
   </object>
   <object id="22" name="sword" x="416" y="928">
-   <point/>
+   <point />
   </object>
   <object id="23" name="spear" x="800" y="928">
-   <point/>
+   <point />
   </object>
   <object id="24" name="sword" x="992" y="928">
-   <point/>
+   <point />
   </object>
   <object id="25" name="axe" x="1280" y="928">
-   <point/>
+   <point />
   </object>
   <object id="26" name="sword" x="1312" y="800">
-   <point/>
+   <point />
   </object>
   <object id="27" name="spear" x="1120" y="800">
-   <point/>
+   <point />
   </object>
   <object id="28" name="sword" x="1088" y="672">
-   <point/>
+   <point />
   </object>
   <object id="29" name="spear" x="1312" y="672">
-   <point/>
+   <point />
   </object>
   <object id="30" name="spear" x="992" y="544">
-   <point/>
+   <point />
   </object>
   <object id="31" name="sword" x="1184" y="544">
-   <point/>
+   <point />
   </object>
   <object id="32" name="spear" x="1536" y="288">
-   <point/>
+   <point />
   </object>
   <object id="33" name="sword" x="1696" y="288">
-   <point/>
+   <point />
   </object>
   <object id="34" name="spear" x="1888" y="160">
-   <point/>
+   <point />
   </object>
   <object id="35" name="sword" x="2048" y="160">
-   <point/>
+   <point />
   </object>
   <object id="36" name="axe" x="2240" y="160">
-   <point/>
+   <point />
   </object>
   <object id="37" name="sword" x="2240" y="288">
-   <point/>
+   <point />
   </object>
   <object id="38" name="spear" x="2080" y="288">
-   <point/>
+   <point />
   </object>
   <object id="39" name="axe" x="2048" y="832">
-   <point/>
+   <point />
   </object>
   <object id="40" name="spear" x="1920" y="832">
-   <point/>
+   <point />
   </object>
   <object id="41" name="sword" x="1792" y="832">
-   <point/>
+   <point />
   </object>
   <object id="42" name="Noli ictu" x="2336" y="800">
-   <point/>
+   <point />
   </object>
  </objectgroup>
- <objectgroup id="6" name="zones"/>
+ <objectgroup id="6" name="zones" />
  <objectgroup id="4" name="pits">
-  <object id="78" name="pits" x="1087" y="1012" width="67" height="11"/>
-  <object id="79" name="pits" x="639" y="1008.5" width="65.5" height="14"/>
+  <object id="78" name="pits" x="1087" y="1012" width="67" height="11" />
+  <object id="79" name="pits" x="639" y="1008.5" width="65.5" height="14" />
  </objectgroup>
  <objectgroup id="5" name="checkpoint">
   <object id="44" name="checkpoint" x="1952" y="288">
-   <point/>
+   <point />
   </object>
  </objectgroup>
- <objectgroup id="6" name="zones"/>
+ <objectgroup id="6" name="zones" />
 </map>
