@@ -23,7 +23,7 @@ class Game:
         self.collision_sprites = pygame.sprite.Group()
         self.spike_sprites = pygame.sprite.Group()
 
-        self.level = f'{1}-{3}'
+        self.level = f'{1}-{2}'
         self.level_map = {
             '1-0': "lvl1-0.tmx",
             '1-1': "lvl1-1.tmx",
@@ -67,8 +67,6 @@ class Game:
         self.menu_manager = MainMenuManager(self.screen, self)
         self.ui = UserInterface(self.screen)
 
-        self.map1()
-
     def fix_tmx_tileset(self, map_folder, tileset_folder):
         map_folder = Path(map_folder)
         tileset_folder = Path(tileset_folder)
@@ -87,6 +85,7 @@ class Game:
         self.all_sprites.empty()
         self.collision_sprites.empty()
         self.spike_sprites.empty()
+        self.map1()
 
     def map1(self):
         map = load_pygame(join('data', 'maps', self.mapz))
@@ -198,39 +197,6 @@ class Game:
         self.transition.start('fade')
         self.transition_target = 'back'
 
-    def handle_player_death(self):
-        if not hasattr(self, 'death_timer'):
-            self.death_timer = pygame.time.get_ticks()
-            self.transition.start('fade')
-            self.transition_target = 'respawn'
-        elif pygame.time.get_ticks() - self.death_timer > 2000:  # 2 seconds delay
-            self.respawn_player()
-            self.transition_target = None
-            self.death_timer = None
-
-    def get_checkpoint_pos(self):
-        map = load_pygame(join('data', 'maps', self.mapz))
-        marker_name = getattr(self, 'respawn_marker', 'Player')
-        for marker in map.get_layer_by_name('entities'):
-            if marker.name == marker_name:
-                return (marker.x, marker.y)
-        return (0, 0)  # fallback
-
-    def respawn_player(self):
-        # reset player stats and re-add to sprites
-        self.player.dead = False
-        self.player.hp = self.player.max_hp
-        self.player.stamina = self.player.max_stamina
-        self.player.invincible = False
-        self.player.attacking = False
-        self.player.attacking_two = False
-        self.player.attack_locked = False
-        self.player.state = 'idle'
-        self.player.rect.midbottom = self.get_checkpoint_pos()
-        self.player.player_hitbox.center = self.player.rect.center
-        self.all_sprites.add(self.player)
-
-
     def run(self):
         while self.running:
             if not self.paused:
@@ -252,11 +218,7 @@ class Game:
                 continue
 
             if not self.transition.active and not self.paused:
-                if self.player.dead:
-                    self.handle_player_death()
-                else:
-                    self.all_sprites.update(dt)
-
+                self.all_sprites.update(dt)
                 if self.shake_timer > 0:
                     self.shake_timer -= dt
                     self.shake_offset.x = random.randint(-self.shake_intensity, self.shake_intensity)
@@ -298,6 +260,15 @@ class Game:
                 self.transition.update(self.clock.get_time())
 
             if self.transition_target and not self.transition.active:
+                if self.transition_target == 'respawn':
+                    self.player.dead = False
+                    self.player.hp = self.player.max_hp
+                    self.player.knives = self.player.max_knives
+                    self.reset_game()
+                    self.transition_target = None
+                    self.transition.fade_reason = None
+                else:
+                    self.reset_game()
                     self.transition_target = None
 
             pygame.display.update()
