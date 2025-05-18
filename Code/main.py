@@ -64,7 +64,7 @@ class Game:
         self.fix_tmx_tileset('data/maps', 'Assets/Tilesets')
         self.game_active = False
         self.paused = False
-        self.transition = Transition(2000)
+        self.transition = Transition(1000)
         self.transition_target = None
 
         self.menu_manager = MainMenuManager(self.screen, self)
@@ -282,15 +282,8 @@ class Game:
 
             # If transition just finished, reset game
             if self.transition_target and not self.transition.active:
-                if self.transition_target == 'respawn':
-                    self.player.dead = False
-                    self.player.hp = self.player.max_hp
-                    self.player.knives = self.player.max_knives
-                    self.reset_game()
-                    self.transition_target = None
-                else:
-                    self.reset_game()
-                    self.transition_target = None
+                self.reset_game()
+                self.transition_target = None
 
             pygame.display.update()
 
