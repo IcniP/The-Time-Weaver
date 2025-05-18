@@ -169,7 +169,6 @@ class CervusPhase2(BossBase):
         self.right_hand.rect = self.right_hand.image.get_rect(center=(self.rect.centerx + offset_x, self.rect.centery + offset_y))
         self.right_hand.start_pos = self.right_hand.rect.center
 
-        # Add hands to sprite groups
         if isinstance(groups, (list, tuple)):
             for group in groups:
                 group.add(self.left_hand)
@@ -178,7 +177,6 @@ class CervusPhase2(BossBase):
             groups.add(self.left_hand)
             groups.add(self.right_hand)
 
-        # Cooldown management
         self.cooldowns = {
             'left_swipe': 0, 'right_swipe': 0,
             'left_plunge': 0, 'right_plunge': 0
@@ -202,7 +200,7 @@ class CervusPhase2(BossBase):
         hand.rect = hand.image.get_rect(center=(self.rect.centerx + offset, self.rect.centery))
         hand.start_pos = pygame.Vector2(hand.rect.center)
 
-        # Tambahkan ke grup dengan benar
+    
         if isinstance(self.sprite_groups, (list, tuple)):
             for group in self.sprite_groups:
                 group.add(hand)
@@ -212,9 +210,6 @@ class CervusPhase2(BossBase):
         return hand
 
     def update(self, dt):
-        self.idle_behavior(dt)  # Call this first
-        if self.dead:
-            return
         self.animate(dt)
         self.update_hand(self.left_hand, is_left=True, dt=dt)
         self.update_hand(self.right_hand, is_left=False, dt=dt)
@@ -228,20 +223,17 @@ class CervusPhase2(BossBase):
         boss_x = self.rect.centerx
         current = pygame.Vector2(hand.rect.center)
 
-        # Posisi idle ditentukan sekali, bukan setiap frame
         if not hasattr(hand, 'idle_pos'):
             offset_x = -40 if is_left else 40
             offset_y = -100
             hand.idle_pos = pygame.Vector2(self.rect.centerx + offset_x, self.rect.centery + offset_y)
 
-        # Target tepat di atas player
         if (is_left and player_x < boss_x) or (not is_left and player_x > boss_x):
             target = pygame.Vector2(self.player.rect.centerx, self.player.rect.top - 80)
             hand.rect.center = current.lerp(target, 0.05)
         else:
             hand.rect.center = current.lerp(hand.idle_pos, 0.05)
 
-        # Animasi serangan jika collide dan cooldown selesai
         if now - self.cooldowns[attack_key] >= self.cooldown_time[attack_key]:
             if hand.rect.colliderect(self.player.player_hitbox):
                 img = self.animations['Handattack1'][0] if is_left else self.animations['Handattack2'][0]
