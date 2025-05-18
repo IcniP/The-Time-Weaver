@@ -8,7 +8,7 @@ class BossBase(Entity):
         self.boss_name = boss_name
         self.animations = {key: [] for key in animation_paths.keys()}
         self.import_assets(animation_paths)
-        self.status = 'Idle'
+        self.status = list(self.animations.keys())[0]  # ambil animasi pertama sebagai default
         self.frame_index = 0
         self.animation_speed = 6
 
