@@ -190,6 +190,7 @@ class Player(Entity):
         self.attack_locked = True
         self.frame_index = 0
         self.state = state
+        swing.play()
 
         hitbox = self.attack_hitbox()
         for enemy in self.groupss:
@@ -229,6 +230,7 @@ class Player(Entity):
                 world_mouse = self.rect.center + (mouse_pos - player_screen_pos)
 
                 enemies = [s for s in self.groupss if isinstance(s, (Entity))]
+                throw.play()
                 PlayerKnife(self.rect.center, world_mouse, self.groupss, enemies)
                 self.knives -= 1
 

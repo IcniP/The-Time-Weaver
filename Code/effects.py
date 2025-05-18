@@ -1,5 +1,29 @@
 from settings import *
 
+#sounds
+pygame.mixer.init()
+
+swing = pygame.mixer.Sound(join('Assets', 'Sounds', 'swing.mp3'))
+throw = pygame.mixer.Sound(join('Assets', 'Sounds', 'throw.mp3'))
+throw.set_volume(0.2)
+
+skelly_hit = pygame.mixer.Sound(join('Assets', 'Sounds', 'skelly-hit.mp3'))
+skelly_hit.set_volume(0.4)
+skelly_die = pygame.mixer.Sound(join('Assets', 'Sounds', 'skelly-die.mp3'))
+
+bookie_hit = pygame.mixer.Sound(join('Assets', 'Sounds', 'bookie-hit.mp3'))
+bookie_hit.set_volume(0.4)
+bookie_die = pygame.mixer.Sound(join('Assets', 'Sounds', 'bookie-die.mp3'))
+bookie_idle = pygame.mixer.Sound(join('Assets', 'Sounds', 'bookie-idle.mp3'))
+bookie_stomp = pygame.mixer.Sound(join('Assets', 'Sounds', 'bookie-stomp.mp3'))
+bookie_stomp.set_volume(0.8)
+
+wraith_hit = pygame.mixer.Sound(join('Assets', 'Sounds', 'wraith-hit.mp3'))
+wraith_hit.set_volume(0.4)
+wraith_attack = pygame.mixer.Sound(join('Assets', 'Sounds', 'wraith-attack.mp3'))
+wraith_attack.set_volume(0.4)
+
+
 class SlashEffect(pygame.sprite.Sprite):
     def __init__(self, pos, groups):
         super().__init__(groups)

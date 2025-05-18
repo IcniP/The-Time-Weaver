@@ -99,6 +99,7 @@ class Monstrosity(Entity):
         self.has_impacted = True
         self.state = 'idle'
         dust_pos = self.entity_hitbox.midbottom
+        bookie_stomp.play()
         StompDust(dust_pos, self.groups())
 
         # Left stomp area
@@ -113,9 +114,14 @@ class Monstrosity(Entity):
 
         if (left_hitbox.colliderect(player_hitbox) or right_hitbox.colliderect(player_hitbox)) and not self.player_ref.invincible:
             self.player_ref.take_damage(1)
+        
+        if hasattr(self.player_ref, 'game'):
+            self.player_ref.game.shake_timer = 0.2
+            self.player_ref.game.shake_duration = 0.2
     
     def take_damage(self, damage):
         self.hp -= damage
+        bookie_hit.play()
 
         if hasattr(self, 'player_ref'):
             dx = self.entity_hitbox.centerx - self.player_ref.player_hitbox.centerx
@@ -127,6 +133,7 @@ class Monstrosity(Entity):
             self.direction.y = knockback_upward / self.gravity
 
         if self.hp <= 0:
+            bookie_die.play()
             self.die()
     
     def die(self, instant = False):
@@ -135,7 +142,7 @@ class Monstrosity(Entity):
             return
 
         self.death_time = pygame.time.get_ticks()
-        mask = pygame.mask.from_surface(self.animations['Jump'])
+        mask = pygame.mask.from_surface(self.image)
         surf = mask.to_surface(setcolor=(255, 100, 0), unsetcolor=(0, 0, 0, 0))
         surf.set_colorkey((0, 0, 0))
         self.image = surf
@@ -168,6 +175,7 @@ class Monstrosity(Entity):
 
     def update(self, dt):
         now = pygame.time.get_ticks()
+
         if self.death_time == 0:
             self.entity_hitbox.center = self.rect.center
             self.move(dt)
