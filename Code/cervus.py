@@ -11,15 +11,13 @@ class Cervus(pygame.sprite.Sprite):
         self.player = player
         self.collision_sprites = collision_sprites
 
-        # Spawn Phase 1 dulu
         self.current_phase = CervusPhase1(pos, groups, player, collision_sprites)
-    
+
     def move(self):
         pass
 
     def update(self, dt):
         self.current_phase.update(dt)
-
         if self.current_phase.hp <= 0:
             self.next_phase()
 
@@ -33,10 +31,9 @@ class Cervus(pygame.sprite.Sprite):
         elif self.phase == 2:
             self.phase = 3
             self.current_phase = CervusPhase3(old_pos, self.groups, self.player)
-    
+
     def __getattr__(self, attr):
         return getattr(self.current_phase, attr)
-
 
 
 # ============================ PHASE 1 ============================
@@ -52,24 +49,18 @@ class CervusPhase1(BossBase):
         self.collision_sprites = collision_sprites or pygame.sprite.Group()
         self.hp = 5
         self.phase = 1
-        self.speed = 10
+        self.speed = 20
         self.gravity = 30
         self.direction = pygame.Vector2(0, 0)
         self.jumping = False
         self.cooldowns = {'stomp': 0, 'dash': 0}
-        self.cooldown_time = {'stomp': 30000, 'dash': 15000}
+        self.cooldown_time = {'stomp': 10000, 'dash': 15000}
         self.attack_in_progress = False
         self.attack_end_time = 0
 
         self.deer_hitbox = pygame.Rect(0, 0, 32, 32)
         self.deer_hitbox.midbottom = self.rect.midbottom
         self.entity_hitbox = self.deer_hitbox.inflate(20, 0)
-    
-    def update(self, dt):
-        self.animate(dt)
-        self.perform_attack()
-        self.move(dt)
-        self.add_gravity(dt)
 
     def move(self, dt):
         if abs(self.player.rect.centerx - self.rect.centerx) > 10:
@@ -80,7 +71,9 @@ class CervusPhase1(BossBase):
         self.deer_hitbox.x += self.direction.x * self.speed * dt
         self.collision('horizontal')
         self.rect.center = self.deer_hitbox.center
-        self.status = 'Deerwalk' if self.direction.x != 0 else 'Deeridle'
+
+        if not self.attack_in_progress:
+            self.status = 'Deerwalk' if self.direction.x != 0 else 'Deeridle'
         self.facing_right = self.direction.x > 0
 
     def perform_attack(self):
@@ -93,13 +86,13 @@ class CervusPhase1(BossBase):
 
         if not self.attack_in_progress:
             if now - self.cooldowns['stomp'] >= self.cooldown_time['stomp']:
-                self.status = 'Deerstomp'
+                self.play_animation('Deerstomp')
                 self.cooldowns['stomp'] = now
                 self.attack_in_progress = True
                 self.attack_end_time = now + 800
                 self.damage_player()
             elif now - self.cooldowns['dash'] >= self.cooldown_time['dash']:
-                self.status = 'Deerdash'
+                self.play_animation('Deerdash')
                 self.cooldowns['dash'] = now
                 self.attack_in_progress = True
                 self.attack_end_time = now + 800
@@ -107,14 +100,12 @@ class CervusPhase1(BossBase):
 
     def damage_player(self):
         if self.rect.colliderect(self.player.player_hitbox):
-            self.player.take_damage(0) # damage ke player
+            self.player.take_damage(1)
 
     def add_gravity(self, dt):
         self.direction.y += self.gravity * dt
         self.deer_hitbox.y += self.direction.y
         self.collision('vertical')
-        self.deer_hitbox.x += self.direction.x * self.speed * dt
-        self.collision('horizontal')
         self.rect.center = self.deer_hitbox.center
         self.entity_hitbox.center = self.deer_hitbox.center
 
@@ -135,7 +126,21 @@ class CervusPhase1(BossBase):
                     elif self.direction.y < 0:
                         self.deer_hitbox.top = sprite.rect.bottom
                         self.direction.y = 0
-        self.rect.center = self.deer_hitbox.center
+
+    def update(self, dt):
+        self.animate(dt)
+        self.perform_attack()
+        self.move(dt)
+        self.add_gravity(dt)
+
+
+# ============================ MAIN BODY CLASS ============================
+class MainBody(pygame.sprite.Sprite):
+    def __init__(self, image, center):
+        super().__init__()
+        self.image = image
+        self.rect = self.image.get_rect(center=center)
+        self.entity_hitbox = self.rect.inflate(-30, -30)
 
 
 # ============================ PHASE 2 ============================
@@ -144,8 +149,8 @@ class CervusPhase2(BossBase):
         animation_paths = {
             'Idle2': ['cervus', '1st'],
             'Hand': ['cervus', 'hand', 'idle'],
-            'Handattack1': ['cervus', 'hand', 'a2'],  # swipe
-            'Handattack2': ['cervus', 'hand', 'a1']   # plunge
+            'Handattack1': ['cervus', 'hand', 'a2'],
+            'Handattack2': ['cervus', 'hand', 'a1']
         }
         super().__init__(pos, groups, player, 'CervusPhase2', animation_paths)
         self.hp = 800
@@ -153,20 +158,21 @@ class CervusPhase2(BossBase):
         self.gravity = 0
         self.sprite_groups = groups
 
-        # Setup hand offset
-        offset_x = 50
-        offset_y = -120
+        self.main_body = MainBody(self.animations['Idle2'][0], self.rect.center)
+        if isinstance(groups, (list, tuple)):
+            for group in groups:
+                group.add(self.main_body)
+        else:
+            groups.add(self.main_body)
 
-        # LEFT HAND
         self.left_hand = pygame.sprite.Sprite()
         self.left_hand.image = pygame.transform.scale2x(self.animations['Hand'][0])
-        self.left_hand.rect = self.left_hand.image.get_rect(center=(self.rect.centerx - offset_x, self.rect.centery + offset_y))
+        self.left_hand.rect = self.left_hand.image.get_rect(center=(self.rect.centerx - 40, self.rect.centery - 60))
         self.left_hand.start_pos = self.left_hand.rect.center
 
-        # RIGHT HAND
         self.right_hand = pygame.sprite.Sprite()
         self.right_hand.image = pygame.transform.scale2x(pygame.transform.flip(self.animations['Hand'][0], True, False))
-        self.right_hand.rect = self.right_hand.image.get_rect(center=(self.rect.centerx + offset_x, self.rect.centery + offset_y))
+        self.right_hand.rect = self.right_hand.image.get_rect(center=(self.rect.centerx + 40, self.rect.centery - 60))
         self.right_hand.start_pos = self.right_hand.rect.center
 
         if isinstance(groups, (list, tuple)):
@@ -189,50 +195,23 @@ class CervusPhase2(BossBase):
     def move(self):
         pass
 
-    def create_hand(self, is_left):
-        hand = pygame.sprite.Sprite()
-        img = self.animations['Hand'][0]
-        if not is_left:
-            img = pygame.transform.flip(img, True, False)
-        hand.image = pygame.transform.scale2x(img)
-
-        offset = -self.default_offset if is_left else self.default_offset
-        hand.rect = hand.image.get_rect(center=(self.rect.centerx + offset, self.rect.centery))
-        hand.start_pos = pygame.Vector2(hand.rect.center)
-
-    
-        if isinstance(self.sprite_groups, (list, tuple)):
-            for group in self.sprite_groups:
-                group.add(hand)
-        else:
-            self.sprite_groups.add(hand)
-
-        return hand
-
     def update(self, dt):
         self.animate(dt)
         self.update_hand(self.left_hand, is_left=True, dt=dt)
         self.update_hand(self.right_hand, is_left=False, dt=dt)
+        if self.main_body.rect.colliderect(self.player.player_hitbox) and not self.player.invincible:
+            self.player.take_damage(1)
 
     def update_hand(self, hand, is_left, dt):
         now = pygame.time.get_ticks()
         side = 'left' if is_left else 'right'
         attack_key = f'{side}_swipe'
 
-        player_x = self.player.rect.centerx
-        boss_x = self.rect.centerx
         current = pygame.Vector2(hand.rect.center)
-
-        if not hasattr(hand, 'idle_pos'):
-            offset_x = -40 if is_left else 40
-            offset_y = -100
-            hand.idle_pos = pygame.Vector2(self.rect.centerx + offset_x, self.rect.centery + offset_y)
-
-        if (is_left and player_x < boss_x) or (not is_left and player_x > boss_x):
-            target = pygame.Vector2(self.player.rect.centerx, self.player.rect.top - 80)
-            hand.rect.center = current.lerp(target, 0.05)
-        else:
-            hand.rect.center = current.lerp(hand.idle_pos, 0.05)
+        target_x = self.player.rect.centerx
+        target_y = self.player.rect.top - 50
+        target = pygame.Vector2(target_x, target_y)
+        hand.rect.center = current.lerp(target, 0.05)
 
         if now - self.cooldowns[attack_key] >= self.cooldown_time[attack_key]:
             if hand.rect.colliderect(self.player.player_hitbox):
@@ -246,7 +225,6 @@ class CervusPhase2(BossBase):
                 if not is_left:
                     img = pygame.transform.flip(img, True, False)
                 hand.image = pygame.transform.scale2x(img)
-
 
 
 # ============================ PHASE 3 ============================

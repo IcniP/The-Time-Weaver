@@ -248,7 +248,10 @@ class Player(Entity):
         if not self.dead:
             self.dead = True
             print("Player mati!")
-            self.kill()
+            self.game.transition.start('fade')
+            self.game.transition_target = 'respawn'
+            self.game.transition.fade_reason = 'respawn'
+            #self.kill()
 
 #-----------------------------------------------Physics thingy-----------------------------------------------
     def add_gravity(self, dt):
