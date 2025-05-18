@@ -24,7 +24,7 @@ class Game:
         self.collision_sprites = pygame.sprite.Group()
         self.spike_sprites = pygame.sprite.Group()
 
-        self.level = f'{3}-{2}'
+        self.level = f'{3}-{3}'
         self.level_map = {
             '1-0': "lvl1-0.tmx",
             '1-1': "lvl1-1.tmx",
@@ -67,7 +67,6 @@ class Game:
         self.paused = False
         self.transition = Transition(1000)
         self.transition_target = None
-
         self.menu_manager = MainMenuManager(self.screen, self)
         self.ui = UserInterface(self.screen)
 
