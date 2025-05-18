@@ -85,6 +85,8 @@ class CervusPhase1(BossBase):
         self.facing_right = self.direction.x > 0
 
     def perform_attack(self):
+        if self.hp <= 0:
+            return
         now = pygame.time.get_ticks()
         if self.attack_in_progress and now >= self.attack_end_time:
             self.attack_in_progress = False
