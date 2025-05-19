@@ -67,6 +67,12 @@ class Game:
         self.menu_manager = MainMenuManager(self.screen, self)
         self.ui = UserInterface(self.screen)
 
+        self.respawn_marker = 'Player'
+        self.respawn_data = {
+            'map_key': self.level,
+            'marker_name': 'Player'
+        }
+
     def fix_tmx_tileset(self, map_folder, tileset_folder):
         map_folder = Path(map_folder)
         tileset_folder = Path(tileset_folder)
@@ -107,6 +113,9 @@ class Game:
         for x, y, image in map.get_layer_by_name('spikes').tiles():
             Sprite((x * TILE_SIZE, y * TILE_SIZE), image, (self.all_sprites, self.spike_sprites))
 
+        for x, y, image in map.get_layer_by_name('things').tiles():
+            Sprite((x * TILE_SIZE, y * TILE_SIZE), image, self.all_sprites)
+
         self.transition_zones = {}
         self.patrol_zones = []
         for obj in map.get_layer_by_name('zones'):
@@ -115,8 +124,17 @@ class Game:
             else:
                 rect = pygame.Rect(obj.x, obj.y, obj.width, obj.height)
                 self.patrol_zones.append(rect)
+        
+        self.checkpoints = []
+        for obj in map.get_layer_by_name('zones'):
+            if obj.name == 'checkpoint':
+                self.checkpoints.append(pygame.Rect(obj.x, obj.y, obj.width, obj.height))
 
-        spawn_marker = getattr(self, 'respawn_marker', 'Player')
+        if self.transition_target == 'respawn':
+            spawn_marker = self.respawn_data.get('marker_name', 'Player')
+        else:
+            spawn_marker = getattr(self, 'respawn_marker', 'Player')
+
         for marker in map.get_layer_by_name('entities'):
             if marker.name == spawn_marker:
                 self.player.rect.midbottom = (marker.x, marker.y)
@@ -212,6 +230,16 @@ class Game:
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                     if self.game_active:
                         self.menu_manager.pause_menu()
+            
+            keys = pygame.key.get_pressed()
+            if keys[pygame.K_e]:
+                for checkpoint in self.checkpoints:
+                    if checkpoint.colliderect(self.player.player_hitbox):
+                        self.respawn_data = {
+                            'map_key': self.level,
+                            'marker_name': 'Player_rest'
+                        }
+                        print("Checkpoint activated!")
 
             if not self.game_active:
                 self.menu_manager.main_menu()
@@ -264,6 +292,11 @@ class Game:
                     self.player.dead = False
                     self.player.hp = self.player.max_hp
                     self.player.knives = self.player.max_knives
+
+                    # Go to checkpoint map
+                    self.level = self.respawn_data.get('map_key', '1-0')
+                    self.mapz = self.level_map.get(self.level, 'test.tmx')
+
                     self.reset_game()
                     self.transition_target = None
                     self.transition.fade_reason = None
