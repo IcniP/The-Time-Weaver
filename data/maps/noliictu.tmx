@@ -1,7 +1,7 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="32" height="32" tilewidth="32" tileheight="32" infinite="0" nextlayerid="8" nextobjectid="26">
- <tileset firstgid="1" source="../tilesets/timeweavertileset.tsx"/>
- <tileset firstgid="10" source="../tilesets/castle.tsx"/>
+ <tileset firstgid="1" source="../tilesets/timeweavertileset.tsx" />
+ <tileset firstgid="10" source="../tilesets/castle.tsx" />
  <layer id="7" name="things" width="32" height="32">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -112,46 +112,46 @@
  </layer>
  <objectgroup id="2" name="entities">
   <object id="1" name="Ult" x="512" y="512">
-   <point/>
+   <point />
   </object>
   <object id="2" name="4" x="320" y="608">
-   <point/>
+   <point />
   </object>
   <object id="3" name="6" x="704" y="608">
-   <point/>
+   <point />
   </object>
   <object id="4" name="8" x="960" y="576">
-   <point/>
+   <point />
   </object>
   <object id="5" name="1" x="64" y="576">
-   <point/>
+   <point />
   </object>
   <object id="6" name="2" x="128" y="672">
-   <point/>
+   <point />
   </object>
   <object id="7" name="7" x="896" y="672">
-   <point/>
+   <point />
   </object>
   <object id="8" name="5" x="512" y="672">
-   <point/>
+   <point />
   </object>
   <object id="9" name="Noliictu" x="512" y="800">
-   <point/>
+   <point />
   </object>
   <object id="10" name="3" x="192" y="800">
-   <point/>
+   <point />
   </object>
   <object id="11" name="9" x="832" y="800">
-   <point/>
+   <point />
   </object>
   <object id="15" name="Player" x="96.3333" y="803">
-   <point/>
+   <point />
   </object>
   <object id="25" name="Player_back" x="960" y="803">
-   <point/>
+   <point />
   </object>
  </objectgroup>
- <objectgroup id="3" name="pits"/>
- <objectgroup id="5" name="zones"/>
- <objectgroup id="6" name="range"/>
+ <objectgroup id="3" name="pits" />
+ <objectgroup id="5" name="zones" />
+ <objectgroup id="6" name="range" />
 </map>
