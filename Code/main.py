@@ -23,13 +23,13 @@ class Game:
         self.collision_sprites = pygame.sprite.Group()
         self.spike_sprites = pygame.sprite.Group()
 
-        self.level = f'{1}-{2}'
+        self.level = f'{2}-{0}'
         self.level_map = {
             '1-0': "lvl1-0.tmx",
             '1-1': "lvl1-1.tmx",
             '1-2': "lvl1-2.tmx",
             '1-3': "lvl2-0.tmx",
-            '1-4': "noliictu.tmx",
+            '2-5': "noliictu.tmx",
             '2-0': 'lvl2-1.tmx',
             '2-1': "lvl2-2.tmx",
             '2-2': "lvl3-0.tmx",
@@ -37,17 +37,26 @@ class Game:
             '2-4': "lvl3-2.tmx",
             '3-3': "cervus.tmx"
         }
+
+        self.bg_folder_map = {
+            '1': 'outdoor',
+            '2': 'castle',
+            '3': 'forest'
+        }
         self.mapz = self.level_map.get(self.level, 'test.tmx')
 
-        self.map = pygame.image.load('Assets/Bg/2.png').convert_alpha()
+        folder_name = self.bg_folder_map.get(self.level.split('-')[0], 'default')
+        self.map = pygame.image.load(f'Assets/Bg/{folder_name}/0.png').convert_alpha()
         self.map_scaled = pygame.transform.scale(self.map, (WINDOW_WIDTH, WINDOW_HEIGHT))
+
         self.parallax_layers = [
-            (pygame.image.load('Assets/Bg/smoke.png').convert_alpha(), 0.2),
-            (pygame.image.load('Assets/Bg/castle.png').convert_alpha(), 0.3),
-            (pygame.image.load('Assets/Bg/bloodtree.png').convert_alpha(), 0.4),
-            (pygame.image.load('Assets/Bg/fronttree.png').convert_alpha(), 0.5),
+            (pygame.image.load(f'Assets/Bg/{folder_name}/1.png').convert_alpha(), 0.2),
+            (pygame.image.load(f'Assets/Bg/{folder_name}/2.png').convert_alpha(), 0.3),
+            (pygame.image.load(f'Assets/Bg/{folder_name}/3.png').convert_alpha(), 0.4),
+            (pygame.image.load(f'Assets/Bg/{folder_name}/4.png').convert_alpha(), 0.5),
         ]
-        self.branches_above = pygame.image.load('Assets/Bg/branchesabove.png').convert_alpha()
+
+        self.branches_above = pygame.image.load(f'Assets/Bg/{folder_name}/5.png').convert_alpha()
         self.branches_above_speed = 0.6
 
         camera_group = self.all_sprites
@@ -215,6 +224,21 @@ class Game:
         self.transition.start('fade')
         self.transition_target = 'back'
 
+    def update_background_assets(self):
+        folder_name = self.bg_folder_map.get(self.level.split('-')[0], 'default')
+
+        self.map = pygame.image.load(f'Assets/Bg/{folder_name}/0.png').convert_alpha()
+        self.map_scaled = pygame.transform.scale(self.map, (WINDOW_WIDTH, WINDOW_HEIGHT))
+
+        self.parallax_layers = [
+            (pygame.image.load(f'Assets/Bg/{folder_name}/1.png').convert_alpha(), 0.2),
+            (pygame.image.load(f'Assets/Bg/{folder_name}/2.png').convert_alpha(), 0.3),
+            (pygame.image.load(f'Assets/Bg/{folder_name}/3.png').convert_alpha(), 0.4),
+            (pygame.image.load(f'Assets/Bg/{folder_name}/4.png').convert_alpha(), 0.5),
+        ]
+
+        self.branches_above = pygame.image.load(f'Assets/Bg/{folder_name}/5.png').convert_alpha()
+
     def run(self):
         while self.running:
             if not self.paused:
@@ -268,9 +292,10 @@ class Game:
 
                 if 'forward' in self.transition_zones and self.player.player_hitbox.colliderect(self.transition_zones['forward']):
                     self.next_level()
-
+                    self.update_background_assets()
                 if 'back' in self.transition_zones and self.player.player_hitbox.colliderect(self.transition_zones['back']):
                     self.previous_level()
+                    self.update_background_assets()
 
             if hasattr(self, 'cervus'):
                 self.cervus.update(dt)
@@ -292,6 +317,7 @@ class Game:
                     self.player.dead = False
                     self.player.hp = self.player.max_hp
                     self.player.knives = self.player.max_knives
+                    self.update_background_assets()
 
                     # Go to checkpoint map
                     self.level = self.respawn_data.get('map_key', '1-0')
