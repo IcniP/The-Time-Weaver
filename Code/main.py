@@ -23,19 +23,19 @@ class Game:
         self.collision_sprites = pygame.sprite.Group()
         self.spike_sprites = pygame.sprite.Group()
 
-        self.level = f'{2}-{0}'
+        self.level = f'{3}-{0}'
         self.level_map = {
             '1-0': "lvl1-0.tmx",
             '1-1': "lvl1-1.tmx",
             '1-2': "lvl1-2.tmx",
             '1-3': "lvl2-0.tmx",
-            '2-5': "noliictu.tmx",
-            '2-0': 'lvl2-1.tmx',
-            '2-1': "lvl2-2.tmx",
-            '2-2': "lvl3-0.tmx",
-            '2-3': "lvl3-1.tmx",
-            '2-4': "lvl3-2.tmx",
-            '3-3': "cervus.tmx"
+            '2-0': "noliictu.tmx",
+            '3-0': 'lvl2-1.tmx',
+            '3-1': "lvl2-2.tmx",
+            '3-2': "lvl3-0.tmx",
+            '3-3': "lvl3-1.tmx",
+            '3-4': "lvl3-2.tmx",
+            '3-5': "cervus.tmx"
         }
 
         self.bg_folder_map = {
