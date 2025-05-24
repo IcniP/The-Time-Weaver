@@ -33,7 +33,7 @@ class Fly(Entity):
 
         self.entity_hitbox = pygame.Rect(0, 0, 32, 32)
 
-        self.hp = 1
+        self.__hp = 1
         self.death_time = 0
         self.death_duration = 400
     
@@ -55,13 +55,13 @@ class Fly(Entity):
         return None
 
     def take_damage(self, damage):
-        self.hp -= damage
+        self.__hp -= damage
 
         if hasattr(self, 'player_ref'):
             dx = self.entity_hitbox.centerx - self.player_ref.player_hitbox.centerx
             self.direction.x = 1 if dx > 0 else -1
 
-        if self.hp <= 0:
+        if self.__hp <= 0:
             self.die()
     
     def die(self):

@@ -60,7 +60,7 @@ class Humanoid(Entity):
         self.last_thrust_time = 0
 
         # Health
-        self.hp = {'Sword': 2, 'Spear': 3, 'Axe': 4}.get(self.type, 1)
+        self.__hp = {'Sword': 2, 'Spear': 3, 'Axe': 4}.get(self.type, 1)
         self.death_time = 0
         self.death_duration = 400
 
@@ -77,7 +77,7 @@ class Humanoid(Entity):
 
 #-----------------------------------------------status thingy-----------------------------------------------
     def take_damage(self, damage):
-        self.hp -= damage
+        self.__hp -= damage
         skelly_hit.play()
 
         if hasattr(self, 'player_ref'):
@@ -91,7 +91,7 @@ class Humanoid(Entity):
 
             self.knockback_timer = pygame.time.get_ticks()
 
-        if self.hp <= 0:
+        if self.__hp <= 0:
             skelly_die.play()
             self.die()
 

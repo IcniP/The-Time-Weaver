@@ -35,7 +35,7 @@ class Monstrosity(Entity):
         self.has_impacted = False
 
         #hp
-        self.hp = 5
+        self.__hp = 5
         self.death_time = 0
         self.death_duration = 400
         
@@ -119,7 +119,7 @@ class Monstrosity(Entity):
             self.player_ref.game.shake_duration = 0.2
     
     def take_damage(self, damage):
-        self.hp -= damage
+        self.__hp -= damage
         bookie_hit.play()
 
         if hasattr(self, 'player_ref'):
@@ -131,7 +131,7 @@ class Monstrosity(Entity):
             self.direction.x *= knockback_speed / self.speed
             self.direction.y = knockback_upward / self.gravity
 
-        if self.hp <= 0:
+        if self.__hp <= 0:
             bookie_die.play()
             self.die()
     

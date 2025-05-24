@@ -30,13 +30,13 @@ class UserInterface:
     def draw(self, player):
         self.draw_bar(
             frames = self.health_bars,
-            current = player.hp,
+            current = player.get_hp(),
             max_value = player.max_hp,
             position = (10, 10),
         )
         self.draw_bar(
             frames = self.stamina_bars,
-            current = player.stamina,
+            current = player.get_stamina(),
             max_value = player.max_stamina,
             position = (10, 10),
         )

@@ -23,11 +23,11 @@ class Player(Entity):
         # Stats
         #hp-----------
         self.max_hp = 4
-        self.hp = self.max_hp
+        self.__hp = self.max_hp
         self.dead = False
         #stamina---------
         self.max_stamina = 4
-        self.stamina = self.max_stamina
+        self.__stamina = self.max_stamina
         self.stamina_regen = 1
         self.last_stamina_use = pygame.time.get_ticks()
 
@@ -79,6 +79,12 @@ class Player(Entity):
 
         self.player_hitbox = pygame.Rect(0, 0, 16, 32)
 
+#-----------------------------------------------getters n setters-----------------------------------------------
+    def get_hp(self):
+        return self.__hp
+    
+    def get_stamina(self):
+        return self.__stamina
 #-----------------------------------------------Importing thingy-----------------------------------------------
     def import_assets(self):
         base_path = join(dirname(abspath(__file__)), '..', 'Assets', 'Player')
@@ -102,7 +108,7 @@ class Player(Entity):
 
         if keys[pygame.K_LSHIFT] and not self.dash_pressed and not self.is_dashing and not self.attack_locked:
             
-            if self.stamina < stamina_cost:
+            if self.__stamina < stamina_cost:
                 return
 
             if self.on_ground() or not self.air_dash:
@@ -114,7 +120,7 @@ class Player(Entity):
                 self.dash_pressed = True
                 self.invincible = True
 
-                self.stamina -= stamina_cost
+                self.__stamina -= stamina_cost
                 self.last_stamina_use = pygame.time.get_ticks()
 
                 if not self.on_ground():
@@ -180,10 +186,10 @@ class Player(Entity):
     def start_attack(self, state):
         stamina_cost = 0.5
 
-        if self.stamina < stamina_cost:
+        if self.__stamina < stamina_cost:
             return
 
-        self.stamina -= stamina_cost
+        self.__stamina -= stamina_cost
         self.last_stamina_use = pygame.time.get_ticks()
 
         setattr(self, 'attacking' if state == 'attack1' else 'attacking_two', True)
@@ -236,11 +242,11 @@ class Player(Entity):
 
     def take_damage(self, damage):
         if  self.invincible == False:
-            self.hp -= damage
+            self.__hp -= damage
             self.invincible = True
             self.last_hit_time = pygame.time.get_ticks()
-            print(f"Player terkena damage! HP sekarang: {self.hp}")
-            if self.hp <= 0:
+            print(f"Player terkena damage! HP sekarang: {self.__hp}")
+            if self.__hp <= 0:
                 self.die()
                 
 
@@ -371,8 +377,8 @@ class Player(Entity):
         time_since_use = (pygame.time.get_ticks() - self.last_stamina_use) / 1000
         regen_amount = self.stamina_regen * dt
         # 1 detik
-        if time_since_use > 1 and self.stamina < self.max_stamina and not self.attack_button_pressed and not self.jumping and not self.is_dashing:
-            self.stamina = min(self.stamina + regen_amount, self.max_stamina)
+        if time_since_use > 1 and self.__stamina < self.max_stamina and not self.attack_button_pressed and not self.jumping and not self.is_dashing:
+            self.__stamina = min(self.__stamina + regen_amount, self.max_stamina)
 
         #playa invicible, utk testing----------
         if self.invincible and pygame.time.get_ticks() - self.last_hit_time > self.invincibility_duration:
