@@ -1,4 +1,5 @@
 from settings import *
+from save_system import SaveManager
 
 class MainMenuManager:
     def __init__(self, screen, game):
@@ -12,9 +13,10 @@ class MainMenuManager:
         self.lobbybg = pygame.image.load('Assets/lobby/1.png').convert_alpha()
 
         self.start_button = self.create_button("Start", (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 30))
-        self.setting_button = self.create_button("Settings", (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 60))
-        self.exit_button = self.create_button("Exit", (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 90))
-
+        self.load_button = self.create_button("Load", (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 60))
+        self.setting_button = self.create_button("Settings", (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 90))
+        self.exit_button = self.create_button("Exit", (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 120))
+        
         self.resume_button = self.create_button("Resume", (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 - 60))
         self.return_button = self.create_button("Return to Main Menu", (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 - 30))
         self.pause_setting_button = self.create_button("Settings", (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2))
@@ -35,6 +37,71 @@ class MainMenuManager:
             if button["rect"].collidepoint(mouse_pos):
                 return button_name
         return None
+    
+    def load_menu(self):
+        pygame.event.clear()
+        font = pygame.font.Font('Assets/Fonts/m5x7.ttf', 30)
+        back_btn = self.create_button("Back", (WINDOW_WIDTH // 2, WINDOW_HEIGHT - 80))
+
+        while self.game.running:
+            # refresh
+            saves = SaveManager.list_saves()
+            mouse_pos = pygame.mouse.get_pos()
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    self.game.running = False
+
+                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                    # klik slot
+                    for idx, (slot, meta) in enumerate(saves):
+                        rect = pygame.Rect(WINDOW_WIDTH//2-140, 180+idx*42, 280, 40)
+                        if rect.collidepoint(mouse_pos):
+                            self.game.load_game_slot(slot)   # → restore & masuk game
+                            return
+
+                    # klik back
+                    if back_btn["rect"].collidepoint(mouse_pos):
+                        return                               # balik ke main_menu()
+
+            # ──── DRAW ──────────────────────────────────────────────────────
+            self.screen.fill("black")
+            self.screen.blit(font.render("Select Save", True, "white"),
+                            (WINDOW_WIDTH//2-90, 120))
+
+            for idx, (slot, meta) in enumerate(saves):
+                txt = f"Slot {slot} • LV {meta.get('level', '?')} • {meta['checkpoint']}"
+                surf = font.render(txt, True, "white")
+                rect = surf.get_rect(center=(WINDOW_WIDTH//2, 200+idx*42))
+                self.screen.blit(surf, rect)
+
+            # kalau belum ada save sama sekali
+            if not saves:
+                note = font.render("No save file found", True, "gray")
+                self.screen.blit(note, note.get_rect(center=(WINDOW_WIDTH//2, 240)))
+
+            # back button
+            self.screen.blit(back_btn["surface"], back_btn["rect"])
+
+            pygame.display.update()
+            self.game.clock.tick(FRAMERATE)
+
+    def flash_text(self, text: str, seconds: float = 2):
+        font = pygame.font.Font('Assets/Fonts/m5x7.ttf', 40)
+        surf = font.render(text, True, 'white')
+        rect = surf.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2))
+
+        start = pygame.time.get_ticks()
+        while (pygame.time.get_ticks() - start) < seconds * 1000 and self.game.running:
+            # keep polling quit so ESC saat pop-up tidak freeze
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    self.game.running = False
+                    return
+
+            self.screen.blit(surf, rect)
+            pygame.display.update()
+            self.game.clock.tick(FRAMERATE)
 
     def main_menu(self):
         title_font = pygame.font.Font('Assets/Fonts/m5x7.ttf', 100)
@@ -53,6 +120,7 @@ class MainMenuManager:
                 if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     action = self.detect_mouse_collision(mouse_pos, {
                         "start": self.start_button,
+                        "load": self.load_button,
                         "settings": self.setting_button,
                         "exit": self.exit_button
                     })
@@ -63,7 +131,8 @@ class MainMenuManager:
 
                         if self.game.level == '4-0':
                             self.lvl4_music.play(loops=-1)
-
+                    elif action == "load":
+                        self.load_menu()   
                     elif action == "settings":
                         self.settings_menu()
                     elif action == "exit":
@@ -73,6 +142,7 @@ class MainMenuManager:
             self.screen.blit(self.lobbybg, (0, 0))
             self.screen.blit(title_surface, (WINDOW_WIDTH // 2 - title_surface.get_width() // 2, WINDOW_HEIGHT // 3 - title_surface.get_height() // 2))
             self.screen.blit(self.start_button["surface"], self.start_button["rect"])
+            self.screen.blit(self.load_button["surface"], self.load_button["rect"])
             self.screen.blit(self.setting_button["surface"], self.setting_button["rect"])
             self.screen.blit(self.exit_button["surface"], self.exit_button["rect"])
 
@@ -103,7 +173,10 @@ class MainMenuManager:
                     elif action == "settings":
                         self.settings_menu()
                     elif action == "save":
-                        print("Game saved!")  # Placeholder
+                        SaveManager.save_game(self.game.player,
+                                            checkpoint=self.game.level,
+                                            slot=1)
+                        self.flash_text("Game Saved!", 2)
 
             self.screen.fill('black')
             self.screen.blit(self.resume_button["surface"], self.resume_button["rect"])

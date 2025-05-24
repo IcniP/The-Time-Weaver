@@ -10,6 +10,7 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 from mainmenu import MainMenuManager, Transition
 from noliictu import Noliictu
+from save_system import SaveManager
 
 class Game:
     def __init__(self):
@@ -23,7 +24,6 @@ class Game:
         self.collision_sprites = pygame.sprite.Group()
         self.spike_sprites = pygame.sprite.Group()
 
-        self.level = f'{3}-{0}'
         self.level_map = {
             '1-0': "lvl1-0.tmx",
             '1-1': "lvl1-1.tmx",
@@ -37,13 +37,12 @@ class Game:
             '3-4': "lvl3-2.tmx",
             '3-5': "cervus.tmx"
         }
-
+        self.set_checkpoint("1-0")
         self.bg_folder_map = {
             '1': 'outdoor',
             '2': 'castle',
             '3': 'forest'
         }
-        self.mapz = self.level_map.get(self.level, 'test.tmx')
 
         folder_name = self.bg_folder_map.get(self.level.split('-')[0], 'default')
         self.map = pygame.image.load(f'Assets/Bg/{folder_name}/0.png').convert_alpha()
@@ -81,6 +80,10 @@ class Game:
             'map_key': self.level,
             'marker_name': 'Player'
         }
+
+    def set_checkpoint(self, chk:str):
+        self.level = chk                          
+        self.mapz  = self.level_map.get(chk, 'test.tmx')
 
     def fix_tmx_tileset(self, map_folder, tileset_folder):
         map_folder = Path(map_folder)
@@ -199,13 +202,12 @@ class Game:
     def next_level(self):
         world, stage = map(int, self.level.split('-'))
         next_stage = stage + 1
-        next_level_key = f'{world}-{next_stage}'
-        if next_level_key not in self.level_map:
+        next_key = f"{world}-{next_stage}"
+        if next_key not in self.level_map:
             world += 1
-            next_stage = 0
-            next_level_key = f'{world}-{next_stage}'
-        self.level = next_level_key
-        self.mapz = self.level_map.get(self.level, 'test.tmx')
+            next_key = f"{world}-0"
+
+        self.set_checkpoint(next_key)       # ← ganti 2 baris manual
         self.respawn_marker = 'Player'
         self.transition.start('fade')
         self.transition_target = 'forward'
@@ -215,14 +217,39 @@ class Game:
         prev_stage = stage - 1
         if prev_stage < 0:
             world -= 1
-            candidate_stages = [int(k.split('-')[1]) for k in self.level_map if k.startswith(f"{world}-") and k.split('-')[1].isdigit()]
-            prev_stage = max(candidate_stages) if candidate_stages else 0
-        self.level = f'{world}-{prev_stage}'
-        self.mapz = self.level_map.get(self.level, 'test.tmx')
+            prev_stage = max(
+                int(k.split('-')[1]) for k in self.level_map
+                if k.startswith(f"{world}-")
+            )
+        self.set_checkpoint(f"{world}-{prev_stage}")   # ← pakai helper
         self.respawn_marker = 'Player_back'
         self.player.facing_right = False
         self.transition.start('fade')
         self.transition_target = 'back'
+
+    def load_game_slot(self, slot:int):
+        data = SaveManager.load_game(slot)
+        if not data:
+            print("❌ Save tidak ditemukan / rusak"); return
+
+        # ganti map bila checkpoint beda
+        if self.level != data["checkpoint"]:
+            self.set_checkpoint(data["checkpoint"])   
+            self.reset_game()
+            self.update_background_assets()
+
+        # pulihkan posisi & stats
+        self.player.rect.topleft = tuple(data["position"])
+        self.player.hp      = data["hp"]
+        self.player.stamina = data["stamina"]
+        if "level" in data and hasattr(self.player, "level"):
+            self.player.level = data["level"]
+
+        # ── print aman ──
+        lvl_str = getattr(self.player, "level", "?")
+        print(f"✔  Slot {slot} loaded — LV{lvl_str} @ {self.level}")
+
+        self.game_active = True
 
     def update_background_assets(self):
         folder_name = self.bg_folder_map.get(self.level.split('-')[0], 'default')
