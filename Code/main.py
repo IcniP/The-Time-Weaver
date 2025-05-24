@@ -19,46 +19,50 @@ class Game:
         self.clock = pygame.time.Clock()
         self.running = True
 
-        #Sprite groups---------------------------------------
         self.all_sprites = AllSprites()
         self.collision_sprites = pygame.sprite.Group()
         self.spike_sprites = pygame.sprite.Group()
 
-        #levels thingy----------------------------------------
-        self.level = f'{2}-{0}'
+        self.level = f'{3}-{0}'
         self.level_map = {
             '1-0': "lvl1-0.tmx",
             '1-1': "lvl1-1.tmx",
             '1-2': "lvl1-2.tmx",
             '1-3': "lvl2-0.tmx",
-            '1-4': "noliictu.tmx",
-            '2-0': 'lvl2-1.tmx',
-            '2-1': "lvl2-2.tmx",
-            '2-2': "lvl3-0.tmx",
-            '2-3': "lvl3-1.tmx",
-            '2-4': "lvl3-2.tmx",
-            '3-3': "cervus.tmx"
+            '2-0': "noliictu.tmx",
+            '3-0': 'lvl2-1.tmx',
+            '3-1': "lvl2-2.tmx",
+            '3-2': "lvl3-0.tmx",
+            '3-3': "lvl3-1.tmx",
+            '3-4': "lvl3-2.tmx",
+            '3-5': "cervus.tmx"
+        }
+
+        self.bg_folder_map = {
+            '1': 'outdoor',
+            '2': 'castle',
+            '3': 'forest'
         }
         self.mapz = self.level_map.get(self.level, 'test.tmx')
 
-        #Background and parallax layers------------------------
-        self.map = pygame.image.load('Assets/Bg/2.png').convert_alpha()
+        folder_name = self.bg_folder_map.get(self.level.split('-')[0], 'default')
+        self.map = pygame.image.load(f'Assets/Bg/{folder_name}/0.png').convert_alpha()
         self.map_scaled = pygame.transform.scale(self.map, (WINDOW_WIDTH, WINDOW_HEIGHT))
+
         self.parallax_layers = [
-            (pygame.image.load('Assets/Bg/smoke.png').convert_alpha(), 0.2),
-            (pygame.image.load('Assets/Bg/castle.png').convert_alpha(), 0.3),
-            (pygame.image.load('Assets/Bg/bloodtree.png').convert_alpha(), 0.4),
-            (pygame.image.load('Assets/Bg/fronttree.png').convert_alpha(), 0.5),
+            (pygame.image.load(f'Assets/Bg/{folder_name}/1.png').convert_alpha(), 0.2),
+            (pygame.image.load(f'Assets/Bg/{folder_name}/2.png').convert_alpha(), 0.3),
+            (pygame.image.load(f'Assets/Bg/{folder_name}/3.png').convert_alpha(), 0.4),
+            (pygame.image.load(f'Assets/Bg/{folder_name}/4.png').convert_alpha(), 0.5),
         ]
-        self.branches_above = pygame.image.load('Assets/Bg/branchesabove.png').convert_alpha()
+
+        self.branches_above = pygame.image.load(f'Assets/Bg/{folder_name}/5.png').convert_alpha()
         self.branches_above_speed = 0.6
 
-        #create the player and the camera--------------------
         camera_group = self.all_sprites
         self.player = Player((0, 0), self.all_sprites, self.collision_sprites, camera_group)
         self.player.game = self
 
-        #camera shake thingy---------------------------
         self.shake_duration = 0
         self.shake_timer = 0
         self.shake_intensity = 2
@@ -67,14 +71,11 @@ class Game:
         self.fix_tmx_tileset('data/maps', 'Assets/Tilesets')
         self.game_active = False
         self.paused = False
-        #transition thingy----------------------
         self.transition = Transition(2000)
         self.transition_target = None
-        #main menu n ui thingy----------------------
         self.menu_manager = MainMenuManager(self.screen, self)
         self.ui = UserInterface(self.screen)
 
-        #checkpoints n respawn thingy-------------------
         self.respawn_marker = 'Player'
         self.respawn_data = {
             'map_key': self.level,
@@ -95,65 +96,49 @@ class Game:
                     image.attrib['source'] = str(correct_path.as_posix())
             tree.write(tmx_file, encoding='utf-8', xml_declaration=True)
 
-    #reset the game when dying / transitioning between maps
     def reset_game(self):
-        #empty all the sprite groups
         self.all_sprites.empty()
         self.collision_sprites.empty()
         self.spike_sprites.empty()
-        #recall map1
         self.map1()
 
-    #method utk load map ny-----------------------
     def map1(self):
-        #map yg diload tergantung self.mapzny
         map = load_pygame(join('data', 'maps', self.mapz))
-        #buat ngambil widht sma height dari mapny
         self.map_w = map.width * TILE_SIZE
         self.map_h = map.height * TILE_SIZE
 
-        #assign smua rects yg ad di layer range ke self.range_rects, utk rangeny si wraith
         self.range_rects = [pygame.Rect(obj.x, obj.y, obj.width, obj.height)
                             for obj in map.get_layer_by_name('range')]
 
-        #utk nampilin tile layer 'ground' ny
         for x, y, image in map.get_layer_by_name('ground').tiles():
             Sprite((x * TILE_SIZE, y * TILE_SIZE), image, (self.all_sprites, self.collision_sprites))
 
-        #buat object2 rect yg di object layer pits
         for pit in map.get_layer_by_name('pits'):
             spike_rect = pygame.Rect(pit.x, pit.y, pit.width, pit.height)
             spike = pygame.sprite.Sprite(self.spike_sprites)
             spike.rect = spike_rect
             spike.image = pygame.Surface((pit.width, pit.height))
 
-        #utk nampilin tile layer 'spikes'
         for x, y, image in map.get_layer_by_name('spikes').tiles():
             Sprite((x * TILE_SIZE, y * TILE_SIZE), image, (self.all_sprites, self.spike_sprites))
 
-        #utk nampilin tile layer 'things'
         for x, y, image in map.get_layer_by_name('things').tiles():
             Sprite((x * TILE_SIZE, y * TILE_SIZE), image, self.all_sprites)
 
-        #buat object2 rect di object layer 'zones
         self.transition_zones = {}
         self.patrol_zones = []
         for obj in map.get_layer_by_name('zones'):
-            #kalau nma rect = forward & back masukin ke transition_zones, jdi pintu/jalan utk ganti map
             if obj.name in ['forward', 'back']:
                 self.transition_zones[obj.name] = pygame.Rect(obj.x, obj.y, obj.width, obj.height)
             else:
-                #klo bkn buat objek2ny trus masukin patrol_zones buat si skellies
                 rect = pygame.Rect(obj.x, obj.y, obj.width, obj.height)
                 self.patrol_zones.append(rect)
         
-        #klo nma rect = checkpoint, buat objekny trus masukin ke checkpoints, utk jdi checkpoints player
         self.checkpoints = []
         for obj in map.get_layer_by_name('zones'):
             if obj.name == 'checkpoint':
                 self.checkpoints.append(pygame.Rect(obj.x, obj.y, obj.width, obj.height))
 
-        #utk nentuin spawnny dmn tergantung kondisi
         if self.transition_target == 'respawn':
             spawn_marker = self.respawn_data.get('marker_name', 'Player')
         else:
@@ -167,7 +152,6 @@ class Game:
                 self.player.collision_sprites = self.collision_sprites
                 break
 
-        #buat object2 enemiesny, Skelly sword n axe(Humanoid)
         for marker in map.get_layer_by_name('entities'):
             if marker.name in ['sword', 'axe']:
                 enemy = Humanoid(marker.name.capitalize(), (marker.x, marker.y), self.all_sprites, self.collision_sprites)
@@ -176,14 +160,11 @@ class Game:
                     if zone.collidepoint(marker.x, marker.y):
                         enemy.patrol_bounds(zone)
                         break
-            #buat object2 enemiesny, Skelly spear(Humanoid)
             elif marker.name == 'spear':
                 enemy = Humanoid('Spear', (marker.x, marker.y), self.all_sprites, self.collision_sprites)
                 enemy.player_ref = self.player
-            #buat object2 enemiesny, Bookie(Mosntrosity)
             elif marker.name == 'bookie':
                 enemy = Monstrosity((marker.x, marker.y), self.all_sprites, self.collision_sprites, self.player)
-            #buat object2 enemiesny, Wraith(Fly)
             elif marker.name == 'wraith':
                 self.range_rect = None
                 for r in self.range_rects:
@@ -191,17 +172,15 @@ class Game:
                         self.range_rect = r
                         break
                 enemy = Fly((marker.x, marker.y), self.all_sprites, self.collision_sprites, self.player, self.range_rect)
-            #buat object boss Noliictu
             elif marker.name == 'Noliictu':
                 self.noliictu = Noliictu((marker.x, marker.y), self.all_sprites, self.player)
-            #buat object boss Cervus
             elif marker.name == 'Cervus':
                 self.cervus = Cervus((marker.x, marker.y), self.all_sprites, self.player, self.collision_sprites)
+                self.all_sprites.add(self.cervus)
 
                 if hasattr(self.cervus.current_phase, 'main_body'):
                     self.all_sprites.add(self.cervus.current_phase.main_body)
 
-    #method utk nampilin gambar2 buat parallaxny---------------------
     def draw_parallax_layers(self, target_pos):
         for image, speed in self.parallax_layers:
             image_width = image.get_width()
@@ -209,8 +188,6 @@ class Game:
             draw_x = -offset_x + (WINDOW_WIDTH // 2 - image_width // 2)
             self.screen.blit(image, (draw_x, 0))
 
-    #method utk nampilin gambar parallax branchesny,-------------------- 
-    #karna di layer atas segalany jdiny dipisah
     def draw_branches_layer(self, target_pos):
         image = self.branches_above
         speed = self.branches_above_speed
@@ -219,7 +196,6 @@ class Game:
         draw_x = -offset_x + (WINDOW_WIDTH // 2 - image_width // 2)
         self.screen.blit(image, (draw_x, 0))
 
-    #method utk pindah kedepan level/mapny---------------------------
     def next_level(self):
         world, stage = map(int, self.level.split('-'))
         next_stage = stage + 1
@@ -234,7 +210,6 @@ class Game:
         self.transition.start('fade')
         self.transition_target = 'forward'
 
-    #method utk mundur level/mapny-----------------------------------
     def previous_level(self):
         world, stage = map(int, self.level.split('-'))
         prev_stage = stage - 1
@@ -249,7 +224,21 @@ class Game:
         self.transition.start('fade')
         self.transition_target = 'back'
 
-    #method run utama gameny-----------------------------------------
+    def update_background_assets(self):
+        folder_name = self.bg_folder_map.get(self.level.split('-')[0], 'default')
+
+        self.map = pygame.image.load(f'Assets/Bg/{folder_name}/0.png').convert_alpha()
+        self.map_scaled = pygame.transform.scale(self.map, (WINDOW_WIDTH, WINDOW_HEIGHT))
+
+        self.parallax_layers = [
+            (pygame.image.load(f'Assets/Bg/{folder_name}/1.png').convert_alpha(), 0.2),
+            (pygame.image.load(f'Assets/Bg/{folder_name}/2.png').convert_alpha(), 0.3),
+            (pygame.image.load(f'Assets/Bg/{folder_name}/3.png').convert_alpha(), 0.4),
+            (pygame.image.load(f'Assets/Bg/{folder_name}/4.png').convert_alpha(), 0.5),
+        ]
+
+        self.branches_above = pygame.image.load(f'Assets/Bg/{folder_name}/5.png').convert_alpha()
+
     def run(self):
         while self.running:
             if not self.paused:
@@ -258,18 +247,14 @@ class Game:
                 self.clock.tick(FRAMERATE)
                 dt = 0
 
-            #events2 ny
             for event in pygame.event.get():
-                #klo klik close button, gameny ditutup
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
-                #klo mencet tombol escape, gameny di pause
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                     if self.game_active:
                         self.menu_manager.pause_menu()
             
-            #klo mencet e pas collide sma rect checkpoint, respawnny jdi disitu
             keys = pygame.key.get_pressed()
             if keys[pygame.K_e]:
                 for checkpoint in self.checkpoints:
@@ -285,9 +270,7 @@ class Game:
                 continue
 
             if not self.transition.active and not self.paused:
-                #ngejalanin semua method update class yg objek2ny di group all_sprites
                 self.all_sprites.update(dt)
-                #shake_timerny di assign di player.start_attack()
                 if self.shake_timer > 0:
                     self.shake_timer -= dt
                     self.shake_offset.x = random.randint(-self.shake_intensity, self.shake_intensity)
@@ -295,14 +278,11 @@ class Game:
                 else:
                     self.shake_offset = pygame.Vector2(0, 0)
 
-                
                 for spike in self.spike_sprites:
-                    #ngecek collision player sama rect2 spikes
                     if spike.rect.colliderect(self.player.player_hitbox):
                         self.player.die()
                         break
-                    
-                    #ngecek collision spike sama rect2 Humanoid(skellies) n Mosntrosity(Bookie)
+
                     for sprite in self.all_sprites:
                         if isinstance(sprite, (Humanoid, Monstrosity)):
                             hitbox = getattr(sprite, 'entity_hitbox', getattr(sprite, 'hitbox', sprite.rect))
@@ -310,12 +290,12 @@ class Game:
                                 if hasattr(sprite, 'die'):
                                     sprite.die(instant=True)
 
-                #utk pindah antar levelny
                 if 'forward' in self.transition_zones and self.player.player_hitbox.colliderect(self.transition_zones['forward']):
                     self.next_level()
-
+                    self.update_background_assets()
                 if 'back' in self.transition_zones and self.player.player_hitbox.colliderect(self.transition_zones['back']):
                     self.previous_level()
+                    self.update_background_assets()
 
             if hasattr(self, 'cervus'):
                 self.cervus.update(dt)
@@ -332,12 +312,12 @@ class Game:
                 self.transition.draw(self.screen)
                 self.transition.update(self.clock.get_time())
 
-            #respawn thingy
             if self.transition_target and not self.transition.active:
                 if self.transition_target == 'respawn':
                     self.player.dead = False
                     self.player.hp = self.player.max_hp
                     self.player.knives = self.player.max_knives
+                    self.update_background_assets()
 
                     # Go to checkpoint map
                     self.level = self.respawn_data.get('map_key', '1-0')
