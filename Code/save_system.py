@@ -2,13 +2,6 @@ import json
 import os
 from typing import Dict, List, Optional, Tuple
 
-"""save_system.py – v3
-
-• Gunakan folder ./saves/ otomatis.
-• Field *level* opsional (tidak crash kalau objek player tidak punya atribut itu).
-• Validasi load cukup cek kunci wajib: checkpoint, position, hp, stamina.
-"""
-
 class SaveManager:
     SAVE_DIR = "saves"
     FILE_TEMPLATE = "slot{slot}.json"

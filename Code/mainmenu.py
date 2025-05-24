@@ -13,12 +13,10 @@ class MainMenuManager:
         self.lobbybg = pygame.image.load('Assets/lobby/1.png').convert_alpha()
 
         self.start_button = self.create_button("Start", (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 30))
-        self.setting_button = self.create_button("Settings", (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 60))
-        self.exit_button = self.create_button("Exit", (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 90))
-
-        self.load_button = self.create_button(
-            "Load", (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 45))
-
+        self.load_button = self.create_button("Load", (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 60))
+        self.setting_button = self.create_button("Settings", (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 90))
+        self.exit_button = self.create_button("Exit", (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 120))
+        
         self.resume_button = self.create_button("Resume", (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 - 60))
         self.return_button = self.create_button("Return to Main Menu", (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 - 30))
         self.pause_setting_button = self.create_button("Settings", (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2))
@@ -46,7 +44,7 @@ class MainMenuManager:
         back_btn = self.create_button("Back", (WINDOW_WIDTH // 2, WINDOW_HEIGHT - 80))
 
         while self.game.running:
-            # refresh daftar setiap frame supaya save baru langsung muncul
+            # refresh
             saves = SaveManager.list_saves()
             mouse_pos = pygame.mouse.get_pos()
 
