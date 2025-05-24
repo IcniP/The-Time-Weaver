@@ -63,10 +63,16 @@ class CervusPhase1(BossBase):
         self.entity_hitbox = self.deer_hitbox.inflate(20, 0)
 
     def move(self, dt):
+        self.rect.center = self.deer_hitbox.center
+        px = self.player.rect.centerx
+        ex = self.rect.centerx
         if abs(self.player.rect.centerx - self.rect.centerx) > 10:
             self.direction.x = 1 if self.player.rect.centerx > self.rect.centerx else -1
         else:
             self.direction.x = 0
+
+        print(f"[Cervus] player_x: {px}, cervus_x: {ex}, direction: {self.direction.x}")
+
 
         self.deer_hitbox.x += self.direction.x * self.speed * dt
         self.collision('horizontal')

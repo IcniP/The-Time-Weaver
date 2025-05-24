@@ -25,7 +25,7 @@ class Game:
         self.spike_sprites = pygame.sprite.Group()
 
         #levels thingy----------------------------------------
-        self.level = f'{3}-{3}'
+        self.level = f'{2}-{0}'
         self.level_map = {
             '1-0': "lvl1-0.tmx",
             '1-1': "lvl1-1.tmx",
@@ -197,7 +197,6 @@ class Game:
             #buat object boss Cervus
             elif marker.name == 'Cervus':
                 self.cervus = Cervus((marker.x, marker.y), self.all_sprites, self.player, self.collision_sprites)
-                self.all_sprites.add(self.cervus)
 
                 if hasattr(self.cervus.current_phase, 'main_body'):
                     self.all_sprites.add(self.cervus.current_phase.main_body)

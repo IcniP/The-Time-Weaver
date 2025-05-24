@@ -1,0 +1,101 @@
+# ================================
+# IMPORT LIBRARY
+# ================================
+import pandas as pd
+import numpy as np
+from scipy import stats
+import matplotlib.pyplot as plt
+# install pip install scipy
+# install pip install pandas matplotlib scipy
+# install pip install matplotlib
+# ================================
+# LOAD DATA
+# ================================
+# Ganti dengan path ke file CSV kamu jika berbeda
+file_path = "ai_dev_productivity.csv"
+data = pd.read_csv(file_path)
+
+# ================================
+# AMBIL DATA VARIABEL sleep_hours
+# ================================
+data_sleep = data['sleep_hours'].dropna()
+n = len(data_sleep)
+mean = np.mean(data_sleep)
+std = np.std(data_sleep, ddof=1)
+var = np.var(data_sleep, ddof=1)
+df = n - 1
+
+# ================================
+# ESTIMASI INTERVAL MEAN (Distribusi t)
+# ================================
+conf_levels = [0.90, 0.95]
+mean_intervals = {}
+
+for conf in conf_levels:
+    alpha = 1 - conf
+    t_crit = stats.t.ppf(1 - alpha / 2, df)
+    margin_error = t_crit * std / np.sqrt(n)
+    lower = mean - margin_error
+    upper = mean + margin_error
+    mean_intervals[conf] = {
+        "t_critical": t_crit,
+        "margin_error": margin_error,
+        "interval": (lower, upper)
+    }
+
+# ================================
+# ESTIMASI INTERVAL VARIANSI (Distribusi Chi-Square)
+# ================================
+var_intervals = {}
+
+for conf in conf_levels:
+    alpha = 1 - conf
+    chi2_lower = stats.chi2.ppf(alpha / 2, df)
+    chi2_upper = stats.chi2.ppf(1 - alpha / 2, df)
+    lower = (df * var) / chi2_upper
+    upper = (df * var) / chi2_lower
+    var_intervals[conf] = {
+        "chi2_lower": chi2_lower,
+        "chi2_upper": chi2_upper,
+        "interval": (lower, upper)
+    }
+
+# ================================
+# VISUALISASI DISTRIBUSI t UNTUK MEAN
+# ================================
+x_t = np.linspace(mean - 4 * std / np.sqrt(n), mean + 4 * std / np.sqrt(n), 1000)
+y_t = stats.t.pdf((x_t - mean) / (std / np.sqrt(n)), df)
+
+plt.figure(figsize=(10, 5))
+plt.plot(x_t, y_t, label='Distribusi t untuk Ekspektasi')
+for conf in conf_levels:
+    ci = mean_intervals[conf]['interval']
+    plt.axvline(ci[0], linestyle='--', label=f'Lower {int(conf*100)}%')
+    plt.axvline(ci[1], linestyle='--', label=f'Upper {int(conf*100)}%')
+plt.title('Distribusi t - Estimasi Interval Ekspektasi (sleep_hours)')
+plt.xlabel('Sleep Hours (Mean)')
+plt.ylabel('Density')
+plt.legend()
+plt.grid(True)
+plt.savefig("distribusi_t_sleep_hours.png")
+plt.close()
+
+# ================================
+# VISUALISASI DISTRIBUSI CHI-SQUARE UNTUK VARIANSI
+# ================================
+x_chi = np.linspace(0.1, 60, 1000)
+y_chi = stats.chi2.pdf(x_chi, df)
+
+plt.figure(figsize=(10, 5))
+plt.plot(x_chi, y_chi, label='Distribusi Chi-Square untuk Variansi')
+for conf in conf_levels:
+    chi2_l = var_intervals[conf]['chi2_lower']
+    chi2_u = var_intervals[conf]['chi2_upper']
+    plt.axvline(chi2_l, linestyle='--', label=f'χ² Lower {int(conf*100)}%')
+    plt.axvline(chi2_u, linestyle='--', label=f'χ² Upper {int(conf*100)}%')
+plt.title('Distribusi Chi-Square - Estimasi Interval Variansi (sleep_hours)')
+plt.xlabel('Chi-Square Value')
+plt.ylabel('Density')
+plt.legend()
+plt.grid(True)
+... (18 lines left)
