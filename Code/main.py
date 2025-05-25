@@ -39,7 +39,7 @@ class Game:
             '3-4': "lvl3-2.tmx",
             '3-5': "cervus.tmx"
         }
-        self.set_checkpoint("3-5")
+        self.set_checkpoint("3-0")
         self.bg_folder_map = {
             '1': 'outdoor',
             '2': 'castle',
@@ -206,11 +206,8 @@ class Game:
                 self.noliictu = Noliictu((marker.x, marker.y), self.all_sprites, self.player)
             #buat object boss Cervus
             elif marker.name == 'Cervus':
-                self.cervus = Cervus((marker.x, marker.y), self.all_sprites, self.player, self.collision_sprites)
-                self.all_sprites.add(self.cervus)
-
-                if hasattr(self.cervus.current_phase, 'main_body'):
-                    self.all_sprites.add(self.cervus.current_phase.main_body, layer='behind_ground')
+                enemy = Cervus((marker.x, marker.y), self.all_sprites, self.collision_sprites, self.player)
+                print("[SPAWN] Cervus placed at:", marker.x, marker.y)
     
     #method utk nampilin gambar2 buat parallaxny---------------------
     def draw_parallax_layers(self, target_pos):
@@ -365,12 +362,6 @@ class Game:
                 if 'back' in self.transition_zones and self.player.player_hitbox.colliderect(self.transition_zones['back']):
                     self.previous_level()
                     self.update_background_assets()
-
-            if hasattr(self, 'cervus'):
-                self.cervus.update(dt)
-                if hasattr(self.cervus.current_phase, 'main_body'):
-                    if self.cervus.current_phase.main_body not in self.all_sprites:
-                        self.all_sprites.add(self.cervus.current_phase.main_body)
 
             self.screen.blit(self.map_scaled, (0, 0))
             self.draw_parallax_layers(self.player.rect.center)

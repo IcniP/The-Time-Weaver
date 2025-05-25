@@ -112,7 +112,7 @@
  </layer>
  <objectgroup id="8" name="zones" />
  <objectgroup id="3" name="entities">
-  <object id="36" name="Cervus" x="96" y="928">
+  <object id="36" name="Cervus" x="800" y="896">
    <point />
   </object>
   <object id="38" name="Right" x="608" y="960">
