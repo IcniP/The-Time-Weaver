@@ -39,7 +39,7 @@ class Game:
             '3-4': "lvl3-2.tmx",
             '3-5': "cervus.tmx"
         }
-        self.set_checkpoint("1-0")
+        self.set_checkpoint("3-5")
         self.bg_folder_map = {
             '1': 'outdoor',
             '2': 'castle',
@@ -210,7 +210,7 @@ class Game:
                 self.all_sprites.add(self.cervus)
 
                 if hasattr(self.cervus.current_phase, 'main_body'):
-                    self.all_sprites.add(self.cervus.current_phase.main_body)
+                    self.all_sprites.add(self.cervus.current_phase.main_body, layer='behind_ground')
     
     #method utk nampilin gambar2 buat parallaxny---------------------
     def draw_parallax_layers(self, target_pos):
@@ -369,7 +369,8 @@ class Game:
             if hasattr(self, 'cervus'):
                 self.cervus.update(dt)
                 if hasattr(self.cervus.current_phase, 'main_body'):
-                    self.all_sprites.add(self.cervus.current_phase.main_body)
+                    if self.cervus.current_phase.main_body not in self.all_sprites:
+                        self.all_sprites.add(self.cervus.current_phase.main_body)
 
             self.screen.blit(self.map_scaled, (0, 0))
             self.draw_parallax_layers(self.player.rect.center)
