@@ -119,7 +119,6 @@ class CervusPhase1(BossBase):
         self.move(dt)
         self.add_gravity(dt)
 
-
 class CervusPhase2:
     def __init__(self, pos, groups, player):
         self.hp = 800
@@ -137,7 +136,11 @@ class CervusPhase2:
                                for f in sorted(listdir(join('Assets', 'Enemy', *v)), key=lambda x: int(x.split('.')[0]))]
                            for k, v in animation_paths.items()}
 
-        self.main_body = MainBody(pos, player, self.animations['Idle2'][0])
+        #main body
+        map_center_x = player.game.map_w // 2
+        map_bottom_y = player.rect.bottom
+        center_pos = (map_center_x, map_bottom_y)
+        self.main_body = MainBody(center_pos, player, self.animations['Idle2'][0])
         self.left_hand = Hand(pos, player, True, self.main_body, self.animations)
         self.right_hand = Hand(pos, player, False, self.main_body, self.animations)
 

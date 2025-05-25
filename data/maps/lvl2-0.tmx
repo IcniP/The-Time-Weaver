@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="77" height="40" tilewidth="32" tileheight="32" infinite="0" nextlayerid="11" nextobjectid="123">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="77" height="40" tilewidth="32" tileheight="32" infinite="0" nextlayerid="12" nextobjectid="123">
  <tileset firstgid="1" source="../tilesets/timeweavertileset.tsx" />
  <tileset firstgid="10" source="../tilesets/outdoor.tsx" />
  <tileset firstgid="74" source="../tilesets/spike.tsx" />
