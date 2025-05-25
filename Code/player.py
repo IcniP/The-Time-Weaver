@@ -7,7 +7,7 @@ from bossbase import BossBase
 class Player(Entity):
     def __init__(self, pos, groups, collision_sprites, camera_group):
         super().__init__(groups)
-        self.animations = {k: [] for k in ['Idle', 'Move', 'Attack', 'Attack2', 'Jump', 'Fall', 'Dash']}
+        self.animations = {k: [] for k in ['Idle', 'Move', 'Attack', 'Attack2', 'Jump', 'Fall', 'Dash', 'Heal']}
         self.import_assets()
         self.frame_index = 0
         self.animation_speed = 6
@@ -271,11 +271,14 @@ class Player(Entity):
 
         if keys[pygame.K_q]:
             if not self._potion_pressed:
-                self._potion_pressed = True  # lock press
+                self._potion_pressed = True
                 print(f"[POTION] Try use: HP={self.__hp}/{self.max_hp}, Pots={self.potions}")
                 if self.potions > 0 and self.__hp < self.max_hp:
                     self.__hp = min(self.__hp + 1, self.max_hp)
                     self.potions -= 1
+                    self.state = 'heal'
+                    self.frame_index = 0
+                    self.attack_locked = True
                     print(f"[POTION] Used! Now HP={self.__hp}, Pots={self.potions}")
                 else:
                     print("[POTION] Blocked — full HP or no potions")
@@ -324,11 +327,12 @@ class Player(Entity):
             'fall': 'Fall', 
             'attack1': 'Attack', 
             'attack2': 'Attack2', 
-            'dash': 'Dash'
+            'dash': 'Dash',
+            'heal': 'Heal'
         }[self.state]
 
     def update_state(self):
-        if self.attacking or self.attacking_two or self.is_dashing:
+        if self.attacking or self.attacking_two or self.is_dashing or self.state == 'heal':
             return
         if self.direction.y < 0:
             self.state = 'jump'
@@ -378,6 +382,9 @@ class Player(Entity):
             elif self.state == 'dash':
                 self.is_dashing = False
                 self.attack_locked = False
+                self.state = 'idle'
+            elif self.state == 'heal':
+                self.attack_locked = True
                 self.state = 'idle'
         
         self.image = frames[int(self.frame_index)]
