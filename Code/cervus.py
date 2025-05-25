@@ -183,7 +183,7 @@ class MainBody(pygame.sprite.Sprite):
                 self.take_damage(1)
         if self.entity_hitbox.colliderect(self.player.player_hitbox):
             if not self.player.invincible:
-                self.player.take_damage(1)
+                self.player.take_damage(0)
 
 
 class Hand(pygame.sprite.Sprite):

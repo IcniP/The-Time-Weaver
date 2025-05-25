@@ -12,6 +12,85 @@ from mainmenu import MainMenuManager, Transition
 from noliictu import Noliictu
 from save_system import SaveManager
 
+
+def wrap_text(text, font, max_width):
+    """Membungkus teks panjang agar muat dalam layar."""
+    words = text.split(' ')
+    lines = []
+    current_line = ""
+
+    for word in words:
+        test_line = current_line + word + " "
+        if font.size(test_line)[0] <= max_width:
+            current_line = test_line
+        else:
+            lines.append(current_line.strip())
+            current_line = word + " "
+
+    if current_line:
+        lines.append(current_line.strip())
+    return lines
+
+
+def noliictu_intro_dialogue(game, noliictu):
+    game.paused = True
+    font = pygame.font.Font('Assets/Fonts/m5x7.ttf', 18)
+    max_width = WINDOW_WIDTH - 60  # untuk wrap text
+
+    dialog_lines = [
+        "Udara terdistorsi saat pintu marmer terbuka. Sebuah aula luas membentang, langit-langitnya tenggelam dalam bayang. Di tengahnya berdiri ICTU, tangannya terlipat di belakang punggung.",
+        "ICTU:\nJadi batas antar realitas akhirnya retak. Aku menghitung butiran pasir, menunggu celahnya menganga... dan ternyata kamulah yang datang. Tak kusangka.",
+        "ICTU:\nMendekatlah. Biarkan aku melihat pantulan dunia yang memuntahkanmu. Detak nadimu tidak berasal dari dimensi ini. Rapuh... tapi menggugah.",
+        "ICTU:\nTahukah kamu, di mana kakimu berdiri? Ini rahim dari Mundus Devorans, jurang yang akan melahap kerajaan. Aku arsiteknya, pusat dari badai bernama Kiamat.",
+        "ICTU:\nKau ragu, bukan? Manusia selalu begitu. Mereka bersandar pada dinding hukum dan dewa yang kini hanya berbisik. Aku akan merobek mereka semua.",
+        "ICTU:\nTapi kau... kau tidak ada dalam catatanku. Tak ada nubuat yang menyebut namamu. Kau noda tinta di atas mahakaryaku. Kecelakaan, atau justru pilihan?",
+        "ICTU:\nMungkin Takdir yang ketakutan lalu mengirimmu ke sini sebagai taruhan terakhir. Atau... kau adalah pilihan yang tak terhitungkan. Dan aku menyukai ketidakpastian.",
+        "ICTU:\nKau merasakannya, bukan? Dunia ini sudah tak mampu menanggung deritanya sendiri. Aku akan merobek kulitnya, membakar semua aturan. Di dalam kobaran itu, rasa sakit tak akan lagi punya bahasa.",
+        "ICTU:\nMinggirlah dan saksikan. Atau angkat senjatamu dan jadi nada pertama dari requiem semesta. Keduanya akan berujung pada kehancuran.",
+        "ICTU:\nSekarang... mari kita uji siapa di antara kita yang memang pantas untuk ada."
+    ]
+
+    current_line = 0
+
+    while game.running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                game.running = False
+                return
+            if event.type in (pygame.KEYDOWN, pygame.MOUSEBUTTONDOWN):
+                if event.type == pygame.KEYDOWN and event.key not in (pygame.K_SPACE, pygame.K_RETURN):
+                    continue
+                current_line += 1
+
+        if current_line >= len(dialog_lines):
+            break
+
+        # GAMESCENE DITAMPILKAN dulu
+        game.screen.blit(game.map_scaled, (0, 0))
+        game.draw_parallax_layers(game.player.rect.center)
+        game.all_sprites.draw(game.player.rect.center, game.map_w, game.map_h)
+        game.draw_branches_layer(game.player.rect.center)
+        game.ui.draw(game.player)
+
+        # DIALOG BOX
+        wrapped = wrap_text(dialog_lines[current_line], font, max_width)
+        box_rect = pygame.Rect(20, WINDOW_HEIGHT - 100, WINDOW_WIDTH - 40, 80)
+        pygame.draw.rect(game.screen, (0, 0, 0), box_rect)
+        pygame.draw.rect(game.screen, (255, 255, 255), box_rect, 2)
+
+        line_spacing = 26  # jarak antar baris
+        text_top_margin = 12  # padding dari atas box
+
+        for i, line in enumerate(wrapped):
+            text_surface = font.render(line, True, 'white')
+            game.screen.blit(text_surface, (box_rect.left + 10, box_rect.top + text_top_margin + i * line_spacing))
+
+        pygame.display.update()
+        game.clock.tick(FRAMERATE)
+
+    game.paused = False
+
+
 class Game:
     def __init__(self):
         pygame.init()
@@ -39,7 +118,7 @@ class Game:
             '3-4': "lvl3-2.tmx",
             '3-5': "cervus.tmx"
         }
-        self.set_checkpoint("3-5")
+        self.set_checkpoint("1-0")
         self.bg_folder_map = {
             '1': 'outdoor',
             '2': 'castle',
@@ -113,7 +192,6 @@ class Game:
         self.collision_sprites.empty()
         self.spike_sprites.empty()
         self.map1()
-
     #method untuk load map ny------------------------------
     def map1(self):
         #map yg diload tergantung self.mapzny
@@ -204,6 +282,7 @@ class Game:
             #buat object boss Noliictu
             elif marker.name == 'Noliictu':
                 self.noliictu = Noliictu((marker.x, marker.y), self.all_sprites, self.player)
+                noliictu_intro_dialogue(self, self.noliictu)
             #buat object boss Cervus
             elif marker.name == 'Cervus':
                 self.cervus = Cervus((marker.x, marker.y), self.all_sprites, self.player, self.collision_sprites)
