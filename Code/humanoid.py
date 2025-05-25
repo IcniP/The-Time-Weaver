@@ -109,7 +109,10 @@ class Humanoid(Entity):
         self.attacking = False
 
         if random.randint(1, 100) <= 40:
-            KnifeDrop(self.rect.center, self.groupss, self.player_ref)
+            if random.randint(1, 100) <= 50:
+                KnifeDrop(self.rect.center, self.groupss, self.player_ref)
+            else:
+                PotionDrop(self.rect.center, self.groupss, self.player_ref)
 
 #-----------------------------------------------movement thingy-----------------------------------------------
     def move(self):

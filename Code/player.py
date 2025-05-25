@@ -75,11 +75,17 @@ class Player(Entity):
         self.knives = 4
         self.max_knives = 4
 
-
+        #hp potions-------------
+        self.potion_presed = False
+        self.potions = 2
+        self.max_potions = 2
 
         self.player_hitbox = pygame.Rect(0, 0, 16, 32)
 
 #-----------------------------------------------getters n setters-----------------------------------------------
+    def set_hp(self, hp):
+        self.__hp = hp
+    
     def get_hp(self):
         return self.__hp
     
@@ -218,7 +224,27 @@ class Player(Entity):
         hitbox.height = 32
         hitbox.width += 25 if self.facing_right else -45
         return hitbox
-    
+
+    def take_damage(self, damage):
+        if  self.invincible == False:
+            self.__hp -= damage
+            self.invincible = True
+            self.last_hit_time = pygame.time.get_ticks()
+            print(f"Player terkena damage! HP sekarang: {self.__hp}")
+            if self.__hp <= 0:
+                self.die()
+                
+
+    def die(self):
+        if not self.dead:
+            self.dead = True
+            print("Player mati!")
+            self.game.transition.start('fade')
+            self.game.transition_target = 'respawn'
+            self.game.transition.fade_reason = 'respawn'
+            #self.kill()
+
+#-----------------------------------------------using stuffs-----------------------------------------------
     def throw_knife(self, mouse_pressed):
          if self.knives != 0:
             if mouse_pressed[2] and not self.throwing:
@@ -240,24 +266,21 @@ class Player(Entity):
                 PlayerKnife(self.rect.center, world_mouse, self.groupss, enemies)
                 self.knives -= 1
 
-    def take_damage(self, damage):
-        if  self.invincible == False:
-            self.__hp -= damage
-            self.invincible = True
-            self.last_hit_time = pygame.time.get_ticks()
-            print(f"Player terkena damage! HP sekarang: {self.__hp}")
-            if self.__hp <= 0:
-                self.die()
-                
+    def use_potion(self):
+        keys = pygame.key.get_pressed()
 
-    def die(self):
-        if not self.dead:
-            self.dead = True
-            print("Player mati!")
-            self.game.transition.start('fade')
-            self.game.transition_target = 'respawn'
-            self.game.transition.fade_reason = 'respawn'
-            #self.kill()
+        if keys[pygame.K_q]:
+            if not self._potion_pressed:
+                self._potion_pressed = True  # lock press
+                print(f"[POTION] Try use: HP={self.__hp}/{self.max_hp}, Pots={self.potions}")
+                if self.potions > 0 and self.__hp < self.max_hp:
+                    self.__hp = min(self.__hp + 1, self.max_hp)
+                    self.potions -= 1
+                    print(f"[POTION] Used! Now HP={self.__hp}, Pots={self.potions}")
+                else:
+                    print("[POTION] Blocked — full HP or no potions")
+        else:
+            self._potion_pressed = False
 
 #-----------------------------------------------Physics thingy-----------------------------------------------
     def add_gravity(self, dt):
@@ -368,6 +391,7 @@ class Player(Entity):
         self.add_gravity(dt)
         self.update_state()
         self.update_animation(dt)
+        self.use_potion()
 
         #combo reset-------------
         if pygame.time.get_ticks() - self.last_attack_time > self.combo_reset_time:

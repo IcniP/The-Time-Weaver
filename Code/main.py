@@ -342,7 +342,7 @@ class Game:
             if self.transition_target and not self.transition.active:
                 if self.transition_target == 'respawn':
                     self.player.dead = False
-                    self.player.hp = self.player.max_hp
+                    self.player.set_hp(self.player.max_hp)
                     self.player.knives = self.player.max_knives
                     self.update_background_assets()
 

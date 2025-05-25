@@ -74,3 +74,28 @@ class KnifeDrop(pygame.sprite.Sprite):
         if self.rect.colliderect(self.player.player_hitbox):
             self.player.knives += 1
             self.kill()
+
+class PotionDrop(pygame.sprite.Sprite):
+    def __init__(self, pos, groups, player):
+        super().__init__(groups)
+        self.player = player
+
+        base_path = join('Assets', 'ui', 'potion_in_world')
+        self.frames = [pygame.image.load(join(base_path, f'{i}.png')).convert_alpha() for i in range(3)]  # adjust count
+        self.frame_index = 0
+        self.animation_speed = 6
+        self.image = self.frames[self.frame_index]
+        self.rect = self.image.get_rect(center=pos)
+        self.timer = 0
+
+    def update(self, dt):
+        # Hover effect
+        self.timer += self.animation_speed * dt
+        if self.timer >= 1:
+            self.timer = 0
+            self.frame_index = (self.frame_index + 1) % len(self.frames)
+            self.image = self.frames[self.frame_index]
+
+        if self.rect.colliderect(self.player.player_hitbox):
+            self.player.potions += 1
+            self.kill()
