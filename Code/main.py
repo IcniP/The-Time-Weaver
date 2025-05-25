@@ -118,7 +118,7 @@ class Game:
             '3-4': "lvl3-2.tmx",
             '3-5': "cervus.tmx"
         }
-        self.set_checkpoint("3-5")
+        self.set_checkpoint("2-0")
         self.bg_folder_map = {
             '1': 'outdoor',
             '2': 'castle',
@@ -160,6 +160,9 @@ class Game:
         #main menu n ui thingy----------------------------------------
         self.menu_manager = MainMenuManager(self.screen, self)
         self.ui = UserInterface(self.screen)
+        self.cervus_hp_bar = BossHealthBar(max_health=800, length=400, pos=(WINDOW_WIDTH//2 - 200, 320), name="Cervus The Simp")
+        self.noliictu_hp_bar = BossHealthBar(max_health=3000, length=400, pos=(WINDOW_WIDTH//2 - 200, 320), name ="Noliictu The Gooner")
+
 
         #checkpoints n respawn thingy----------------------------------------
         self.respawn_marker = 'Player'
@@ -445,6 +448,15 @@ class Game:
             self.all_sprites.draw(self.player.rect.center + self.shake_offset, self.map_w, self.map_h)
             self.draw_branches_layer(self.player.rect.center)
             self.ui.draw(self.player)
+
+            # Update health bar values
+            if hasattr(self, 'cervus') and hasattr(self.cervus.current_phase, 'main_body'):
+                self.cervus_hp_bar.update(self.cervus.current_phase.main_body.hp)
+                self.cervus_hp_bar.draw(self.screen)
+
+            if hasattr(self, 'noliictu') and self.noliictu.alive():
+                self.noliictu_hp_bar.update(self.noliictu.hp)
+                self.noliictu_hp_bar.draw(self.screen)
 
             if self.transition.active:
                 self.transition.draw(self.screen)
