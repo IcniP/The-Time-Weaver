@@ -118,7 +118,7 @@ class Game:
             '3-4': "lvl3-2.tmx",
             '3-5': "cervus.tmx"
         }
-        self.set_checkpoint("1-0")
+        self.set_checkpoint("3-5")
         self.bg_folder_map = {
             '1': 'outdoor',
             '2': 'castle',

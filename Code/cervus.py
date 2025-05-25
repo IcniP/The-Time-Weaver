@@ -11,8 +11,7 @@ class Cervus(pygame.sprite.Sprite):
         self.player = player
         self.collision_sprites = collision_sprites
 
-        spawn_pos = (player.rect.centerx, player.rect.top - 96)
-        self.current_phase = CervusPhase1(spawn_pos, groups, player, collision_sprites)
+        self.current_phase = CervusPhase1(pos, groups, player, collision_sprites)
 
     def move(self):
         pass
@@ -23,12 +22,21 @@ class Cervus(pygame.sprite.Sprite):
             self.next_phase()
 
     def next_phase(self):
-        old_pos = self.current_phase.rect.midbottom
         self.current_phase.kill()
 
         if self.phase == 1:
             self.phase = 2
-            self.current_phase = CervusPhase2(old_pos, self.groups, self.player)
+            # Force CervusPhase2 to spawn BEHIND the player
+            player = self.player
+            facing_right = player.facing_right
+
+            # Calculate offset to place Cervus behind the player
+            offset_x = -200 if facing_right else 200
+            offset_y = 0  # vertical offset to align near feet
+
+            spawn_pos = (player.rect.centerx + offset_x, player.rect.bottom + offset_y)
+            self.current_phase = CervusPhase2(spawn_pos, self.groups, self.player)
+            self.rect = self.current_phase.main_body.rect  # sync outer cervus sprite to main body
 
     def __getattr__(self, attr):
         return getattr(self.current_phase, attr)
