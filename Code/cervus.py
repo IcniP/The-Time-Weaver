@@ -1,6 +1,7 @@
 import pygame
 from settings import *
 from bossbase import BossBase
+from player import PlayerKnife
 
 class Cervus(pygame.sprite.Sprite):
     def __init__(self, pos, groups, player, collision_sprites=None):
@@ -185,6 +186,13 @@ class MainBody(pygame.sprite.Sprite):
             if not self.player.invincible:
                 self.player.take_damage(0)
 
+        for sprite in self.player.groupss:
+            if isinstance(sprite, PlayerKnife):
+                if self.entity_hitbox.colliderect(sprite.rect):
+                    self.take_damage(sprite.damage)
+                    sprite.kill()
+
+
 
 class Hand(pygame.sprite.Sprite):
     def __init__(self, pos, player, is_left, anchor, animations):
@@ -211,13 +219,27 @@ class Hand(pygame.sprite.Sprite):
         self.attack_type = 'swipe'
 
     def update(self, dt):
+        
+        self.attack_timer += dt
+        if self.attack_timer >= 5:  
+            if self.is_left:
+                self.start_attack1()
+            else:
+                self.start_attack2()
+            self.attack_timer = 0
+
         self.frame_index += 6 * dt
-        if self.frame_index >= len(self.anim_frames):
+        frames = self.anim_frames
+
+        if self.frame_index >= len(frames):
             self.anim_frames = self.animations['Hand']
             self.frame_index = 0
             self.attack_type = None
+            return
 
-        self.image = self.anim_frames[int(self.frame_index)]
+        self.image = frames[int(self.frame_index)]
+
+
         target_x = self.player.player_hitbox.centerx
         if self.attack_type == 'stomp':
             target_y = self.player.player_hitbox.bottom + 10
@@ -232,5 +254,8 @@ class Hand(pygame.sprite.Sprite):
         target = pygame.Vector2(target_x, target_y)
         self.rect.center = pygame.Vector2(self.rect.center).lerp(target, 0.1)
 
-        if self.rect.colliderect(self.player.player_hitbox) and not self.player.invincible:
-            self.player.take_damage(1)
+    
+        if self.attack_type and int(self.frame_index) == 3:  
+            if self.rect.colliderect(self.player.player_hitbox) and not self.player.invincible:
+                self.player.take_damage(0)
+

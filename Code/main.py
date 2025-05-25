@@ -118,7 +118,7 @@ class Game:
             '3-4': "lvl3-2.tmx",
             '3-5': "cervus.tmx"
         }
-        self.set_checkpoint("1-3")
+        self.set_checkpoint("1-0")
         self.bg_folder_map = {
             '1': 'outdoor',
             '2': 'castle',
@@ -194,68 +194,58 @@ class Game:
         self.map1()
     #method untuk load map ny------------------------------
     def map1(self):
-        #map yg diload tergantung self.mapzny
         map = load_pygame(join('data', 'maps', self.mapz))
-        #buat ngambil widht sma height dari mapny
         self.map_w = map.width * TILE_SIZE
         self.map_h = map.height * TILE_SIZE
 
-        #assign smua rects yg ad di layer range ke self.range_rects, utk rangeny si wraith
         self.range_rects = [pygame.Rect(obj.x, obj.y, obj.width, obj.height)
                             for obj in map.get_layer_by_name('range')]
 
-        #utk nampilin tile layer 'ground' ny
         for x, y, image in map.get_layer_by_name('ground').tiles():
             Sprite((x * TILE_SIZE, y * TILE_SIZE), image, (self.all_sprites, self.collision_sprites))
 
-        #buat object2 rect yg di object layer pits
         for pit in map.get_layer_by_name('pits'):
             spike_rect = pygame.Rect(pit.x, pit.y, pit.width, pit.height)
             spike = pygame.sprite.Sprite(self.spike_sprites)
             spike.rect = spike_rect
             spike.image = pygame.Surface((pit.width, pit.height))
 
-        #utk nampilin tile layer 'spikes'
         for x, y, image in map.get_layer_by_name('spikes').tiles():
             Sprite((x * TILE_SIZE, y * TILE_SIZE), image, (self.all_sprites, self.spike_sprites))
 
-        #utk nampilin tile layer 'things'
         for x, y, image in map.get_layer_by_name('things').tiles():
             Sprite((x * TILE_SIZE, y * TILE_SIZE), image, self.all_sprites)
 
-        #buat object2 rect di object layer 'zones
         self.transition_zones = {}
         self.patrol_zones = []
         for obj in map.get_layer_by_name('zones'):
-            #kalau nma rect = forward & back masukin ke transition_zones, jdi pintu/jalan utk ganti map
             if obj.name in ['forward', 'back']:
                 self.transition_zones[obj.name] = pygame.Rect(obj.x, obj.y, obj.width, obj.height)
             else:
-                #klo bkn buat objek2ny trus masukin patrol_zones buat si skellies
                 rect = pygame.Rect(obj.x, obj.y, obj.width, obj.height)
                 self.patrol_zones.append(rect)
-        
-         #klo nma rect = checkpoint, buat objekny trus masukin ke checkpoints, utk jdi checkpoints player
+
         self.checkpoints = []
         for obj in map.get_layer_by_name('zones'):
             if obj.name == 'checkpoint':
                 self.checkpoints.append(pygame.Rect(obj.x, obj.y, obj.width, obj.height))
 
-        #utk nentuin spawnny dmn tergantung kondisi
         if self.transition_target == 'respawn':
             spawn_marker = self.respawn_data.get('marker_name', 'Player')
         else:
             spawn_marker = getattr(self, 'respawn_marker', 'Player')
- 
+
+        cervus_marker = None
         for marker in map.get_layer_by_name('entities'):
             if marker.name == spawn_marker:
                 self.player.rect.midbottom = (marker.x, marker.y)
                 self.player.player_hitbox.center = self.player.rect.center
                 self.all_sprites.add(self.player)
                 self.player.collision_sprites = self.collision_sprites
-                break
+            elif marker.name == 'Cervus':
+                cervus_marker = marker
 
-        #buat object2 enemiesny, Skelly sword n axe(Humanoid)
+        # Enemy and boss entities
         for marker in map.get_layer_by_name('entities'):
             if marker.name in ['sword', 'axe']:
                 enemy = Humanoid(marker.name.capitalize(), (marker.x, marker.y), self.all_sprites, self.collision_sprites)
@@ -264,14 +254,11 @@ class Game:
                     if zone.collidepoint(marker.x, marker.y):
                         enemy.patrol_bounds(zone)
                         break
-            #buat object2 enemiesny, Skelly spear(Humanoid)
             elif marker.name == 'spear':
                 enemy = Humanoid('Spear', (marker.x, marker.y), self.all_sprites, self.collision_sprites)
                 enemy.player_ref = self.player
-            #buat object2 enemiesny, Bookie(Mosntrosity)
             elif marker.name == 'bookie':
                 enemy = Monstrosity((marker.x, marker.y), self.all_sprites, self.collision_sprites, self.player)
-            #buat object2 enemiesny, Wraith(Fly)
             elif marker.name == 'wraith':
                 self.range_rect = None
                 for r in self.range_rects:
@@ -279,18 +266,20 @@ class Game:
                         self.range_rect = r
                         break
                 enemy = Fly((marker.x, marker.y), self.all_sprites, self.collision_sprites, self.player, self.range_rect)
-            #buat object boss Noliictu
             elif marker.name == 'Noliictu':
                 self.noliictu = Noliictu((marker.x, marker.y), self.all_sprites, self.player)
                 noliictu_intro_dialogue(self, self.noliictu)
-            #buat object boss Cervus
-            elif marker.name == 'Cervus':
-                self.cervus = Cervus((marker.x, marker.y), self.all_sprites, self.player, self.collision_sprites)
-                self.all_sprites.add(self.cervus)
 
-                if hasattr(self.cervus.current_phase, 'main_body'):
-                    self.all_sprites.add(self.cervus.current_phase.main_body, layer='behind_ground')
-    
+        # Spawn Cervus after player to ensure it's placed behind
+        if cervus_marker:
+            self.cervus = Cervus((self.player.rect.centerx - 80, self.player.rect.top - 96), self.all_sprites, self.player, self.collision_sprites)
+            self.all_sprites.add(self.cervus)
+            if hasattr(self.cervus.current_phase, 'main_body'):
+                self.all_sprites.add(self.cervus.current_phase.main_body, layer='behind_ground')
+            if hasattr(self.cervus.current_phase, 'main_body'):
+                self.all_sprites.add(self.cervus.current_phase.main_body, layer='behind_ground')
+
+
     #method utk nampilin gambar2 buat parallaxny---------------------
     def draw_parallax_layers(self, target_pos):
         for image, speed in self.parallax_layers:
