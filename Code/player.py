@@ -330,8 +330,9 @@ class Player(Entity):
         }[self.state]
 
     def update_state(self):
-        if self.attacking or self.attacking_two or self.is_dashing or self.state == 'heal':
+        if self.attack_locked or self.throwing or self.state in ['heal', 'attack1', 'attack2', 'dash']:
             return
+
         if self.direction.y < 0:
             self.state = 'jump'
         elif self.direction.y > 1 and not self.on_ground():
