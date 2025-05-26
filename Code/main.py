@@ -248,24 +248,24 @@ class Game:
         # Enemy and boss entities
         for marker in map.get_layer_by_name('entities'):
             if marker.name in ['sword', 'axe']:
-                enemy = Humanoid(marker.name.capitalize(), (marker.x, marker.y), self.all_sprites, self.collision_sprites)
-                enemy.player_ref = self.player
+                skelly = Humanoid(marker.name.capitalize(), (marker.x, marker.y), self.all_sprites, self.collision_sprites)
+                skelly.player_ref = self.player
                 for zone in self.patrol_zones:
                     if zone.collidepoint(marker.x, marker.y):
-                        enemy.patrol_bounds(zone)
+                        skelly.patrol_bounds(zone)
                         break
             elif marker.name == 'spear':
-                enemy = Humanoid('Spear', (marker.x, marker.y), self.all_sprites, self.collision_sprites)
-                enemy.player_ref = self.player
+                seklly = Humanoid('Spear', (marker.x, marker.y), self.all_sprites, self.collision_sprites)
+                seklly.player_ref = self.player
             elif marker.name == 'bookie':
-                enemy = Monstrosity((marker.x, marker.y), self.all_sprites, self.collision_sprites, self.player)
+                bookie = Monstrosity((marker.x, marker.y), self.all_sprites, self.collision_sprites, self.player)
             elif marker.name == 'wraith':
                 self.range_rect = None
                 for r in self.range_rects:
                     if r.collidepoint(marker.x, marker.y):
                         self.range_rect = r
                         break
-                enemy = Fly((marker.x, marker.y), self.all_sprites, self.collision_sprites, self.player, self.range_rect)
+                wraith = Fly((marker.x, marker.y), self.all_sprites, self.collision_sprites, self.player, self.range_rect)
             elif marker.name == 'Noliictu':
                 self.noliictu = Noliictu((marker.x, marker.y), self.all_sprites, self.player)
                 noliictu_intro_dialogue(self, self.noliictu)
