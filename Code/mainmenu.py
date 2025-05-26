@@ -7,8 +7,9 @@ class MainMenuManager:
         self.game = game  # reference ke Game instance
         self.volume = 0.2
 
-        self.lvl4_music = pygame.mixer.Sound('Assets/ost/lacrimosatnbe.mp3')
+        self.lvl4_music = pygame.mixer.Sound('Assets/ost/pollux.mp3')
         self.lobby_music = pygame.mixer.Sound('Assets/ost/lobby.mp3')
+        self.level_music = pygame.mixer.Sound('Assets/ost/normlevel.mp3')
 
         self.lobbybg = pygame.image.load('Assets/lobby/1.png').convert_alpha()
 
@@ -129,8 +130,10 @@ class MainMenuManager:
                         self.game.game_active = True
                         self.lobby_music.stop()
 
-                        if self.game.level == '4-0':
+                        if self.game.level == '2-0':
                             self.lvl4_music.play(loops=-1)
+                        elif self.game.level != '2-0':
+                            self.level_music.play(loops=-1)
                     elif action == "load":
                         self.load_menu()   
                     elif action == "settings":

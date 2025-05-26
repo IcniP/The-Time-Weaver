@@ -118,7 +118,7 @@ class Game:
             '3-4': "lvl3-2.tmx",
             '3-5': "cervus.tmx"
         }
-        self.set_checkpoint("3-2")
+        self.set_checkpoint("3-5")
         self.bg_folder_map = {
             '1': 'outdoor',
             '2': 'castle',
@@ -160,6 +160,9 @@ class Game:
         #main menu n ui thingy----------------------------------------
         self.menu_manager = MainMenuManager(self.screen, self)
         self.ui = UserInterface(self.screen)
+
+        self.cervus_hp_bar = BossHealthBar(max_health=800, length=400, pos=(WINDOW_WIDTH//2 - 200, 320), name="Cervus The Devourer")
+        self.noliictu_hp_bar = BossHealthBar(max_health=3000, length=400, pos=(WINDOW_WIDTH//2 - 200, 320), name ="Noliictu The One who stands above all")
 
         #checkpoints n respawn thingy----------------------------------------
         self.respawn_marker = 'Player'
@@ -248,15 +251,15 @@ class Game:
         # Enemy and boss entities
         for marker in map.get_layer_by_name('entities'):
             if marker.name in ['sword', 'axe']:
-                skelly = Humanoid(marker.name.capitalize(), (marker.x, marker.y), self.all_sprites, self.collision_sprites)
-                skelly.player_ref = self.player
+                skelly_slash = Humanoid(marker.name.capitalize(), (marker.x, marker.y), self.all_sprites, self.collision_sprites)
+                skelly_slash.player_ref = self.player
                 for zone in self.patrol_zones:
                     if zone.collidepoint(marker.x, marker.y):
-                        skelly.patrol_bounds(zone)
+                        skelly_slash.patrol_bounds(zone)
                         break
             elif marker.name == 'spear':
-                seklly = Humanoid('Spear', (marker.x, marker.y), self.all_sprites, self.collision_sprites)
-                seklly.player_ref = self.player
+                skelly_thrust = Humanoid('Spear', (marker.x, marker.y), self.all_sprites, self.collision_sprites)
+                skelly_thrust.player_ref = self.player
             elif marker.name == 'bookie':
                 bookie = Monstrosity((marker.x, marker.y), self.all_sprites, self.collision_sprites, self.player)
             elif marker.name == 'wraith':
@@ -445,6 +448,14 @@ class Game:
             self.all_sprites.draw(self.player.rect.center + self.shake_offset, self.map_w, self.map_h)
             self.draw_branches_layer(self.player.rect.center)
             self.ui.draw(self.player)
+
+            if hasattr(self, 'cervus') and hasattr(self.cervus.current_phase, 'main_body'):
+                self.cervus_hp_bar.update(self.cervus.current_phase.main_body.hp)
+                self.cervus_hp_bar.draw(self.screen)
+
+            if hasattr(self, 'noliictu') and self.noliictu.alive():
+                self.noliictu_hp_bar.update(self.noliictu.hp)
+                self.noliictu_hp_bar.draw(self.screen)
 
             if self.transition.active:
                 self.transition.draw(self.screen)
