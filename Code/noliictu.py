@@ -58,6 +58,7 @@ class RainKnive(pygame.sprite.Sprite):
 
     def update(self, dt):
         self.rect.y += self.speed * dt
+        sword_rain.play()
 
         if self.rect.top > 2000:
             self.kill()
@@ -323,6 +324,7 @@ class Noliictu(BossBase):
 
         if self.teleporting:
             frames = self.animations[self.status]
+            teleport.play()
             if self.status == 'TeleportOut' and self.frame_index >= len(frames) - 1:
                 map = load_pygame(join('data', 'maps', 'noliictu.tmx'))
                 for marker in map.get_layer_by_name('entities'):
@@ -367,6 +369,7 @@ class Noliictu(BossBase):
         if self.hp <= 0 and not self.dying:
             self.hp = 0
             self.dying = True
+            teleport.play()
             self.play_animation('TeleportOut')
 
     def draw_detection_rect(self, surface):

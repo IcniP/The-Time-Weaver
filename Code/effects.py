@@ -3,6 +3,8 @@ from settings import *
 #sounds
 pygame.mixer.init()
 
+heal = pygame.mixer.Sound(join('Assets', 'Sounds', 'heal.mp3'))
+hurt = pygame.mixer.Sound(join('Assets', 'Sounds', 'hurt.mp3'))
 swing = pygame.mixer.Sound(join('Assets', 'Sounds', 'swing.mp3'))
 throw = pygame.mixer.Sound(join('Assets', 'Sounds', 'throw.mp3'))
 throw.set_volume(0.2)
@@ -22,6 +24,11 @@ wraith_hit = pygame.mixer.Sound(join('Assets', 'Sounds', 'wraith-hit.mp3'))
 wraith_hit.set_volume(0.4)
 wraith_attack = pygame.mixer.Sound(join('Assets', 'Sounds', 'wraith-attack.mp3'))
 wraith_attack.set_volume(0.4)
+
+teleport = pygame.mixer.Sound(join('Assets', 'Sounds', 'teleport.mp3'))
+sword_rain = pygame.mixer.Sound(join('Assets', 'Sounds', 'swordrain.mp3'))
+
+
 
 
 class SlashEffect(pygame.sprite.Sprite):

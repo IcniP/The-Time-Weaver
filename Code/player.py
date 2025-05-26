@@ -227,6 +227,7 @@ class Player(Entity):
 
     def take_damage(self, damage):
         if  self.invincible == False:
+            hurt.play()
             self.__hp -= damage
             self.invincible = True
             self.last_hit_time = pygame.time.get_ticks()
@@ -272,16 +273,13 @@ class Player(Entity):
         if keys[pygame.K_q]:
             if not self._potion_pressed:
                 self._potion_pressed = True
-                print(f"[POTION] Try use: HP={self.__hp}/{self.max_hp}, Pots={self.potions}")
                 if self.potions > 0 and self.__hp < self.max_hp:
                     self.__hp = min(self.__hp + 1, self.max_hp)
+                    heal.play()
                     self.potions -= 1
                     self.state = 'heal'
                     self.frame_index = 0
                     self.attack_locked = True
-                    print(f"[POTION] Used! Now HP={self.__hp}, Pots={self.potions}")
-                else:
-                    print("[POTION] Blocked — full HP or no potions")
         else:
             self._potion_pressed = False
 
