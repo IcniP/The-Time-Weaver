@@ -248,15 +248,15 @@ class Game:
         # Enemy and boss entities
         for marker in map.get_layer_by_name('entities'):
             if marker.name in ['sword', 'axe']:
-                skelly = Humanoid(marker.name.capitalize(), (marker.x, marker.y), self.all_sprites, self.collision_sprites)
-                skelly.player_ref = self.player
+                skelly_slash = Humanoid(marker.name.capitalize(), (marker.x, marker.y), self.all_sprites, self.collision_sprites)
+                skelly_slash.player_ref = self.player
                 for zone in self.patrol_zones:
                     if zone.collidepoint(marker.x, marker.y):
-                        skelly.patrol_bounds(zone)
+                        skelly_slash.patrol_bounds(zone)
                         break
             elif marker.name == 'spear':
-                skelly = Humanoid('Spear', (marker.x, marker.y), self.all_sprites, self.collision_sprites)
-                skelly.player_ref = self.player
+                skelly_thrust = Humanoid('Spear', (marker.x, marker.y), self.all_sprites, self.collision_sprites)
+                skelly_thrust.player_ref = self.player
             elif marker.name == 'bookie':
                 bookie = Monstrosity((marker.x, marker.y), self.all_sprites, self.collision_sprites, self.player)
             elif marker.name == 'wraith':
