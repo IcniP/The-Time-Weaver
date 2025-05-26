@@ -73,7 +73,7 @@ class ArcSwordFollow(pygame.sprite.Sprite):
         super().__init__(groups)
 
         num = random.randint(0, 3)
-        self.image_original = pygame.image.load(join('Assets', 'Enemy', 'noliictu', 'Knive', f'{num}.png')).convert_alpha()
+        self.image_original = pygame.image.load(join('Assets', 'Enemy', 'noliictu', 'projectile', f'{num}.png')).convert_alpha()
         self.image = self.image_original.copy()
         self.rect = self.image.get_rect(center=pos)
         self.player = player
