@@ -1,9 +1,9 @@
 {
-  "checkpoint": "1-2",
+  "checkpoint": "1-3",
   "position": [
-    -32,
-    560
+    168,
+    1040
   ],
-  "hp": 4,
-  "stamina": 2
+  "hp": 0,
+  "stamina": 0
 }

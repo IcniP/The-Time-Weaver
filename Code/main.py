@@ -161,6 +161,9 @@ class Game:
         self.menu_manager = MainMenuManager(self.screen, self)
         self.ui = UserInterface(self.screen)
 
+        self.cervus_hp_bar = BossHealthBar(max_health=800, length=400, pos=(WINDOW_WIDTH//2 - 200, 320), name="Cervus The Devourer")
+        self.noliictu_hp_bar = BossHealthBar(max_health=3000, length=400, pos=(WINDOW_WIDTH//2 - 200, 320), name ="Noliictu The One who stands above all")
+
         #checkpoints n respawn thingy----------------------------------------
         self.respawn_marker = 'Player'
         self.respawn_data = {
@@ -248,24 +251,24 @@ class Game:
         # Enemy and boss entities
         for marker in map.get_layer_by_name('entities'):
             if marker.name in ['sword', 'axe']:
-                enemy = Humanoid(marker.name.capitalize(), (marker.x, marker.y), self.all_sprites, self.collision_sprites)
-                enemy.player_ref = self.player
+                skelly_slash = Humanoid(marker.name.capitalize(), (marker.x, marker.y), self.all_sprites, self.collision_sprites)
+                skelly_slash.player_ref = self.player
                 for zone in self.patrol_zones:
                     if zone.collidepoint(marker.x, marker.y):
-                        enemy.patrol_bounds(zone)
+                        skelly_slash.patrol_bounds(zone)
                         break
             elif marker.name == 'spear':
-                enemy = Humanoid('Spear', (marker.x, marker.y), self.all_sprites, self.collision_sprites)
-                enemy.player_ref = self.player
+                skelly_thrust = Humanoid('Spear', (marker.x, marker.y), self.all_sprites, self.collision_sprites)
+                skelly_thrust.player_ref = self.player
             elif marker.name == 'bookie':
-                enemy = Monstrosity((marker.x, marker.y), self.all_sprites, self.collision_sprites, self.player)
+                bookie = Monstrosity((marker.x, marker.y), self.all_sprites, self.collision_sprites, self.player)
             elif marker.name == 'wraith':
                 self.range_rect = None
                 for r in self.range_rects:
                     if r.collidepoint(marker.x, marker.y):
                         self.range_rect = r
                         break
-                enemy = Fly((marker.x, marker.y), self.all_sprites, self.collision_sprites, self.player, self.range_rect)
+                wraith = Fly((marker.x, marker.y), self.all_sprites, self.collision_sprites, self.player, self.range_rect)
             elif marker.name == 'Noliictu':
                 self.noliictu = Noliictu((marker.x, marker.y), self.all_sprites, self.player)
                 noliictu_intro_dialogue(self, self.noliictu)
@@ -445,6 +448,14 @@ class Game:
             self.all_sprites.draw(self.player.rect.center + self.shake_offset, self.map_w, self.map_h)
             self.draw_branches_layer(self.player.rect.center)
             self.ui.draw(self.player)
+
+            if hasattr(self, 'cervus') and hasattr(self.cervus.current_phase, 'main_body'):
+                self.cervus_hp_bar.update(self.cervus.current_phase.main_body.hp)
+                self.cervus_hp_bar.draw(self.screen)
+
+            if hasattr(self, 'noliictu') and self.noliictu.alive():
+                self.noliictu_hp_bar.update(self.noliictu.hp)
+                self.noliictu_hp_bar.draw(self.screen)
 
             if self.transition.active:
                 self.transition.draw(self.screen)
