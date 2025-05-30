@@ -58,4 +58,7 @@ python main.py
 * [Blasphemous](https://store.steampowered.com/app/774361/Blasphemous/)
 * [Bloodborne](https://www.playstation.com/en-id/games/bloodborne/)
 
+## Game Preview in Youtube
+* https://youtu.be/fTgYGopxRis
+
 
