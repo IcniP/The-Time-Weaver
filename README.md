@@ -1,4 +1,5 @@
 <h2 align="center">The Time Weaver</h2>
+
 ![raw](https://github.com/user-attachments/assets/dda01a85-9aeb-4bb8-8b8c-1d656dc8a95f)
 
 ## Project Description
@@ -22,19 +23,19 @@ This game offers challange to those who want to try it.
 ## How To Run
 
 1. Install pygame ce
-   ```bash
-   pip install pygame-ce
-   ```
+```bash
+pip install pygame-ce
+```
    
 2. Install Pytmx(Tiled map loader for python/pygame)
-  ```bash
-  pip install PyTMX
-  ```
+```bash
+pip install PyTMX
+```
 
 3. Run the game
-  ```bash
-  python main.py
-  ```
+```bash
+python main.py
+```
 
 ## Class Diagram
 ![lLbVZzku4N_tf_3R-L07Q84-ve9BxYvjKEHGTDjdOYoEBTvIf40ExNNQVlUQeZWYjO8s3cwRXopr8pb_XZE_eUGVFO6ZqEcDVrIc1mVTjj7W_NiYfmw1y5DZpOFwWji_RZR3pFOlqE7stvljxT-RhMySeXaV6csRnt7iWZ7AdCOdq5hutYb2dzTQhPLNripmNiCLtVZGGJ-DX6z0enm1ZMV](https://github.com/user-attachments/assets/fcea5235-6d1b-4b43-9e5a-dde0350bb692)
